@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { questions, roles } from './social-role/data';
+import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
+import { updatePsycheState } from '../../lib/lme/lme-core';
+import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
 
 type Scores = {
     stability: number;
@@ -18,29 +21,50 @@ export function SocialRoleQuiz() {
     const [scores, setScores] = useState<Scores>({ stability: 0, fire: 0, truth: 0, harbor: 0, compass: 0, bridge: 0 });
     const [result, setResult] = useState<typeof roles[keyof typeof roles] | null>(null);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
+
+
 
     const startQuiz = () => setStage('quiz');
 
-    const handleAnswer = (optionScores: Partial<Scores>) => {
+    const handleAnswer = (option: typeof questions[0]['options'][0]) => {
         setIsAnimating(true);
         setTimeout(() => {
             const newScores = { ...scores };
-            Object.entries(optionScores).forEach(([key, val]) => {
+            Object.entries(option.scores).forEach(([key, val]) => {
                 newScores[key as keyof Scores] += val as number;
             });
             setScores(newScores);
+
+            const newMarkers = [...collectedMarkers];
+            if ((option as any).psyche_markers) {
+                newMarkers.push((option as any).psyche_markers);
+                setCollectedMarkers(newMarkers);
+            }
 
             if (currentQ < questions.length - 1) {
                 setCurrentQ(currentQ + 1);
                 setIsAnimating(false);
             } else {
-                calculateResult(newScores);
+                calculateResult(newScores, newMarkers);
             }
         }, 300);
     };
 
-    const calculateResult = (finalScores: Scores) => {
+    const calculateResult = (finalScores: Scores, finalMarkers: any[]) => {
         setStage('loading');
+
+        // LME Update immediately
+        if (finalMarkers.length > 0) {
+            try {
+                const aggregated = aggregateMarkers(finalMarkers, 0.8); // 0.8 reliability (Deep)
+                const currentPsyche = getPsycheState();
+                const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
+                savePsycheState(newPsyche);
+            } catch (e) {
+                console.error("LME Update failed", e);
+            }
+        }
 
         // Simulate suspense
         setTimeout(() => {
@@ -89,7 +113,7 @@ export function SocialRoleQuiz() {
                     Entdecken
                 </button>
                 <p className="text-zinc-600 text-xs mt-6">
-                    Zur Selbstreflexion. Keine Diagnose.
+                    Zur Selbstreflexion. Keine Diagnose. <span className="text-violet-500">Syncts mit deinem Profil.</span>
                 </p>
             </div>
         );
@@ -132,7 +156,7 @@ export function SocialRoleQuiz() {
                         {q.options.map((opt, i) => (
                             <button
                                 key={i}
-                                onClick={() => handleAnswer(opt.scores)}
+                                onClick={() => handleAnswer(opt)}
                                 className="w-full text-left p-4 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 hover:border-violet-500/50 
                                        rounded-xl transition-all duration-200 flex items-center gap-4 group"
                             >
@@ -226,6 +250,7 @@ export function SocialRoleQuiz() {
                                 setStage('intro');
                                 setCurrentQ(0);
                                 setScores({ stability: 0, fire: 0, truth: 0, harbor: 0, compass: 0, bridge: 0 });
+                                setCollectedMarkers([]);
                             }}
                             className="px-6 py-3 rounded-xl font-semibold border border-zinc-700 hover:bg-zinc-800 transition-colors text-zinc-400"
                         >

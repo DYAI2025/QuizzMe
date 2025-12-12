@@ -3,10 +3,10 @@ export const questions = [
         scenario: "Es ist 2 Uhr nachts. Dein Telefon klingelt. Ein Freund.",
         text: "Was ist dein erster Gedanke?",
         options: [
-            { text: "Etwas ist passiert. Ich bin wach.", scores: { harbor: 3, stability: 2 }, vibe: "🛡️" },
-            { text: "Hoffentlich was Lustiges. Ich nehme ab.", scores: { fire: 2, bridge: 1 }, vibe: "🎉" },
-            { text: "Ob alles okay ist? Ich mache mir Sorgen.", scores: { harbor: 2, compass: 1 }, vibe: "💭" },
-            { text: "Das muss wichtig sein. Sonst würden sie nicht anrufen.", scores: { truth: 2, stability: 1 }, vibe: "🎯" }
+            { text: "Etwas ist passiert. Ich bin wach.", scores: { harbor: 3, stability: 2 }, vibe: "🛡️", psyche_markers: { structure: 0.8, connection: 0.6 } },
+            { text: "Hoffentlich was Lustiges. Ich nehme ab.", scores: { fire: 2, bridge: 1 }, vibe: "🎉", psyche_markers: { emergence: 0.9, connection: 0.7 } },
+            { text: "Ob alles okay ist? Ich mache mir Sorgen.", scores: { harbor: 2, compass: 1 }, vibe: "💭", psyche_markers: { connection: 0.9, depth: 0.5 } },
+            { text: "Das muss wichtig sein. Sonst würden sie nicht anrufen.", scores: { truth: 2, stability: 1 }, vibe: "🎯", psyche_markers: { structure: 0.7, depth: 0.4 } }
         ]
     },
     {

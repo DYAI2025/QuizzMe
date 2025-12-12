@@ -1,6 +1,9 @@
 'use client'
 
 import React, { useState } from 'react';
+import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
+import { updatePsycheState } from '../../lib/lme/lme-core';
+import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
 
 const DestinyQuiz = () => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -13,16 +16,17 @@ const DestinyQuiz = () => {
     const [showResult, setShowResult] = useState(false);
     const [fadeIn, setFadeIn] = useState(true);
     const [started, setStarted] = useState(false);
+    const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
 
     const questions = [
         {
             id: 1,
             text: "Wenn du nachts wach liegst, woran denkst du?",
             options: [
-                { text: "An Systeme, die ich verändern will – Bildung, Wirtschaft, Gesellschaft", scores: { vision: 3, innerCall: 2 } },
-                { text: "An Menschen, die ich erreichen möchte – konkrete Gesichter, konkrete Wirkung", scores: { magnetism: 3, vision: 1 } },
-                { text: "An den nächsten konkreten Schritt, der alles verändern könnte", scores: { resilience: 2, vision: 1 } },
-                { text: "An ein Gefühl, das ich nicht benennen kann – aber es zieht", scores: { innerCall: 3, vision: 1 } }
+                { text: "An Systeme, die ich verändern will – Bildung, Wirtschaft, Gesellschaft", scores: { vision: 3, innerCall: 2 }, psyche_markers: { structure: 0.8, emergence: 0.8 } },
+                { text: "An Menschen, die ich erreichen möchte – konkrete Gesichter, konkrete Wirkung", scores: { magnetism: 3, vision: 1 }, psyche_markers: { connection: 0.9, shadow: 0.6 } },
+                { text: "An den nächsten konkreten Schritt, der alles verändern könnte", scores: { resilience: 2, vision: 1 }, psyche_markers: { structure: 0.9, emergence: 0.5 } },
+                { text: "An ein Gefühl, das ich nicht benennen kann – aber es zieht", scores: { innerCall: 3, vision: 1 }, psyche_markers: { depth: 1.0, shadow: 0.7 } },
             ]
         },
         {
@@ -189,9 +193,27 @@ const DestinyQuiz = () => {
             });
             setScores(newScores);
 
+            // Collect markers
+            const newMarkers = [...collectedMarkers];
+            if ((option as any).psyche_markers) {
+                newMarkers.push((option as any).psyche_markers);
+                setCollectedMarkers(newMarkers);
+            }
+
             if (currentQuestion < questions.length - 1) {
                 setCurrentQuestion(currentQuestion + 1);
             } else {
+                // LME Update on finish
+                if (newMarkers.length > 0) {
+                    try {
+                        const aggregated = aggregateMarkers(newMarkers, 0.6); // 0.6 reliability
+                        const currentPsyche = getPsycheState();
+                        const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
+                        savePsycheState(newPsyche);
+                    } catch (e) {
+                        console.error("LME Update failed", e);
+                    }
+                }
                 setShowResult(true);
             }
             setFadeIn(true);
@@ -337,6 +359,7 @@ const DestinyQuiz = () => {
                                     setStarted(false);
                                     setCurrentQuestion(0);
                                     setScores({ vision: 0, resilience: 0, magnetism: 0, innerCall: 0 });
+                                    setCollectedMarkers([]);
                                     setShowResult(false);
                                 }}
                                 className="flex-1 py-3 px-6 rounded-xl font-bold bg-zinc-700 text-white shadow-lg hover:bg-zinc-600 transition-colors"
@@ -347,6 +370,7 @@ const DestinyQuiz = () => {
 
                         <p className="text-zinc-600 text-xs text-center mt-8">
                             Dieser Test dient der Selbstreflexion und Unterhaltung. Er ist keine psychologische Diagnose.
+                            <br /><span className="text-amber-500/50">Dein dynamisches Profil wurde aktualisiert.</span>
                         </p>
                     </div>
                 </div>

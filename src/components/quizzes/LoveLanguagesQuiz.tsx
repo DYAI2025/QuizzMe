@@ -1,6 +1,9 @@
 'use client'
 
 import React, { useState } from 'react';
+import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
+import { updatePsycheState } from '../../lib/lme/lme-core';
+import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
 
 const quizData = {
     meta: {
@@ -13,10 +16,10 @@ const quizData = {
             context: "Es ist spät. Dein Mensch hatte einen schweren Tag.",
             text: "Was tust du instinktiv?",
             options: [
-                { id: "a", text: "Ich sage die Worte, die niemand sonst findet", scores: { intensity: 0, expression: 0, connection: 1 } },
-                { id: "b", text: "Ich halte einfach still – meine Arme sagen alles", scores: { intensity: 1, expression: 1, connection: 2 } },
-                { id: "c", text: "Ich handle: Tee, Decke, das Handy auf lautlos", scores: { intensity: 0, expression: 2, connection: 1 } },
-                { id: "d", text: "Ich bleibe einfach da – meine Präsenz ist das Geschenk", scores: { intensity: 1, expression: 1, connection: 1 } }
+                { id: "a", text: "Ich sage die Worte, die niemand sonst findet", scores: { intensity: 0, expression: 0, connection: 1 }, psyche_markers: { depth: 0.6, connection: 0.8 } },
+                { id: "b", text: "Ich halte einfach still – meine Arme sagen alles", scores: { intensity: 1, expression: 1, connection: 2 }, psyche_markers: { connection: 1.0, shadow: 0.4 } },
+                { id: "c", text: "Ich handle: Tee, Decke, das Handy auf lautlos", scores: { intensity: 0, expression: 2, connection: 1 }, psyche_markers: { structure: 0.8, connection: 0.6 } },
+                { id: "d", text: "Ich bleibe einfach da – meine Präsenz ist das Geschenk", scores: { intensity: 1, expression: 1, connection: 1 }, psyche_markers: { connection: 0.9, depth: 0.5 } }
             ]
         },
         {
@@ -24,10 +27,10 @@ const quizData = {
             context: "Du denkst an einen perfekten Moment mit jemandem, den du liebst.",
             text: "Was siehst du?",
             options: [
-                { id: "a", text: "Ein Gespräch, das die Zeit vergessen lässt", scores: { intensity: 0, expression: 0, connection: 1 } },
-                { id: "b", text: "Hände, die sich finden, ohne hinzusehen", scores: { intensity: 2, expression: 1, connection: 2 } },
-                { id: "c", text: "Ein Ort, den wir gemeinsam gebaut haben", scores: { intensity: 1, expression: 2, connection: 1 } },
-                { id: "d", text: "Stille, die sich wie Zuhause anfühlt", scores: { intensity: 0, expression: 1, connection: 2 } }
+                { id: "a", text: "Ein Gespräch, das die Zeit vergessen lässt", scores: { intensity: 0, expression: 0, connection: 1 }, psyche_markers: { connection: 1.0, depth: 0.8 } },
+                { id: "b", text: "Hände, die sich finden, ohne hinzusehen", scores: { intensity: 2, expression: 1, connection: 2 }, psyche_markers: { shadow: 0.5, connection: 0.9 } },
+                { id: "c", text: "Ein Ort, den wir gemeinsam gebaut haben", scores: { intensity: 1, expression: 2, connection: 1 }, psyche_markers: { structure: 1.0, connection: 0.5 } },
+                { id: "d", text: "Stille, die sich wie Zuhause anfühlt", scores: { intensity: 0, expression: 1, connection: 2 }, psyche_markers: { depth: 0.7, connection: 0.8 } }
             ]
         },
         {
@@ -283,6 +286,7 @@ export function LoveLanguagesQuiz() {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [result, setResult] = useState<typeof quizData.profiles[0] | undefined>(undefined);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
 
     const handleStart = () => {
         setIsAnimating(true);
@@ -301,6 +305,13 @@ export function LoveLanguagesQuiz() {
         };
         setScores(newScores);
 
+        // Collect markers if they exist
+        const updatedMarkers = [...collectedMarkers];
+        if ((option as any).psyche_markers) {
+            updatedMarkers.push((option as any).psyche_markers);
+            setCollectedMarkers(updatedMarkers);
+        }
+
         setTimeout(() => {
             if (currentQ < quizData.questions.length - 1) {
                 setIsAnimating(true);
@@ -313,6 +324,19 @@ export function LoveLanguagesQuiz() {
                 setIsAnimating(true);
                 setTimeout(() => {
                     setResult(getProfile(newScores));
+
+                    // LME Update
+                    if (updatedMarkers.length > 0) {
+                        try {
+                            const aggregated = aggregateMarkers(updatedMarkers, 0.7); // 0.7 reliability
+                            const currentPsyche = getPsycheState();
+                            const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
+                            savePsycheState(newPsyche);
+                        } catch (e) {
+                            console.error("LME Update failed", e);
+                        }
+                    }
+
                     setStage('result');
                     setIsAnimating(false);
                 }, 500);
@@ -325,7 +349,9 @@ export function LoveLanguagesQuiz() {
         setTimeout(() => {
             setStage('intro');
             setCurrentQ(0);
+            setCurrentQ(0);
             setScores({ intensity: 0, expression: 0, connection: 0 });
+            setCollectedMarkers([]);
             setSelectedOption(null);
             setResult(undefined);
             setIsAnimating(false);
@@ -397,10 +423,10 @@ export function LoveLanguagesQuiz() {
                                 onClick={() => handleAnswer(option)}
                                 disabled={selectedOption !== null}
                                 className={`w-full p-4 text-left rounded-xl border transition-all duration-300 ${selectedOption === option.id
-                                        ? 'border-purple-400 bg-purple-500/20 text-white scale-98'
-                                        : selectedOption !== null
-                                            ? 'border-slate-700/50 bg-slate-800/30 text-slate-500'
-                                            : 'border-slate-700 bg-slate-800/50 text-purple-100 hover:border-purple-500/50 hover:bg-slate-800 active:scale-98'
+                                    ? 'border-purple-400 bg-purple-500/20 text-white scale-98'
+                                    : selectedOption !== null
+                                        ? 'border-slate-700/50 bg-slate-800/30 text-slate-500'
+                                        : 'border-slate-700 bg-slate-800/50 text-purple-100 hover:border-purple-500/50 hover:bg-slate-800 active:scale-98'
                                     }`}
                             >
                                 <span className="text-sm leading-relaxed">{option.text}</span>
@@ -487,6 +513,7 @@ export function LoveLanguagesQuiz() {
 
                     <p className="text-white/30 text-xs text-center leading-relaxed pb-4">
                         Dieser Test dient der spielerischen Selbstreflexion und stellt keine psychologische Bewertung dar.
+                        <br /><span className="text-purple-400/50">Dein dynamisches Profil wurde aktualisiert.</span>
                     </p>
                 </div>
             </div>
