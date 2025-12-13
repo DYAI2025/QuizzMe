@@ -6,6 +6,20 @@ import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
 import { updatePsycheState } from '../../lib/lme/lme-core';
 import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
 
+// Modern Alchemy colors
+const colors = {
+    bgPrimary: '#041726',
+    bgEmerald: '#0D5A5F',
+    goldPrimary: '#D2A95A',
+    goldDark: '#A77D38',
+    sage: '#6CA192',
+    teal: '#1C5B5C',
+    cream: '#F7F0E6',
+    creamDark: '#F2E3CF',
+    textDark: '#271C16',
+    textLight: '#F7F3EA',
+};
+
 type Scores = {
     stability: number;
     fire: number;
@@ -15,15 +29,35 @@ type Scores = {
     bridge: number;
 };
 
+// Social connections icon
+const ConnectionsIcon = () => (
+    <svg viewBox="0 0 120 120" className="w-28 h-28">
+        <circle cx="60" cy="60" r="50" stroke={colors.goldPrimary} strokeWidth="1.5" fill="none" strokeDasharray="4 4" opacity="0.4" />
+        <circle cx="60" cy="35" r="10" stroke={colors.goldPrimary} strokeWidth="1.5" fill={colors.goldPrimary} fillOpacity="0.2" />
+        <circle cx="35" cy="75" r="10" stroke={colors.goldPrimary} strokeWidth="1.5" fill={colors.goldPrimary} fillOpacity="0.2" />
+        <circle cx="85" cy="75" r="10" stroke={colors.goldPrimary} strokeWidth="1.5" fill={colors.goldPrimary} fillOpacity="0.2" />
+        <line x1="60" y1="45" x2="40" y2="67" stroke={colors.goldPrimary} strokeWidth="1" opacity="0.5" />
+        <line x1="60" y1="45" x2="80" y2="67" stroke={colors.goldPrimary} strokeWidth="1" opacity="0.5" />
+        <line x1="45" y1="75" x2="75" y2="75" stroke={colors.goldPrimary} strokeWidth="1" opacity="0.5" />
+    </svg>
+);
+
+// Loading spinner
+const LoadingSpinner = () => (
+    <svg viewBox="0 0 80 80" className="w-20 h-20 animate-spin" style={{ animationDuration: '3s' }}>
+        <circle cx="40" cy="40" r="35" stroke={colors.goldPrimary} strokeWidth="1.5" fill="none" strokeDasharray="8 4" opacity="0.4" />
+        <circle cx="40" cy="40" r="6" fill={colors.goldPrimary} opacity="0.4" />
+        <circle cx="40" cy="40" r="3" fill={colors.goldPrimary} />
+    </svg>
+);
+
 export function SocialRoleQuiz() {
-    const [stage, setStage] = useState('intro');
+    const [stage, setStage] = useState<'intro' | 'quiz' | 'loading' | 'result'>('intro');
     const [currentQ, setCurrentQ] = useState(0);
     const [scores, setScores] = useState<Scores>({ stability: 0, fire: 0, truth: 0, harbor: 0, compass: 0, bridge: 0 });
     const [result, setResult] = useState<typeof roles[keyof typeof roles] | null>(null);
     const [isAnimating, setIsAnimating] = useState(false);
     const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
-
-
 
     const startQuiz = () => setStage('quiz');
 
@@ -57,7 +91,7 @@ export function SocialRoleQuiz() {
         // LME Update immediately
         if (finalMarkers.length > 0) {
             try {
-                const aggregated = aggregateMarkers(finalMarkers, 0.8); // 0.8 reliability (Deep)
+                const aggregated = aggregateMarkers(finalMarkers, 0.8);
                 const currentPsyche = getPsycheState();
                 const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
                 savePsycheState(newPsyche);
@@ -66,7 +100,6 @@ export function SocialRoleQuiz() {
             }
         }
 
-        // Simulate suspense
         setTimeout(() => {
             const roleMapping: Record<string, keyof typeof roles> = {
                 stability: 'rock',
@@ -91,64 +124,126 @@ export function SocialRoleQuiz() {
             setResult(resultRole);
             setStage('result');
             setIsAnimating(false);
-        }, 1500);
+        }, 2000);
     };
 
     const progress = ((currentQ + 1) / questions.length) * 100;
 
+    // INTRO SCREEN
     if (stage === 'intro') {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[600px] text-center p-8 bg-gradient-to-br from-zinc-900 to-black text-white rounded-3xl">
-                <div className="text-6xl mb-6">👥</div>
-                <h1 className="text-3xl font-bold mb-4">Wer bist du für andere?</h1>
-                <p className="text-zinc-400 text-lg mb-8 max-w-md">
-                    Der Fels? Die Flamme? Der Spiegel? <br />
+            <div
+                className="flex flex-col items-center justify-center min-h-[600px] text-center p-8 rounded-3xl"
+                style={{
+                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
+                    color: colors.textLight
+                }}
+            >
+                <div className="flex justify-center mb-6">
+                    <ConnectionsIcon />
+                </div>
+
+                <h1
+                    className="text-3xl font-serif font-semibold mb-4"
+                    style={{ color: colors.goldPrimary }}
+                >
+                    Wer bist du für andere?
+                </h1>
+
+                <p className="text-lg mb-8 max-w-md" style={{ color: colors.sage }}>
+                    Der Fels? Die Flamme? Der Spiegel?<br />
                     Finde heraus, welche Rolle du unbewusst in deinem Umfeld spielst.
                 </p>
+
                 <button
                     onClick={startQuiz}
-                    className="px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl font-bold text-lg 
-                         shadow-lg shadow-violet-500/30 hover:scale-105 transition-transform"
+                    className="px-10 py-4 rounded-xl font-semibold text-lg transition-all hover:translate-y-[-2px]"
+                    style={{
+                        background: `linear-gradient(135deg, ${colors.goldPrimary} 0%, ${colors.goldDark} 100%)`,
+                        color: colors.textDark,
+                        boxShadow: '0 4px 20px rgba(210, 169, 90, 0.25)'
+                    }}
                 >
                     Entdecken
                 </button>
-                <p className="text-zinc-600 text-xs mt-6">
-                    Zur Selbstreflexion. Keine Diagnose. <span className="text-violet-500">Syncts mit deinem Profil.</span>
+
+                <p className="text-xs mt-6" style={{ color: colors.teal }}>
+                    Zur Selbstreflexion. Keine Diagnose. <span style={{ color: colors.sage }}>Syncts mit deinem Profil.</span>
                 </p>
             </div>
         );
     }
 
+    // LOADING SCREEN
     if (stage === 'loading') {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[600px] bg-zinc-900 text-white rounded-3xl">
-                <div className="text-6xl mb-6 animate-pulse">🔮</div>
-                <p className="text-zinc-400 text-lg">Dein soziales Profil nimmt Form an...</p>
+            <div
+                className="flex flex-col items-center justify-center min-h-[600px] rounded-3xl"
+                style={{
+                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
+                    color: colors.textLight
+                }}
+            >
+                <LoadingSpinner />
+                <p className="text-lg mt-6 font-serif" style={{ color: colors.cream }}>
+                    Dein soziales Profil nimmt Form an...
+                </p>
             </div>
         );
     }
 
+    // QUIZ SCREEN
     if (stage === 'quiz') {
         const q = questions[currentQ];
 
         return (
-            <div className={`bg-zinc-900 text-white p-6 rounded-3xl min-h-[600px] flex flex-col transition-opacity duration-300 ${isAnimating ? 'opacity-50' : 'opacity-100'}`}>
+            <div
+                className={`min-h-[600px] p-6 rounded-3xl flex flex-col transition-opacity duration-300 ${isAnimating ? 'opacity-50' : 'opacity-100'}`}
+                style={{
+                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
+                    color: colors.textLight
+                }}
+            >
+                {/* Progress */}
                 <div className="mb-8">
-                    <div className="flex justify-between text-xs text-zinc-500 mb-2">
+                    <div className="flex justify-between text-xs mb-2" style={{ color: colors.goldDark }}>
                         <span>Frage {currentQ + 1} von {questions.length}</span>
                         <span>{Math.round(progress)}%</span>
                     </div>
-                    <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                        className="h-1 rounded-full overflow-hidden"
+                        style={{ background: 'rgba(210, 169, 90, 0.2)' }}
+                    >
                         <div
-                            className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 transition-all duration-300"
-                            style={{ width: `${progress}%` }}
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{
+                                width: `${progress}%`,
+                                background: `linear-gradient(90deg, ${colors.goldDark} 0%, ${colors.goldPrimary} 100%)`
+                            }}
                         />
                     </div>
                 </div>
 
-                <div className="flex-grow flex flex-col justify-center max-w-xl mx-auto w-full">
-                    <p className="text-violet-400 italic mb-4 text-sm">{q.scenario}</p>
-                    <h2 className="text-2xl font-bold mb-8 leading-snug">
+                {/* Question Card */}
+                <div
+                    className="flex-grow flex flex-col justify-center rounded-2xl p-6"
+                    style={{
+                        background: colors.cream,
+                        border: `1px solid ${colors.goldPrimary}`,
+                        boxShadow: '0 4px 40px rgba(0, 0, 0, 0.3)'
+                    }}
+                >
+                    <p
+                        className="text-sm italic mb-4 font-serif"
+                        style={{ color: colors.teal }}
+                    >
+                        {q.scenario}
+                    </p>
+
+                    <h2
+                        className="text-xl font-serif font-semibold mb-8 leading-snug"
+                        style={{ color: colors.textDark }}
+                    >
                         {q.text}
                     </h2>
 
@@ -157,11 +252,19 @@ export function SocialRoleQuiz() {
                             <button
                                 key={i}
                                 onClick={() => handleAnswer(opt)}
-                                className="w-full text-left p-4 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 hover:border-violet-500/50 
-                                       rounded-xl transition-all duration-200 flex items-center gap-4 group"
+                                className="w-full text-left p-4 rounded-xl transition-all duration-200 hover:translate-y-[-1px] flex items-center gap-4 group"
+                                style={{
+                                    background: 'rgba(247, 240, 230, 0.6)',
+                                    border: '1px solid rgba(167, 125, 56, 0.3)',
+                                    color: colors.textDark
+                                }}
                             >
-                                <span className="text-2xl opacity-60 group-hover:opacity-100 transition-opacity">{opt.vibe}</span>
-                                <span className="text-zinc-300 group-hover:text-white">{opt.text}</span>
+                                <span
+                                    className="text-xl opacity-70 group-hover:opacity-100 transition-opacity"
+                                >
+                                    {opt.vibe}
+                                </span>
+                                <span className="text-sm">{opt.text}</span>
                             </button>
                         ))}
                     </div>
@@ -170,68 +273,147 @@ export function SocialRoleQuiz() {
         );
     }
 
+    // RESULT SCREEN
     if (stage === 'result' && result) {
         return (
-            <div className={`bg-gradient-to-br ${result.gradient} text-white p-1 rounded-3xl shadow-2xl overflow-hidden`}>
-                <div className="bg-zinc-900/90 backdrop-blur-sm p-8 h-full rounded-[20px] overflow-y-auto max-h-[800px] no-scrollbar">
-                    <div className="text-center mb-10">
-                        <div className="text-6xl mb-4">{result.emoji}</div>
-                        <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-                            {result.name}
-                        </h1>
-                        <p className="text-zinc-400 text-lg italic">&quot;{result.tagline}&quot;</p>
-                    </div>
-
-                    <p className="text-zinc-200 leading-relaxed mb-8 text-lg text-center">
-                        {result.description}
-                    </p>
-
-                    <div className="grid md:grid-cols-2 gap-4 mb-8">
-                        <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-                            <div className="text-2xl mb-2">⚡</div>
-                            <h3 className="text-zinc-400 text-xs uppercase tracking-wider mb-1">Superkraft</h3>
-                            <p className="font-medium text-white">{result.superpower}</p>
+            <div
+                className="rounded-3xl overflow-hidden p-6"
+                style={{
+                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
+                    color: colors.textLight
+                }}
+            >
+                <div className="max-w-lg mx-auto">
+                    {/* Result Card */}
+                    <div
+                        className="rounded-2xl overflow-hidden"
+                        style={{
+                            background: colors.cream,
+                            border: `1px solid ${colors.goldPrimary}`,
+                            boxShadow: '0 8px 50px rgba(0, 0, 0, 0.35)'
+                        }}
+                    >
+                        {/* Header */}
+                        <div
+                            className="p-6 text-center"
+                            style={{
+                                background: `linear-gradient(135deg, ${colors.goldPrimary}15 0%, ${colors.goldPrimary}05 100%)`,
+                                borderBottom: `1px solid ${colors.goldPrimary}`
+                            }}
+                        >
+                            <div className="text-5xl mb-4">{result.emoji}</div>
+                            <h1
+                                className="text-2xl font-serif font-bold mb-2"
+                                style={{ color: colors.textDark }}
+                            >
+                                {result.name}
+                            </h1>
+                            <p className="italic text-sm" style={{ color: colors.teal }}>
+                                „{result.tagline}"
+                            </p>
                         </div>
-                        <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-                            <div className="text-2xl mb-2">🌑</div>
-                            <h3 className="text-zinc-400 text-xs uppercase tracking-wider mb-1">Schattenseite</h3>
-                            <p className="font-medium text-white">{result.shadow}</p>
-                        </div>
-                    </div>
 
-                    <div className="bg-zinc-950/50 rounded-xl p-6 mb-8">
-                        <h3 className="text-zinc-500 text-xs uppercase tracking-wide mb-4">Deine Zutaten</h3>
-                        <div className="space-y-4">
-                            {result.ingredients.map(([pct, label], i) => (
-                                <div key={i} className="flex items-center gap-4">
-                                    <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full bg-gradient-to-r ${result.gradient}`}
-                                            style={{ width: `${pct}%` }}
-                                        />
-                                    </div>
-                                    <span className="text-sm text-zinc-300 w-32 text-right">{label}</span>
+                        <div className="p-6 space-y-5 max-h-[500px] overflow-y-auto">
+                            <p
+                                className="leading-relaxed text-center"
+                                style={{ color: colors.textDark, opacity: 0.9 }}
+                            >
+                                {result.description}
+                            </p>
+
+                            {/* Superpower & Shadow */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div
+                                    className="rounded-xl p-4"
+                                    style={{
+                                        background: 'rgba(108, 161, 146, 0.12)',
+                                        border: '1px solid rgba(108, 161, 146, 0.25)'
+                                    }}
+                                >
+                                    <div className="text-xl mb-2">⚡</div>
+                                    <h3 className="text-xs uppercase tracking-wider mb-1" style={{ color: colors.sage }}>
+                                        Superkraft
+                                    </h3>
+                                    <p className="font-medium text-sm" style={{ color: colors.textDark }}>{result.superpower}</p>
                                 </div>
-                            ))}
+                                <div
+                                    className="rounded-xl p-4"
+                                    style={{
+                                        background: 'rgba(167, 125, 56, 0.1)',
+                                        border: '1px solid rgba(167, 125, 56, 0.25)'
+                                    }}
+                                >
+                                    <div className="text-xl mb-2">🌑</div>
+                                    <h3 className="text-xs uppercase tracking-wider mb-1" style={{ color: colors.goldDark }}>
+                                        Schattenseite
+                                    </h3>
+                                    <p className="font-medium text-sm" style={{ color: colors.textDark }}>{result.shadow}</p>
+                                </div>
+                            </div>
+
+                            {/* Ingredients */}
+                            <div
+                                className="rounded-xl p-5"
+                                style={{
+                                    background: 'rgba(28, 91, 92, 0.08)',
+                                    border: '1px solid rgba(28, 91, 92, 0.15)'
+                                }}
+                            >
+                                <h3 className="text-xs uppercase tracking-wider mb-4" style={{ color: colors.teal }}>
+                                    Deine Zutaten
+                                </h3>
+                                <div className="space-y-3">
+                                    {result.ingredients.map(([pct, label], i) => (
+                                        <div key={i} className="flex items-center gap-4">
+                                            <div
+                                                className="flex-1 h-2 rounded-full overflow-hidden"
+                                                style={{ background: 'rgba(28, 91, 92, 0.15)' }}
+                                            >
+                                                <div
+                                                    className="h-full rounded-full"
+                                                    style={{
+                                                        width: `${pct}%`,
+                                                        background: `linear-gradient(90deg, ${colors.goldDark} 0%, ${colors.goldPrimary} 100%)`
+                                                    }}
+                                                />
+                                            </div>
+                                            <span className="text-sm w-32 text-right" style={{ color: colors.textDark }}>{label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Dynamics */}
+                            <div
+                                className="rounded-xl p-5"
+                                style={{
+                                    background: 'rgba(28, 91, 92, 0.05)',
+                                    border: '1px solid rgba(28, 91, 92, 0.1)'
+                                }}
+                            >
+                                <h3 className="text-xs uppercase tracking-wider mb-4 text-center" style={{ color: colors.teal }}>
+                                    Deine Dynamiken
+                                </h3>
+                                <div className="flex justify-between text-center">
+                                    <div>
+                                        <p className="text-xs mb-1" style={{ color: colors.teal }}>Verstärkt durch</p>
+                                        <p className="font-medium text-sm" style={{ color: colors.sage }}>{result.compatible}</p>
+                                    </div>
+                                    <div
+                                        className="w-px mx-4"
+                                        style={{ background: 'rgba(28, 91, 92, 0.2)' }}
+                                    />
+                                    <div>
+                                        <p className="text-xs mb-1" style={{ color: colors.teal }}>Herausfordernd</p>
+                                        <p className="font-medium text-sm" style={{ color: colors.goldDark }}>{result.challenging}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="border-t border-white/10 pt-6 mb-8">
-                        <h3 className="text-center text-zinc-500 text-xs uppercase tracking-wide mb-6">Deine Dynamiken</h3>
-                        <div className="flex justify-between text-center max-w-md mx-auto">
-                            <div>
-                                <p className="text-xs text-zinc-500 mb-1">Verstärkt durch</p>
-                                <p className="text-emerald-400 font-medium">{result.compatible}</p>
-                            </div>
-                            <div className="w-px bg-white/10 mx-4"></div>
-                            <div>
-                                <p className="text-xs text-zinc-500 mb-1">Herausfordernd</p>
-                                <p className="text-amber-400 font-medium">{result.challenging}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-4">
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 mt-4">
                         <button
                             onClick={() => {
                                 const text = `${result.emoji} Ich bin ${result.name}\n\n"${result.tagline}"\n\nFinde heraus, wer DU für andere bist.`;
@@ -241,7 +423,12 @@ export function SocialRoleQuiz() {
                                     navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));
                                 }
                             }}
-                            className={`flex-1 py-3 px-6 rounded-xl font-bold bg-gradient-to-r ${result.gradient} shadow-lg hover:opacity-90 transition-opacity`}
+                            className="flex-1 py-4 rounded-xl font-semibold transition-all hover:translate-y-[-2px]"
+                            style={{
+                                background: `linear-gradient(135deg, ${colors.goldPrimary} 0%, ${colors.goldDark} 100%)`,
+                                color: colors.textDark,
+                                boxShadow: '0 6px 25px rgba(210, 169, 90, 0.35)'
+                            }}
                         >
                             Teilen
                         </button>
@@ -252,7 +439,12 @@ export function SocialRoleQuiz() {
                                 setScores({ stability: 0, fire: 0, truth: 0, harbor: 0, compass: 0, bridge: 0 });
                                 setCollectedMarkers([]);
                             }}
-                            className="px-6 py-3 rounded-xl font-semibold border border-zinc-700 hover:bg-zinc-800 transition-colors text-zinc-400"
+                            className="px-6 py-4 rounded-xl font-medium transition-colors"
+                            style={{
+                                background: 'transparent',
+                                border: '1px solid rgba(210, 169, 90, 0.4)',
+                                color: colors.cream
+                            }}
                         >
                             Nochmal
                         </button>
