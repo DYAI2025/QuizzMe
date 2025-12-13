@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+@theme {
+  /* Colors */
+  --color-alchemy-bg-emerald: var(--alchemy-bg-emerald);
+  --color-alchemy-bg-midnight: var(--alchemy-bg-midnight);
+  --color-alchemy-bg-deep: var(--alchemy-bg-deep);
+  --color-alchemy-bg-surface: var(--alchemy-bg-surface);
+
+  --color-alchemy-gold-primary: var(--alchemy-gold-primary);
+  --color-alchemy-gold-dark: var(--alchemy-gold-dark);
+  --color-alchemy-gold-light: var(--alchemy-gold-light);
+  --color-alchemy-gold-muted: var(--alchemy-gold-muted);
+
+  --color-alchemy-cream: var(--alchemy-cream);
+  --color-alchemy-parchment: var(--alchemy-parchment);
+
+  --color-alchemy-text-dark: var(--alchemy-text-dark);
+  --color-alchemy-text-light: var(--alchemy-text-light);
+
+  /* Semantic - Light Grimoire */
+  --color-bg-parchment: var(--bg-parchment);
+  --color-bg-parchment-light: var(--bg-parchment-light);
+  --color-text-ink: var(--text-ink);
+  --color-text-ink-muted: var(--text-ink-muted);
+  --color-border-gold-subtle: var(--border-gold-subtle);
+  --color-accent-emerald: var(--accent-emerald);
+
+  /* Fonts */
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+
+  /* Spacing/Radius */
+  --radius-xl: var(--radius-xl);
+}
+
 /* ============================================
    QuizzMe - Modern Alchemy Global Styles
    ============================================ */
@@ -123,33 +157,43 @@
    ============================================ */
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) translateX(0px);
   }
+
   25% {
     transform: translateY(-15px) translateX(8px);
   }
+
   50% {
     transform: translateY(-25px) translateX(-8px);
   }
+
   75% {
     transform: translateY(-10px) translateX(5px);
   }
 }
 
 @keyframes float-quiz {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) translateX(0) scale(1);
     opacity: 0.12;
   }
+
   25% {
     transform: translateY(-30px) translateX(15px) scale(1.1);
     opacity: 0.18;
   }
+
   50% {
     transform: translateY(-20px) translateX(-15px) scale(0.9);
     opacity: 0.08;
   }
+
   75% {
     transform: translateY(-40px) translateX(10px) scale(1.05);
     opacity: 0.15;
@@ -160,9 +204,11 @@
   0% {
     opacity: 0.3;
   }
+
   50% {
     opacity: 0.6;
   }
+
   100% {
     opacity: 0.3;
   }

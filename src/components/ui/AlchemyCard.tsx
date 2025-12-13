@@ -18,14 +18,23 @@ interface AlchemyCardProps {
     as?: 'div' | 'article' | 'section';
 }
 
+// Ornament SVG (Corner Flourish - simplified placeholder)
+const CornerOrnament = ({ className }: { className: string }) => (
+    <svg viewBox="0 0 40 40" className={`absolute w-10 h-10 text-gold-muted opacity-40 pointer-events-none ${className}`} fill="none" stroke="currentColor" strokeWidth="1">
+        <path d="M5,35 L5,5 L35,5" />
+        <circle cx="5" cy="5" r="2" fill="currentColor" />
+    </svg>
+);
+
 export function AlchemyCard({
     children,
     variant = 'default',
     size = 'md',
     hoverable = false,
+    cornerOrnaments = false,
     className = '',
     as: Component = 'div',
-}: AlchemyCardProps) {
+}: AlchemyCardProps & { cornerOrnaments?: boolean }) {
     // Size padding classes
     const sizeStyles = {
         sm: 'p-4',
@@ -33,53 +42,32 @@ export function AlchemyCard({
         lg: 'p-8 md:p-12',
     };
 
-    // Variant styles
-    const variantStyles = {
-        default: {
-            background: 'var(--alchemy-cream)',
-            borderColor: 'var(--alchemy-gold-primary)',
-        },
-        parchment: {
-            background: 'linear-gradient(135deg, var(--alchemy-cream) 0%, var(--alchemy-parchment) 100%)',
-            borderColor: 'var(--alchemy-gold-dark)',
-        },
-        elevated: {
-            background: 'var(--alchemy-cream-light)',
-            borderColor: 'var(--alchemy-gold-light)',
-        },
-    };
-
-    const style = variantStyles[variant];
-
     return (
         <Component
             className={`
-        rounded-2xl
-        border
+        relative overflow-hidden
+        rounded-2xl border
         ${sizeStyles[size]}
-        ${hoverable ? 'transition-all duration-300 cursor-pointer' : ''}
+        ${hoverable ? 'transition-all duration-300 cursor-pointer hover:-translate-y-0.5 hover:shadow-lg' : 'shadow-sm'}
         ${className}
       `}
             style={{
-                background: style.background,
-                borderColor: style.borderColor,
-                borderWidth: '1px',
-                boxShadow: 'var(--shadow-md)',
-                color: 'var(--alchemy-text-dark)',
-                ...(hoverable ? {} : {}),
+                background: variant === 'elevated' ? 'var(--bg-parchment-light)' : 'var(--bg-parchment)',
+                borderColor: 'var(--border-gold-subtle)',
+                color: 'var(--text-ink)',
             }}
-            onMouseEnter={hoverable ? (e) => {
-                const target = e.currentTarget as HTMLElement;
-                target.style.transform = 'translateY(-2px)';
-                target.style.boxShadow = 'var(--shadow-lg), var(--glow-gold-subtle)';
-            } : undefined}
-            onMouseLeave={hoverable ? (e) => {
-                const target = e.currentTarget as HTMLElement;
-                target.style.transform = 'translateY(0)';
-                target.style.boxShadow = 'var(--shadow-md)';
-            } : undefined}
         >
-            {children}
+            {cornerOrnaments && (
+                <>
+                    <CornerOrnament className="top-2 left-2" />
+                    <CornerOrnament className="top-2 right-2 rotate-90" />
+                    <CornerOrnament className="bottom-2 right-2 rotate-180" />
+                    <CornerOrnament className="bottom-2 left-2 -rotate-90" />
+                </>
+            )}
+            <div className="relative z-10">
+                {children}
+            </div>
         </Component>
     );
 }

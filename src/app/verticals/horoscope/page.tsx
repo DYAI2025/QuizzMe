@@ -5,7 +5,11 @@ import { QuizSymbol } from "@/components/ui/QuizSymbol";
 
 export default function HoroscopeLandingPage() {
     return (
-        <AlchemyBackground withStars withBotanicals>
+        <AlchemyBackground
+            withStars
+            withBotanicals
+            backgroundImage="/assets/images/backgrounds/horoscope-bg.png"
+        >
             <div className="min-h-screen p-8 text-white font-serif">
                 <div className="max-w-4xl mx-auto">
                     <header className="text-center mb-16 pt-8">

@@ -14,6 +14,7 @@ interface AlchemyBackgroundProps {
     variant?: 'default' | 'radial' | 'minimal';
     withStars?: boolean;
     withBotanicals?: boolean;
+    backgroundImage?: string;
     className?: string;
 }
 
@@ -22,6 +23,7 @@ export function AlchemyBackground({
     variant = 'default',
     withStars = true,
     withBotanicals = false,
+    backgroundImage,
     className = '',
 }: AlchemyBackgroundProps) {
     const bgClass = variant === 'radial'
@@ -32,19 +34,35 @@ export function AlchemyBackground({
 
     return (
         <div className={`relative min-h-screen overflow-hidden ${bgClass} ${className}`}>
+            {/* Custom Background Image */}
+            {backgroundImage && (
+                <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                        backgroundImage: `url(${backgroundImage})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        opacity: 0.8 // Blend slightly with the base theme
+                    }}
+                    aria-hidden="true"
+                />
+            )}
+
             {/* Gradient overlay */}
             <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
                     background: variant === 'radial'
-                        ? 'radial-gradient(ellipse at 50% 30%, rgba(5, 59, 63, 0.8) 0%, rgba(4, 23, 38, 0.95) 60%, rgba(2, 17, 26, 1) 100%)'
-                        : 'linear-gradient(135deg, rgba(5, 59, 63, 0.9) 0%, rgba(4, 23, 38, 0.95) 50%, rgba(2, 17, 26, 1) 100%)',
+                        ? 'radial-gradient(ellipse at 50% 30%, rgba(5, 59, 63, 0.6) 0%, rgba(4, 23, 38, 0.85) 60%, rgba(2, 17, 26, 0.95) 100%)'
+                        : 'linear-gradient(135deg, rgba(5, 59, 63, 0.7) 0%, rgba(4, 23, 38, 0.85) 50%, rgba(2, 17, 26, 0.95) 100%)',
+                    // Reduced opacity if image is present to let it shine through, but keeping text readable
+                    opacity: backgroundImage ? 0.85 : 1
                 }}
                 aria-hidden="true"
             />
 
-            {/* Subtle star pattern */}
-            {withStars && (
+            {/* Subtle star pattern (only if no custom image or explicitly requested) */}
+            {withStars && !backgroundImage && (
                 <div
                     className="absolute inset-0 pointer-events-none opacity-40"
                     style={{

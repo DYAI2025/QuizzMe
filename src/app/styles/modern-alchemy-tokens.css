@@ -206,6 +206,17 @@
   --z-modal-backdrop: 40;
   --z-modal: 50;
   --z-tooltip: 60;
+
+  /* ============================================
+     LIGHT-GRIMOIRE THEME TOKENS
+     Mapping semantics to palette
+     ============================================ */
+  --bg-parchment: var(--alchemy-parchment);
+  --bg-parchment-light: var(--alchemy-cream);
+  --text-ink: var(--alchemy-text-dark);
+  --text-ink-muted: var(--alchemy-text-dark-muted);
+  --border-gold-subtle: rgba(210, 169, 90, 0.3);
+  --accent-emerald: var(--alchemy-bg-emerald);
 }
 
 /* ============================================
