@@ -2,6 +2,20 @@
 
 import React, { useState } from 'react';
 
+// Modern Alchemy colors
+const colors = {
+    bgPrimary: '#041726',
+    bgEmerald: '#0D5A5F',
+    goldPrimary: '#D2A95A',
+    goldDark: '#A77D38',
+    sage: '#6CA192',
+    teal: '#1C5B5C',
+    cream: '#F7F0E6',
+    creamDark: '#F2E3CF',
+    textDark: '#271C16',
+    textLight: '#F7F3EA',
+};
+
 const questions = [
     {
         id: "f1", text: "Wenn ich morgens aufwache, denke ich zuerst an das, was ICH heute brauche.",
@@ -111,8 +125,7 @@ const profiles = [
         id: "giver",
         title: "Der Weltverbesserer",
         subtitle: "Dein Kompass zeigt auf andere",
-        emoji: "🌍",
-        color: "from-emerald-500 to-teal-600",
+        symbol: "🌍",
         description: "Du lebst mit einem tiefen Bewusstsein für das Wohlergehen anderer. Empathie ist für dich keine Anstrengung, sondern dein natürlicher Modus.",
         strengths: ["Tiefe Empathie und emotionale Intelligenz", "Fähigkeit, Vertrauen aufzubauen", "Natürliche Führungskraft durch Fürsorge"],
         affirmation: "Ich darf mir selbst geben, was ich anderen so großzügig schenke.",
@@ -123,8 +136,7 @@ const profiles = [
         id: "selfkeeper",
         title: "Der Eigenständige",
         subtitle: "Du bist deine erste Priorität – und das ist gesund",
-        emoji: "🏔️",
-        color: "from-slate-500 to-zinc-600",
+        symbol: "🏔️",
         description: "Du hast verstanden, was viele erst spät lernen: Man kann nur geben, was man hat. Deine Fähigkeit zur Selbstfürsorge ist emotionale Intelligenz.",
         strengths: ["Gesunde Grenzsetzung", "Emotionale Stabilität unter Druck", "Klare Prioritäten und Fokus"],
         affirmation: "Meine Stärke liegt darin, meine Schale zu füllen, um dann überfließen zu können.",
@@ -135,8 +147,7 @@ const profiles = [
         id: "balancer",
         title: "Der Ausgewogene",
         subtitle: "Die seltene Kunst der Balance",
-        emoji: "⚖️",
-        color: "from-violet-500 to-purple-600",
+        symbol: "⚖️",
         description: "Du hast das geschafft, woran viele scheitern: ein echtes Gleichgewicht zwischen Selbstfürsorge und Fürsorge für andere.",
         strengths: ["Nachhaltige Energie durch ausgewogenes Geben und Nehmen", "Gesunde Beziehungen ohne Abhängigkeit", "Flexibilität in beide Richtungen"],
         affirmation: "Ich vertraue meinem inneren Pendel, das immer wieder zur Mitte findet.",
@@ -147,8 +158,7 @@ const profiles = [
         id: "strategist",
         title: "Der Strategische Geber",
         subtitle: "Du gibst klug – nicht blind",
-        emoji: "🎯",
-        color: "from-amber-500 to-orange-600",
+        symbol: "🎯",
         description: "Du hilfst – aber mit Verstand. Deine Fürsorge für andere ist durchdacht: Du fragst dich, wo dein Beitrag den größten Unterschied macht.",
         strengths: ["Hohe Wirksamkeit bei Hilfeleistungen", "Gute Ressourcen-Allokation", "Verbindet Kopf und Herz"],
         affirmation: "Mein Geben ist ein bewusster Akt der Gestaltung, nicht nur Reaktion.",
@@ -159,8 +169,7 @@ const profiles = [
         id: "empath",
         title: "Der Empathische Schwamm",
         subtitle: "Du fühlst alles – ob du willst oder nicht",
-        emoji: "💧",
-        color: "from-cyan-500 to-blue-600",
+        symbol: "💧",
         description: "Deine empathische Antenne ist auf voller Empfangsstärke. Du nimmst die Emotionen anderer auf wie ein Schwamm.",
         strengths: ["Tiefes, authentisches Verstehen anderer", "Fähigkeit, Trost zu spenden der wirklich ankommt", "Hohe emotionale Intelligenz"],
         affirmation: "Ich schütze meinen inneren Raum, damit mein Mitgefühl nachhaltig bleibt.",
@@ -169,24 +178,41 @@ const profiles = [
     }
 ];
 
+// Balance scale icon
+const BalanceIcon = () => (
+    <svg viewBox="0 0 120 120" className="w-24 h-24">
+        <circle cx="60" cy="60" r="50" stroke={colors.goldPrimary} strokeWidth="1.5" fill="none" strokeDasharray="4 4" opacity="0.4" />
+        <line x1="60" y1="25" x2="60" y2="95" stroke={colors.goldPrimary} strokeWidth="1.5" />
+        <line x1="25" y1="50" x2="95" y2="50" stroke={colors.goldPrimary} strokeWidth="1.5" />
+        <path d="M25 50 L35 70 L15 70 Z" fill={colors.goldPrimary} fillOpacity="0.3" stroke={colors.goldPrimary} strokeWidth="1" />
+        <path d="M95 50 L105 70 L85 70 Z" fill={colors.goldPrimary} fillOpacity="0.3" stroke={colors.goldPrimary} strokeWidth="1" />
+        <circle cx="60" cy="25" r="5" fill={colors.goldPrimary} />
+    </svg>
+);
+
 export function PersonalityQuiz() {
-    const [stage, setStage] = useState('intro');
+    const [stage, setStage] = useState<'intro' | 'quiz' | 'result'>('intro');
     const [currentQ, setCurrentQ] = useState(0);
     const [answers, setAnswers] = useState<Record<string, { scores: any, weight: number }>>({});
     const [result, setResult] = useState<typeof profiles[0] | null>(null);
     const [scores, setScores] = useState({ focus: 0, resources: 0, empathy: 0 });
+    const [isAnimating, setIsAnimating] = useState(false);
 
     const startQuiz = () => setStage('quiz');
 
     const handleAnswer = (option: any, question: any) => {
-        const newAnswers = { ...answers, [question.id]: { scores: option.scores, weight: question.weight || 1 } };
-        setAnswers(newAnswers);
+        setIsAnimating(true);
+        setTimeout(() => {
+            const newAnswers = { ...answers, [question.id]: { scores: option.scores, weight: question.weight || 1 } };
+            setAnswers(newAnswers);
 
-        if (currentQ < questions.length - 1) {
-            setCurrentQ(currentQ + 1);
-        } else {
-            calculateResult(newAnswers);
-        }
+            if (currentQ < questions.length - 1) {
+                setCurrentQ(currentQ + 1);
+                setIsAnimating(false);
+            } else {
+                calculateResult(newAnswers);
+            }
+        }, 200);
     };
 
     const calculateResult = (finalAnswers: any) => {
@@ -194,7 +220,6 @@ export function PersonalityQuiz() {
         const dimSums = { focus: 0, resources: 0, empathy: 0 };
 
         Object.values(finalAnswers).forEach((a: any) => {
-            // @ts-ignore
             Object.entries(a.scores).forEach(([dim, score]) => {
                 // @ts-ignore
                 dimSums[dim] += score * a.weight;
@@ -212,56 +237,103 @@ export function PersonalityQuiz() {
         setScores(finalScores);
 
         const sorted = [...profiles].sort((a, b) => b.priority - a.priority);
-        // @ts-ignore
         const match = sorted.find(p => p.match(finalScores)) || profiles.find(p => p.id === 'balancer');
 
-        setResult(match || profiles[2]); // Default to balancer if something fails
+        setResult(match || profiles[2]);
         setStage('result');
+        setIsAnimating(false);
     };
 
     const progress = ((currentQ + 1) / questions.length) * 100;
     const q = questions[currentQ];
 
+    // INTRO SCREEN
     if (stage === 'intro') {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[500px] text-center p-8 bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-3xl">
-                <div className="text-6xl mb-6">🪞</div>
-                <h1 className="text-3xl font-bold mb-4">Selbstfürsorge oder Weltverbesserer?</h1>
-                <p className="text-indigo-200 text-lg mb-8 max-w-md">
+            <div
+                className="flex flex-col items-center justify-center min-h-[500px] text-center p-8 rounded-3xl"
+                style={{
+                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
+                    color: colors.textLight
+                }}
+            >
+                <div className="flex justify-center mb-6">
+                    <BalanceIcon />
+                </div>
+
+                <h1
+                    className="text-3xl font-serif font-semibold mb-4"
+                    style={{ color: colors.goldPrimary }}
+                >
+                    Selbstfürsorge oder Weltverbesserer?
+                </h1>
+
+                <p className="text-lg mb-8 max-w-md" style={{ color: colors.sage }}>
                     Entdecke dein persönliches Gleichgewicht zwischen Geben und Nehmen.
                 </p>
+
                 <button
                     onClick={startQuiz}
-                    className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-bold text-lg 
-                   shadow-lg shadow-purple-500/30 hover:scale-105 transition-transform"
+                    className="px-10 py-4 rounded-xl font-semibold text-lg transition-all hover:translate-y-[-2px]"
+                    style={{
+                        background: `linear-gradient(135deg, ${colors.goldPrimary} 0%, ${colors.goldDark} 100%)`,
+                        color: colors.textDark,
+                        boxShadow: '0 4px 20px rgba(210, 169, 90, 0.25)'
+                    }}
                 >
                     Test starten
                 </button>
-                <p className="text-indigo-400 text-xs mt-6">
+
+                <p className="text-xs mt-6" style={{ color: colors.teal }}>
                     Zur Selbstreflexion. Keine Diagnose.
                 </p>
             </div>
         );
     }
 
+    // QUIZ SCREEN
     if (stage === 'quiz') {
         return (
-            <div className="bg-slate-900 text-white p-6 rounded-3xl min-h-[500px] flex flex-col">
+            <div
+                className={`min-h-[500px] p-6 rounded-3xl flex flex-col transition-opacity duration-200 ${isAnimating ? 'opacity-50' : 'opacity-100'}`}
+                style={{
+                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
+                    color: colors.textLight
+                }}
+            >
+                {/* Progress */}
                 <div className="mb-8">
-                    <div className="flex justify-between text-xs text-slate-400 mb-2">
+                    <div className="flex justify-between text-xs mb-2" style={{ color: colors.goldDark }}>
                         <span>Frage {currentQ + 1} von {questions.length}</span>
                         <span>{Math.round(progress)}%</span>
                     </div>
-                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                        className="h-1 rounded-full overflow-hidden"
+                        style={{ background: 'rgba(210, 169, 90, 0.2)' }}
+                    >
                         <div
-                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
-                            style={{ width: `${progress}%` }}
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{
+                                width: `${progress}%`,
+                                background: `linear-gradient(90deg, ${colors.goldDark} 0%, ${colors.goldPrimary} 100%)`
+                            }}
                         />
                     </div>
                 </div>
 
-                <div className="flex-grow flex flex-col justify-center max-w-xl mx-auto w-full">
-                    <h2 className="text-2xl font-bold mb-8 leading-snug">
+                {/* Question Card */}
+                <div
+                    className="flex-grow flex flex-col justify-center rounded-2xl p-6"
+                    style={{
+                        background: colors.cream,
+                        border: `1px solid ${colors.goldPrimary}`,
+                        boxShadow: '0 4px 40px rgba(0, 0, 0, 0.3)'
+                    }}
+                >
+                    <h2
+                        className="text-xl font-serif font-semibold mb-8 leading-snug"
+                        style={{ color: colors.textDark }}
+                    >
                         {q.text}
                     </h2>
 
@@ -270,10 +342,14 @@ export function PersonalityQuiz() {
                             <button
                                 key={i}
                                 onClick={() => handleAnswer(opt, q)}
-                                className="w-full text-left p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 
-                         rounded-xl transition-all duration-200"
+                                className="w-full text-left p-4 rounded-xl transition-all duration-200 hover:translate-y-[-1px]"
+                                style={{
+                                    background: 'rgba(247, 240, 230, 0.6)',
+                                    border: '1px solid rgba(167, 125, 56, 0.3)',
+                                    color: colors.textDark
+                                }}
                             >
-                                {opt.text}
+                                <span className="text-sm">{opt.text}</span>
                             </button>
                         ))}
                     </div>
@@ -282,81 +358,148 @@ export function PersonalityQuiz() {
         );
     }
 
+    // RESULT SCREEN
     if (stage === 'result' && result) {
         return (
-            <div className={`bg-gradient-to-br ${result.color} text-white p-1 rounded-3xl shadow-xl overflow-hidden`}>
-                <div className="bg-slate-900/90 backdrop-blur-sm p-8 h-full rounded-[20px]">
-                    <div className="text-center mb-8">
-                        <div className="text-6xl mb-4">{result.emoji}</div>
-                        <h1 className={`text-3xl font-bold bg-gradient-to-r ${result.color} bg-clip-text text-transparent mb-2`}>
-                            {result.title}
-                        </h1>
-                        <p className="text-slate-300 italic">{result.subtitle}</p>
-                    </div>
-
-                    <p className="text-slate-200 leading-relaxed mb-8 text-lg">
-                        {result.description}
-                    </p>
-
-                    <div className="grid md:grid-cols-2 gap-6 mb-8">
-                        <div className="bg-white/5 rounded-xl p-5">
-                            <h3 className="text-emerald-400 font-semibold mb-3 flex items-center gap-2">
-                                <span>✨</span> Deine Stärken
-                            </h3>
-                            <ul className="space-y-2 text-sm text-slate-300">
-                                {result.strengths.map((s, i) => (
-                                    <li key={i} className="flex gap-2">
-                                        <span className="text-emerald-500">•</span> {s}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div className="bg-white/5 rounded-xl p-5">
-                            <h3 className="text-amber-400 font-semibold mb-3 flex items-center gap-2">
-                                <span>🌟</span> Affirmation
-                            </h3>
-                            <p className="text-slate-200 italic font-medium leading-relaxed">
-                                &quot;{result.affirmation}&quot;
+            <div
+                className="rounded-3xl overflow-hidden p-6"
+                style={{
+                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
+                    color: colors.textLight
+                }}
+            >
+                <div className="max-w-lg mx-auto">
+                    {/* Result Card */}
+                    <div
+                        className="rounded-2xl overflow-hidden"
+                        style={{
+                            background: colors.cream,
+                            border: `1px solid ${colors.goldPrimary}`,
+                            boxShadow: '0 8px 50px rgba(0, 0, 0, 0.35)'
+                        }}
+                    >
+                        {/* Header */}
+                        <div
+                            className="p-6 text-center"
+                            style={{
+                                background: `linear-gradient(135deg, ${colors.goldPrimary}15 0%, ${colors.goldPrimary}05 100%)`,
+                                borderBottom: `1px solid ${colors.goldPrimary}`
+                            }}
+                        >
+                            <div className="text-5xl mb-4">{result.symbol}</div>
+                            <h1
+                                className="text-2xl font-serif font-bold mb-2"
+                                style={{ color: colors.textDark }}
+                            >
+                                {result.title}
+                            </h1>
+                            <p className="italic text-sm" style={{ color: colors.teal }}>
+                                {result.subtitle}
                             </p>
                         </div>
-                    </div>
 
-                    <div className="bg-slate-950/50 rounded-xl p-4 mb-8">
-                        <h4 className="text-slate-500 text-xs uppercase tracking-wide mb-4">Deine Balance</h4>
-                        <div className="space-y-4">
-                            {[
-                                { label: 'Fokus (Selbst vs. Andere)', val: scores.focus },
-                                { label: 'Ressourcen (Behalten vs. Geben)', val: scores.resources },
-                                { label: 'Empathie (Abgrenzung vs. Resonanz)', val: scores.empathy }
-                            ].map((d, i) => (
-                                <div key={i}>
-                                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                                        <span>{d.label}</span>
-                                        <span>{d.val}%</span>
-                                    </div>
-                                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full bg-gradient-to-r ${result?.color}`}
-                                            style={{ width: `${d.val}%` }}
-                                        />
-                                    </div>
+                        <div className="p-6 space-y-5">
+                            <p
+                                className="leading-relaxed text-lg"
+                                style={{ color: colors.textDark, opacity: 0.9 }}
+                            >
+                                {result.description}
+                            </p>
+
+                            {/* Strengths */}
+                            <div
+                                className="rounded-xl p-5"
+                                style={{
+                                    background: 'rgba(108, 161, 146, 0.08)',
+                                    border: '1px solid rgba(108, 161, 146, 0.2)'
+                                }}
+                            >
+                                <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: colors.sage }}>
+                                    ✨ Deine Stärken
+                                </h3>
+                                <ul className="space-y-2 text-sm">
+                                    {result.strengths.map((s, i) => (
+                                        <li key={i} className="flex gap-2" style={{ color: colors.textDark }}>
+                                            <span style={{ color: colors.sage }}>•</span> {s}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Affirmation */}
+                            <div
+                                className="rounded-xl p-5"
+                                style={{
+                                    background: 'rgba(210, 169, 90, 0.08)',
+                                    border: '1px solid rgba(210, 169, 90, 0.2)'
+                                }}
+                            >
+                                <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: colors.goldDark }}>
+                                    🌟 Affirmation
+                                </h3>
+                                <p className="italic font-medium leading-relaxed" style={{ color: colors.textDark }}>
+                                    „{result.affirmation}"
+                                </p>
+                            </div>
+
+                            {/* Balance Stats */}
+                            <div
+                                className="rounded-xl p-5"
+                                style={{
+                                    background: 'rgba(28, 91, 92, 0.08)',
+                                    border: '1px solid rgba(28, 91, 92, 0.15)'
+                                }}
+                            >
+                                <h4 className="text-xs uppercase tracking-wide mb-4" style={{ color: colors.teal }}>
+                                    Deine Balance
+                                </h4>
+                                <div className="space-y-4">
+                                    {[
+                                        { label: 'Fokus (Selbst vs. Andere)', val: scores.focus },
+                                        { label: 'Ressourcen (Behalten vs. Geben)', val: scores.resources },
+                                        { label: 'Empathie (Abgrenzung vs. Resonanz)', val: scores.empathy }
+                                    ].map((d, i) => (
+                                        <div key={i}>
+                                            <div className="flex justify-between text-xs mb-1" style={{ color: colors.textDark, opacity: 0.7 }}>
+                                                <span>{d.label}</span>
+                                                <span>{d.val}%</span>
+                                            </div>
+                                            <div
+                                                className="h-2 rounded-full overflow-hidden"
+                                                style={{ background: 'rgba(28, 91, 92, 0.15)' }}
+                                            >
+                                                <div
+                                                    className="h-full rounded-full"
+                                                    style={{
+                                                        width: `${d.val}%`,
+                                                        background: `linear-gradient(90deg, ${colors.goldDark} 0%, ${colors.goldPrimary} 100%)`
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex gap-4">
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 mt-4">
                         <button
                             onClick={() => {
-                                const text = `${result.emoji} Mein Ergebnis: ${result.title} – ${result.subtitle}`;
+                                const text = `${result.symbol} Mein Ergebnis: ${result.title} – ${result.subtitle}`;
                                 if (navigator.share) {
                                     navigator.share({ title: 'Selbstfürsorge Test', text });
                                 } else {
                                     navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));
                                 }
                             }}
-                            className={`flex-1 py-3 px-6 rounded-xl font-bold bg-gradient-to-r ${result.color} shadow-lg hover:opacity-90 transition-opacity`}
+                            className="flex-1 py-4 rounded-xl font-semibold transition-all hover:translate-y-[-2px]"
+                            style={{
+                                background: `linear-gradient(135deg, ${colors.goldPrimary} 0%, ${colors.goldDark} 100%)`,
+                                color: colors.textDark,
+                                boxShadow: '0 6px 25px rgba(210, 169, 90, 0.35)'
+                            }}
                         >
                             Teilen
                         </button>
@@ -367,7 +510,12 @@ export function PersonalityQuiz() {
                                 setAnswers({});
                                 setScores({ focus: 0, resources: 0, empathy: 0 });
                             }}
-                            className="px-6 py-3 rounded-xl font-semibold border border-slate-700 hover:bg-slate-800 transition-colors text-slate-400"
+                            className="px-6 py-4 rounded-xl font-medium transition-colors"
+                            style={{
+                                background: 'transparent',
+                                border: '1px solid rgba(210, 169, 90, 0.4)',
+                                color: colors.cream
+                            }}
                         >
                             Nochmal
                         </button>

@@ -5,6 +5,24 @@ import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
 import { updatePsycheState } from '../../lib/lme/lme-core';
 import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
 
+// Modern Alchemy Botanical colors
+const colors = {
+    emerald900: '#1B4332',
+    emerald800: '#2D5A45',
+    emerald700: '#3D6B4F',
+    emerald600: '#4A7C59',
+    emerald500: '#5A8F68',
+    emerald100: '#D8E9DE',
+    emerald50: '#EBF3ED',
+    gold600: '#9A7B2C',
+    gold500: '#B8942F',
+    gold400: '#D4AA33',
+    gold100: '#FAF6E9',
+    stone100: '#F5F5F4',
+    stone200: '#E7E5E4',
+    stone50: '#FAFAF9',
+};
+
 const quizData = {
     meta: {
         title: "Welche Sprache spricht dein Herz?",
@@ -147,29 +165,29 @@ const quizData = {
     profiles: [
         {
             id: "the_poet",
-            title: "Der Dichter",
-            emoji: "🖤",
+            title: "Die Dichterin",
+            symbol: "✧",
             tagline: "Du liebst in Sätzen, die andere nie vergessen werden.",
             loveLanguage: "Worte der Anerkennung",
-            description: "Es gibt Menschen, die Liebe aussprechen wie ein Geständnis – und dann gibt es dich. Du hast verstanden, dass Worte keine leeren Hüllen sind. Sie sind Brücken. Schlüssel. Manchmal sogar Waffen.\\n\\nIn bestimmten Momenten findest du Formulierungen, die andere ihr Leben lang suchen. Das ist keine Fähigkeit, die man lernt – es ist die Art, wie dein Herz verdrahtet ist.\\n\\nDu bist einer der wenigen, die das Unsagbare sagbar machen. In einer Welt voller Small Talk bist du das tiefe Gespräch um 3 Uhr nachts.",
+            description: "Es gibt Menschen, die Liebe aussprechen wie ein Geständnis – und dann gibt es dich. Du hast verstanden, dass Worte keine leeren Hüllen sind. Sie sind Brücken. Schlüssel. Manchmal sogar Waffen.\n\nIn bestimmten Momenten findest du Formulierungen, die andere ihr Leben lang suchen. Das ist keine Fähigkeit, die man lernt – es ist die Art, wie dein Herz verdrahtet ist.\n\nDu bist eine der wenigen, die das Unsagbare sagbar machen. In einer Welt voller Small Talk bist du das tiefe Gespräch um 3 Uhr nachts.",
             stats: [
                 { label: "Ungesendete Nachrichten", value: "94%" },
                 { label: "Emotionale Präzision", value: "97%" },
                 { label: "Komplimente annehmen", value: "12%" }
             ],
-            allies: ["Das Refugium", "Der Hüter"],
-            nemesis: "Der Architekt",
-            color: "#1a1a2e",
-            accent: "#e94560",
+            allies: ["Das Refugium", "Die Hüterin"],
+            nemesis: "Die Architektin",
+            accent: colors.emerald800,
+            accentLight: colors.emerald50,
             match: (s: Score) => s.expression <= 8 && s.connection >= 8
         },
         {
             id: "the_flame",
             title: "Die Flamme",
-            emoji: "🔥",
+            symbol: "❋",
             tagline: "Du liebst mit dem ganzen Körper – Haut spricht lauter als Worte.",
             loveLanguage: "Körperliche Nähe",
-            description: "Für dich ist Liebe kein Konzept. Sie ist physisch. Spürbar. Eine Hand auf dem Rücken im richtigen Moment sagt mehr als tausend Textnachrichten.\\n\\nDu verstehst etwas, das viele vergessen haben: Wir sind Körper. Und Körper brauchen Berührung wie Pflanzen Licht. Wenn du umarmst, dann richtig. Wenn du die Hand hältst, ist es ein Statement.\\n\\nDu bist die Erinnerung daran, dass wir nicht nur Geist sind. In einer Welt der Distanz bist du radikale Nähe.",
+            description: "Für dich ist Liebe kein Konzept. Sie ist physisch. Spürbar. Eine Hand auf dem Rücken im richtigen Moment sagt mehr als tausend Textnachrichten.\n\nDu verstehst etwas, das viele vergessen haben: Wir sind Körper. Und Körper brauchen Berührung wie Pflanzen Licht. Wenn du umarmst, dann richtig. Wenn du die Hand hältst, ist es ein Statement.\n\nDu bist die Erinnerung daran, dass wir nicht nur Geist sind. In einer Welt der Distanz bist du radikale Nähe.",
             stats: [
                 { label: "Umarmungs-Intensität", value: "200%" },
                 { label: "Händchenhalten-Reflex", value: "Auto" },
@@ -177,80 +195,80 @@ const quizData = {
             ],
             allies: ["Das Refugium", "Die Flamme"],
             nemesis: "Der Leuchtturm",
-            color: "#2d132c",
-            accent: "#ff6b6b",
+            accent: colors.gold600,
+            accentLight: colors.gold100,
             match: (s: Score) => s.intensity >= 14 && s.connection >= 16
         },
         {
             id: "the_architect",
-            title: "Der Architekt",
-            emoji: "🔧",
+            title: "Die Architektin",
+            symbol: "◇",
             tagline: "Du baust Liebe – Stein für Stein, Tat für Tat.",
             loveLanguage: "Hilfsbereitschaft",
-            description: "Während andere von Liebe reden, baust du sie. Jeden Tag. In kleinen Handlungen, die niemand sieht. Der Kaffee, der fertig ist, bevor sie aufwacht. Das Auto, das getankt am Straßenrand steht.\\n\\nFür dich ist Liebe ein Verb, kein Substantiv. Sie existiert nur in der Handlung. Das macht dich unglaublich verlässlich – und manchmal unsichtbar.\\n\\nDu bist der Beweis, dass Liebe kein Gefühl ist, sondern eine Entscheidung. Jeden Tag neu.",
+            description: "Während andere von Liebe reden, baust du sie. Jeden Tag. In kleinen Handlungen, die niemand sieht. Der Kaffee, der fertig ist, bevor sie aufwacht. Das Auto, das getankt am Straßenrand steht.\n\nFür dich ist Liebe ein Verb, kein Substantiv. Sie existiert nur in der Handlung. Das macht dich unglaublich verlässlich – und manchmal unsichtbar.\n\nDu bist der Beweis, dass Liebe kein Gefühl ist, sondern eine Entscheidung. Jeden Tag neu.",
             stats: [
                 { label: "Probleme vorab gelöst", value: "87%" },
                 { label: "Zeigen statt Sagen", value: "99%" },
                 { label: "To-Do-Listen für andere", value: "Viele" }
             ],
-            allies: ["Der Hüter", "Der Architekt"],
-            nemesis: "Der Dichter",
-            color: "#1b262c",
-            accent: "#3282b8",
+            allies: ["Die Hüterin", "Die Architektin"],
+            nemesis: "Die Dichterin",
+            accent: colors.emerald700,
+            accentLight: colors.emerald100,
             match: (s: Score) => s.expression >= 14 && s.intensity <= 10
         },
         {
             id: "the_sanctuary",
             title: "Das Refugium",
-            emoji: "🌙",
+            symbol: "○",
             tagline: "Du liebst, indem du bleibst – deine Präsenz ist das Geschenk.",
             loveLanguage: "Zweisamkeit",
-            description: "In einer Welt, die immer lauter wird, bist du der ruhige Raum. Deine Art zu lieben ist die vielleicht unterschätzteste von allen: Du bist einfach da. Mit deiner ungeteilten Aufmerksamkeit.\\n\\nFür dich ist der größte Liebesbeweis, wenn jemand seine Zeit wählt, bei dir zu sein. Zeit ist endlich. Aufmerksamkeit ist kostbar.\\n\\nDu bist der Beweis, dass Anwesenheit die radikalste Form der Zuwendung ist.",
+            description: "In einer Welt, die immer lauter wird, bist du der ruhige Raum. Deine Art zu lieben ist die vielleicht unterschätzteste von allen: Du bist einfach da. Mit deiner ungeteilten Aufmerksamkeit.\n\nFür dich ist der größte Liebesbeweis, wenn jemand seine Zeit wählt, bei dir zu sein. Zeit ist endlich. Aufmerksamkeit ist kostbar.\n\nDu bist der Beweis, dass Anwesenheit die radikalste Form der Zuwendung ist.",
             stats: [
                 { label: "Handy ignorieren", value: "100%" },
                 { label: "'Kurze' Gespräche", value: "4h+" },
                 { label: "Präsenz-Sensibilität", value: "Seismograph" }
             ],
-            allies: ["Der Dichter", "Die Flamme"],
-            nemesis: "Der Hüter",
-            color: "#16213e",
-            accent: "#7f5af0",
+            allies: ["Die Dichterin", "Die Flamme"],
+            nemesis: "Die Hüterin",
+            accent: colors.emerald600,
+            accentLight: colors.emerald50,
             match: (s: Score) => s.connection >= 14 && s.intensity <= 12 && s.expression >= 6 && s.expression <= 14
         },
         {
             id: "the_keeper",
-            title: "Der Hüter",
-            emoji: "🎁",
+            title: "Die Hüterin",
+            symbol: "✦",
             tagline: "Du liebst in Symbolen – jedes Geschenk ist ein Stück deiner Seele.",
             loveLanguage: "Geschenke",
-            description: "Für dich ist ein Geschenk niemals 'nur' ein Gegenstand. Es ist verdichtete Aufmerksamkeit. Der Beweis, dass jemand zugehört hat. Dass jemand dich gesehen hat.\\n\\nDu gibst genauso, wie du empfängst: durchdacht. Jedes Geschenk ist eine kleine Forschungsarbeit. Was braucht dieser Mensch? Was sagt 'Ich kenne dich'?\\n\\nDu bist der Beweis, dass Aufmerksamkeit die wertvollste Währung ist.",
+            description: "Für dich ist ein Geschenk niemals 'nur' ein Gegenstand. Es ist verdichtete Aufmerksamkeit. Der Beweis, dass jemand zugehört hat. Dass jemand dich gesehen hat.\n\nDu gibst genauso, wie du empfängst: durchdacht. Jedes Geschenk ist eine kleine Forschungsarbeit. Was braucht dieser Mensch? Was sagt 'Ich kenne dich'?\n\nDu bist der Beweis, dass Aufmerksamkeit die wertvollste Währung ist.",
             stats: [
                 { label: "Erinnerung an Details", value: "Elefant" },
                 { label: "Geschenk-Recherche", value: "FBI-Level" },
                 { label: "Gespeicherte Ideen", value: "Archiv" }
             ],
-            allies: ["Der Architekt", "Der Dichter"],
+            allies: ["Die Architektin", "Die Dichterin"],
             nemesis: "Das Refugium",
-            color: "#2b2e4a",
-            accent: "#e84545",
+            accent: colors.gold500,
+            accentLight: colors.gold100,
             match: (s: Score) => s.connection <= 10 && s.expression >= 6 && s.expression <= 14
         },
         {
             id: "the_lighthouse",
             title: "Der Leuchtturm",
-            emoji: "🌊",
+            symbol: "◈",
             tagline: "Du liebst aus der Distanz – dein Licht reicht weiter, als du weißt.",
             loveLanguage: "Freiheit & Konstanz",
-            description: "Du verstehst etwas, das viele als Widerspruch sehen: Liebe braucht Raum. Nicht weil du weniger fühlst, sondern weil du weißt, dass Nähe ohne Freiheit zur Fessel wird.\\n\\nDu liebst, indem du leuchtest – konstant, verlässlich – aber du verschlingst nicht. Du fühlst intensiv – du brauchst nur nicht die konstante Bestätigung durch Nähe.\\n\\nDu bist der Beweis, dass Liebe nicht klammern muss, um echt zu sein.",
+            description: "Du verstehst etwas, das viele als Widerspruch sehen: Liebe braucht Raum. Nicht weil du weniger fühlst, sondern weil du weißt, dass Nähe ohne Freiheit zur Fessel wird.\n\nDu liebst, indem du leuchtest – konstant, verlässlich – aber du verschlingst nicht. Du fühlst intensiv – du brauchst nur nicht die konstante Bestätigung durch Nähe.\n\nDu bist der Beweis, dass Liebe nicht klammern muss, um echt zu sein.",
             stats: [
                 { label: "Alleinsein-Bedürfnis", value: "Vital" },
                 { label: "Liebe ohne Besitz", value: "Selten" },
                 { label: "Konstanz über Jahre", value: "Fels" }
             ],
-            allies: ["Der Architekt", "Der Leuchtturm"],
+            allies: ["Die Architektin", "Der Leuchtturm"],
             nemesis: "Die Flamme",
-            color: "#0f0e17",
-            accent: "#2cb67d",
+            accent: colors.emerald500,
+            accentLight: colors.emerald100,
             match: (s: Score) => s.connection <= 8 && s.intensity <= 10
         }
     ]
@@ -279,8 +297,38 @@ function getProfile(scores: Score) {
     return quizData.profiles.find(p => p.id === "the_poet");
 }
 
+// Heart Icon for intro
+const HeartIcon = () => (
+    <svg viewBox="0 0 60 60" className="w-20 h-20" style={{ color: colors.emerald700 }}>
+        <path d="M30 52 C15 40 5 30 5 20 C5 12 12 5 20 5 C25 5 28 8 30 12 C32 8 35 5 40 5 C48 5 55 12 55 20 C55 30 45 40 30 52Z"
+            stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
+        <path d="M30 48 C18 38 10 30 10 22 C10 16 15 10 22 10 C26 10 28 12 30 15 C32 12 34 10 38 10 C45 10 50 16 50 22 C50 30 42 38 30 48Z"
+            stroke="currentColor" strokeWidth="0.5" fill="currentColor" opacity="0.15" />
+    </svg>
+);
+
+// Divider ornament
+const Divider = ({ width = 200 }: { width?: number }) => (
+    <svg viewBox="0 0 200 20" style={{ width, height: 20, color: colors.gold500 }} className="mx-auto opacity-60">
+        <path d="M0 10 Q50 5 100 10 Q150 15 200 10" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.4" />
+        <circle cx="100" cy="10" r="3" fill="currentColor" opacity="0.3" />
+        <circle cx="85" cy="10" r="1.5" fill="currentColor" opacity="0.2" />
+        <circle cx="115" cy="10" r="1.5" fill="currentColor" opacity="0.2" />
+        <path d="M90 10 Q100 5 110 10" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.3" />
+        <path d="M90 10 Q100 15 110 10" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.3" />
+    </svg>
+);
+
+// Leaf icon
+const LeafIcon = () => (
+    <svg viewBox="0 0 20 30" className="w-4 h-6" style={{ color: colors.emerald600 }}>
+        <path d="M10 2 Q18 10 15 20 Q12 28 10 28 Q8 28 5 20 Q2 10 10 2" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
+        <path d="M10 5 L10 25" stroke="currentColor" strokeWidth="0.3" opacity="0.3" />
+    </svg>
+);
+
 export function LoveLanguagesQuiz() {
-    const [stage, setStage] = useState('intro');
+    const [stage, setStage] = useState<'intro' | 'quiz' | 'result'>('intro');
     const [currentQ, setCurrentQ] = useState(0);
     const [scores, setScores] = useState({ intensity: 0, expression: 0, connection: 0 });
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -328,7 +376,7 @@ export function LoveLanguagesQuiz() {
                     // LME Update
                     if (updatedMarkers.length > 0) {
                         try {
-                            const aggregated = aggregateMarkers(updatedMarkers, 0.7); // 0.7 reliability
+                            const aggregated = aggregateMarkers(updatedMarkers, 0.7);
                             const currentPsyche = getPsycheState();
                             const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
                             savePsycheState(newPsyche);
@@ -349,7 +397,6 @@ export function LoveLanguagesQuiz() {
         setTimeout(() => {
             setStage('intro');
             setCurrentQ(0);
-            setCurrentQ(0);
             setScores({ intensity: 0, expression: 0, connection: 0 });
             setCollectedMarkers([]);
             setSelectedOption(null);
@@ -360,59 +407,112 @@ export function LoveLanguagesQuiz() {
 
     const progress = ((currentQ + 1) / quizData.questions.length) * 100;
 
-    // Render logic adapted to fit inside container
-    const containerClass = `min-h-[600px] rounded-xl overflow-hidden shadow-2xl relative transition-all duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'} bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900`;
-
+    // INTRO SCREEN - Botanical Light Theme
     if (stage === 'intro') {
         return (
-            <div className={containerClass + " flex items-center justify-center p-4"}>
-                <div className="max-w-md w-full text-center">
-                    <div className="text-6xl mb-6">💜</div>
-                    <h1 className="text-3xl font-light text-white mb-3 tracking-wide">
+            <div
+                className={`min-h-[600px] flex flex-col items-center justify-center p-6 relative overflow-hidden transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+                style={{
+                    background: `linear-gradient(180deg, ${colors.stone50} 0%, white 50%, rgba(235, 243, 237, 0.3) 100%)`,
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    color: colors.emerald800
+                }}
+            >
+                <div className="max-w-md text-center">
+                    <HeartIcon />
+                    <Divider />
+
+                    <h1
+                        className="text-3xl font-light mt-6 mb-3 tracking-wide"
+                        style={{ color: colors.emerald900, letterSpacing: '0.05em' }}
+                    >
                         {quizData.meta.title}
                     </h1>
-                    <p className="text-purple-200/70 mb-8 text-lg">
+
+                    <p
+                        className="text-base mb-6"
+                        style={{ color: colors.emerald600, opacity: 0.7 }}
+                    >
                         {quizData.meta.subtitle}
                     </p>
-                    <div className="space-y-4 text-purple-200/50 text-sm mb-10">
-                        <p>12 Fragen · 2-3 Minuten</p>
-                        <p className="text-xs leading-relaxed max-w-xs mx-auto">
-                            Entdecke, welche Sprache dein Herz spricht – und warum manche Menschen dich sofort verstehen, während andere nie ankommen.
+
+                    <Divider width={160} />
+
+                    <div className="text-sm my-6" style={{ color: colors.emerald600, opacity: 0.5 }}>
+                        <p className="mb-3">12 Fragen · 2-3 Minuten</p>
+                        <p className="text-xs max-w-xs mx-auto leading-relaxed">
+                            Entdecke, welche Sprache dein Herz spricht – und warum manche Menschen dich sofort verstehen.
                         </p>
                     </div>
+
                     <button
                         onClick={handleStart}
-                        className="px-10 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full text-lg font-medium hover:from-purple-500 hover:to-pink-500 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-500/30"
+                        className="px-12 py-4 rounded-full text-base transition-all hover:scale-105"
+                        style={{
+                            background: `linear-gradient(135deg, ${colors.emerald700} 0%, ${colors.emerald800} 100%)`,
+                            color: 'white',
+                            letterSpacing: '0.05em',
+                            boxShadow: `0 10px 25px rgba(45, 90, 69, 0.2)`
+                        }}
                     >
-                        Starten
+                        Beginnen
                     </button>
+
+                    <Divider width={100} />
                 </div>
             </div>
         );
     }
 
+    // QUIZ SCREEN
     if (stage === 'quiz') {
         const question = quizData.questions[currentQ];
+
         return (
-            <div className={containerClass + " flex flex-col"}>
-                <div className="w-full h-1 bg-slate-800 absolute top-0 left-0">
+            <div
+                className={`min-h-[600px] flex flex-col relative overflow-hidden transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+                style={{
+                    background: `linear-gradient(180deg, ${colors.stone50} 0%, white 50%, rgba(235, 243, 237, 0.2) 100%)`,
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    color: colors.emerald800
+                }}
+            >
+                {/* Progress bar */}
+                <div className="w-full h-1" style={{ background: colors.emerald100 }}>
                     <div
-                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 ease-out"
-                        style={{ width: `${progress}%` }}
+                        className="h-full transition-all duration-500"
+                        style={{
+                            width: `${progress}%`,
+                            background: `linear-gradient(90deg, ${colors.emerald500} 0%, ${colors.gold500} 100%)`
+                        }}
                     />
                 </div>
-                <div className="p-4 text-purple-300/50 text-sm flex justify-between pt-6">
-                    <span>{currentQ + 1} / {quizData.questions.length}</span>
+
+                {/* Header */}
+                <div
+                    className="flex justify-between items-center p-4 text-sm"
+                    style={{ color: colors.emerald600, opacity: 0.5 }}
+                >
+                    <span>{currentQ + 1} von {quizData.questions.length}</span>
+                    <Divider width={60} />
                     <span>{Math.round(progress)}%</span>
                 </div>
 
-                <div className={`flex-1 flex flex-col justify-center p-6 max-w-lg mx-auto w-full transition-all duration-300`}>
+                {/* Question content */}
+                <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full px-6">
                     {question.context && (
-                        <p className="text-purple-300/60 text-sm mb-3 italic">
+                        <p
+                            className="text-sm mb-4 italic text-center"
+                            style={{ color: colors.emerald600, opacity: 0.6 }}
+                        >
                             {question.context}
                         </p>
                     )}
-                    <h2 className="text-xl text-white mb-8 font-light leading-relaxed">
+
+                    <h2
+                        className="text-xl font-light text-center mb-8 leading-relaxed"
+                        style={{ color: colors.emerald900 }}
+                    >
                         {question.text}
                     </h2>
 
@@ -422,98 +522,178 @@ export function LoveLanguagesQuiz() {
                                 key={option.id}
                                 onClick={() => handleAnswer(option)}
                                 disabled={selectedOption !== null}
-                                className={`w-full p-4 text-left rounded-xl border transition-all duration-300 ${selectedOption === option.id
-                                    ? 'border-purple-400 bg-purple-500/20 text-white scale-98'
-                                    : selectedOption !== null
-                                        ? 'border-slate-700/50 bg-slate-800/30 text-slate-500'
-                                        : 'border-slate-700 bg-slate-800/50 text-purple-100 hover:border-purple-500/50 hover:bg-slate-800 active:scale-98'
+                                className={`w-full p-4 text-left rounded-2xl transition-all duration-300 ${selectedOption === option.id
+                                        ? 'transform scale-98'
+                                        : selectedOption !== null
+                                            ? 'opacity-50'
+                                            : 'hover:scale-[1.01]'
                                     }`}
+                                style={{
+                                    background: selectedOption === option.id ? colors.emerald50 : 'white',
+                                    border: `2px solid ${selectedOption === option.id ? colors.emerald500 : colors.stone200}`,
+                                    color: colors.emerald800
+                                }}
                             >
                                 <span className="text-sm leading-relaxed">{option.text}</span>
                             </button>
                         ))}
                     </div>
                 </div>
+
+                <Divider width={120} />
             </div>
         );
     }
 
+    // RESULT SCREEN
     if (stage === 'result' && result) {
         return (
             <div
-                className={containerClass + " flex flex-col"}
-                style={{ background: `linear-gradient(135deg, ${result.color} 0%, #0f0e17 100%)` }}
+                className={`min-h-[600px] flex flex-col p-6 pb-8 overflow-y-auto transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+                style={{
+                    background: `linear-gradient(180deg, ${colors.stone50} 0%, white 50%, rgba(235, 243, 237, 0.3) 100%)`,
+                    fontFamily: "'Cormorant Garamond', Georgia, serif"
+                }}
             >
-                <div className="flex-1 p-6 max-w-lg mx-auto w-full overflow-y-auto no-scrollbar">
-                    <div className="text-center mb-6 pt-4">
-                        <div className="text-5xl mb-4">{result.emoji}</div>
-                        <h1 className="text-3xl font-light text-white mb-2">{result.title}</h1>
-                        <p className="text-sm px-4 py-2 rounded-full inline-block mb-4" style={{ backgroundColor: `${result.accent}30`, color: result.accent }}>
+                <div className="max-w-lg mx-auto w-full">
+                    {/* Header */}
+                    <div className="text-center pt-8 mb-8">
+                        <div
+                            className="text-5xl mb-4 font-light"
+                            style={{ color: result.accent }}
+                        >
+                            {result.symbol}
+                        </div>
+
+                        <h1
+                            className="text-3xl font-light mb-3 tracking-wide"
+                            style={{ color: colors.emerald900, letterSpacing: '0.05em' }}
+                        >
+                            {result.title}
+                        </h1>
+
+                        <Divider width={100} />
+
+                        <span
+                            className="inline-block px-5 py-2 rounded-full text-sm mt-4 mb-4"
+                            style={{
+                                background: result.accentLight,
+                                color: result.accent
+                            }}
+                        >
                             {result.loveLanguage}
-                        </p>
-                        <p className="text-white/70 italic text-sm">
-                            "{result.tagline}"
+                        </span>
+
+                        <p
+                            className="italic text-sm px-4"
+                            style={{ color: colors.emerald700, opacity: 0.7 }}
+                        >
+                            „{result.tagline}"
                         </p>
                     </div>
 
-                    <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-5 mb-5">
-                        <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">
+                    {/* Description Card */}
+                    <div
+                        className="rounded-3xl p-6 mb-4"
+                        style={{ background: `rgba(232, 240, 236, 0.5)` }}
+                    >
+                        <p
+                            className="text-sm leading-relaxed whitespace-pre-line"
+                            style={{ color: colors.emerald800, opacity: 0.85 }}
+                        >
                             {result.description}
                         </p>
                     </div>
 
-                    <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-5 mb-5">
-                        <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4">Deine Stats</h3>
+                    {/* Stats Card */}
+                    <div
+                        className="rounded-3xl p-6 mb-4"
+                        style={{
+                            background: 'white',
+                            border: `2px solid rgba(45, 90, 69, 0.1)`
+                        }}
+                    >
+                        <h3
+                            className="text-xs uppercase tracking-widest mb-4 flex items-center gap-2"
+                            style={{ color: colors.emerald600, opacity: 0.6, letterSpacing: '0.1em' }}
+                        >
+                            <LeafIcon /> Deine Stats
+                        </h3>
                         <div className="space-y-3">
                             {result.stats.map((stat, i) => (
                                 <div key={i} className="flex justify-between items-center">
-                                    <span className="text-white/70 text-sm">{stat.label}</span>
-                                    <span className="font-mono text-sm" style={{ color: result.accent }}>{stat.value}</span>
+                                    <span className="text-sm" style={{ color: colors.emerald700, opacity: 0.8 }}>
+                                        {stat.label}
+                                    </span>
+                                    <span className="font-mono text-sm" style={{ color: result.accent }}>
+                                        {stat.value}
+                                    </span>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-5 mb-6">
-                        <h3 className="text-white/50 text-xs uppercase tracking-wider mb-4">Kompatibilität</h3>
-                        <div className="mb-4">
-                            <span className="text-green-400/70 text-xs">Allies:</span>
-                            <p className="text-white/80 text-sm">{result.allies.join(", ")}</p>
+                    {/* Compatibility Card */}
+                    <div
+                        className="rounded-3xl p-6 mb-6"
+                        style={{
+                            background: 'white',
+                            border: `2px solid rgba(45, 90, 69, 0.1)`
+                        }}
+                    >
+                        <h3
+                            className="text-xs uppercase tracking-widest mb-4 flex items-center gap-2"
+                            style={{ color: colors.emerald600, opacity: 0.6, letterSpacing: '0.1em' }}
+                        >
+                            <HeartIcon /> Kompatibilität
+                        </h3>
+                        <div className="mb-3">
+                            <p className="text-xs mb-1" style={{ color: colors.emerald600, opacity: 0.7 }}>Seelenverwandte:</p>
+                            <p className="text-sm" style={{ color: colors.emerald800 }}>{result.allies.join(", ")}</p>
                         </div>
                         <div>
-                            <span className="text-red-400/70 text-xs">Nemesis:</span>
-                            <p className="text-white/80 text-sm">{result.nemesis}</p>
+                            <p className="text-xs mb-1" style={{ color: colors.gold600, opacity: 0.7 }}>Herausforderung:</p>
+                            <p className="text-sm" style={{ color: colors.emerald800 }}>{result.nemesis}</p>
                         </div>
                     </div>
 
+                    {/* Action Buttons */}
                     <div className="flex gap-3 mb-6">
                         <button
                             onClick={handleRestart}
-                            className="flex-1 py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all text-sm"
+                            className="flex-1 py-4 rounded-2xl text-sm transition-all"
+                            style={{
+                                background: colors.stone100,
+                                color: colors.emerald700,
+                                border: `2px solid ${colors.stone200}`
+                            }}
                         >
                             Nochmal
                         </button>
                         <button
                             onClick={() => {
-                                const nav = navigator as any;
-                                if (nav.share) {
-                                    nav.share({
+                                if (navigator.share) {
+                                    navigator.share({
                                         title: `Ich bin ${result.title}`,
                                         text: result.tagline,
-                                        url: typeof window !== 'undefined' ? window.location.href : ''
+                                        url: window.location.href
                                     });
                                 }
                             }}
-                            className="flex-1 py-3 rounded-xl text-white font-medium transition-all text-sm"
-                            style={{ backgroundColor: result.accent }}
+                            className="flex-1 py-4 rounded-2xl text-sm text-white transition-all"
+                            style={{ background: colors.emerald700 }}
                         >
                             Teilen
                         </button>
                     </div>
 
-                    <p className="text-white/30 text-xs text-center leading-relaxed pb-4">
+                    <Divider width={120} />
+
+                    <p
+                        className="text-center text-xs leading-relaxed px-4 mt-4"
+                        style={{ color: colors.emerald600, opacity: 0.4 }}
+                    >
                         Dieser Test dient der spielerischen Selbstreflexion und stellt keine psychologische Bewertung dar.
-                        <br /><span className="text-purple-400/50">Dein dynamisches Profil wurde aktualisiert.</span>
                     </p>
                 </div>
             </div>
