@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AlchemyCard, AlchemyCardContent } from '@/components/ui/AlchemyCard';
+import { characterSheetCopy } from '@/content/character-sheet.de';
 
 interface ArchetypeStoryCardProps {
     archetype?: string;
@@ -20,7 +21,7 @@ export function ArchetypeStoryCard({ archetype, secondary, snippet, className = 
                     {/* Archetype Badge */}
                     {archetype && (
                         <div className="space-y-1">
-                            <span className="text-xs font-sans uppercase tracking-widest text-gold-dark">Primärer Archetyp</span>
+                            <span className="text-xs font-sans uppercase tracking-widest text-gold-dark">{characterSheetCopy.sections.archetype}</span>
                             <h3 className="text-2xl font-serif font-bold text-text-ink">{archetype}</h3>
                         </div>
                     )}

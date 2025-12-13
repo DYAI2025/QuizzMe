@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PsycheCoreStats } from '@/types/psyche';
 
+import { characterSheetCopy } from '@/content/character-sheet.de';
+
 interface AfterQuizDeltaBannerProps {
     deltas?: Partial<PsycheCoreStats>;
     visibleDuration?: number; // ms, default 10000
@@ -49,7 +51,7 @@ export function AfterQuizDeltaBanner({ deltas, visibleDuration = 10000 }: AfterQ
                 >
                     <div className="bg-alchemy-bg-midnight border border-gold-primary rounded-xl shadow-2xl p-4 flex items-center justify-between text-text-light">
                         <div className="flex-1">
-                            <h4 className="text-sm font-serif text-gold-primary mb-1">Update nach Quiz</h4>
+                            <h4 className="text-sm font-serif text-gold-primary mb-1">{characterSheetCopy.banner.title}</h4>
                             <div className="flex gap-2 flex-wrap">
                                 {movers.map(([key, val]) => (
                                     <span key={key} className="text-xs bg-white/10 px-2 py-0.5 rounded-full flex items-center gap-1">

@@ -9,6 +9,7 @@ import { DerivedStatsCard } from '@/components/character/DerivedStatsCard';
 import { ArchetypeStoryCard } from '@/components/character/ArchetypeStoryCard';
 
 import { AfterQuizDeltaBanner } from '@/components/character/AfterQuizDeltaBanner';
+import { characterSheetCopy } from '@/content/character-sheet.de';
 
 export default function CharacterSheetPage() {
     const { profile, isLoading, error } = usePsycheProfile();
@@ -43,10 +44,10 @@ export default function CharacterSheetPage() {
             {/* Header Section */}
             <header className="pt-20 pb-10 px-4 text-center">
                 <h1 className="font-serif text-4xl md:text-5xl font-bold text-text-light mb-3 text-gold-gradient">
-                    Dein Charakter
+                    {characterSheetCopy.header.title}
                 </h1>
                 <p className="font-sans text-text-light-muted max-w-lg mx-auto">
-                    Dein Avatar ist ein Klima, kein Label. Er wandelt sich mit jeder Entscheidung.
+                    {characterSheetCopy.header.subtitle}
                 </p>
             </header>
 
