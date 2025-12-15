@@ -1,10 +1,11 @@
+
 'use client'
 
 import React, { useState } from 'react';
 import { questions, roles } from './social-role/data';
-import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
-import { updatePsycheState } from '../../lib/lme/lme-core';
-import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
+// import { aggregateMarkers } from '../../lib/lme/marker-aggregator'; 
+// import { updatePsycheState } from '../../lib/lme/lme-core'; 
+// import { getPsycheState, savePsycheState } from '../../lib/lme/storage'; 
 
 type Scores = {
     stability: number;
@@ -21,6 +22,7 @@ export function SocialRoleQuiz() {
     const [scores, setScores] = useState<Scores>({ stability: 0, fire: 0, truth: 0, harbor: 0, compass: 0, bridge: 0 });
     const [result, setResult] = useState<typeof roles[keyof typeof roles] | null>(null);
     const [isAnimating, setIsAnimating] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
 
 
@@ -37,7 +39,9 @@ export function SocialRoleQuiz() {
             setScores(newScores);
 
             const newMarkers = [...collectedMarkers];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if ((option as any).psyche_markers) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 newMarkers.push((option as any).psyche_markers);
                 setCollectedMarkers(newMarkers);
             }
@@ -51,43 +55,70 @@ export function SocialRoleQuiz() {
         }, 300);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const calculateResult = (finalScores: Scores, finalMarkers: any[]) => {
         setStage('loading');
 
-        // LME Update immediately
-        if (finalMarkers.length > 0) {
-            try {
-                const aggregated = aggregateMarkers(finalMarkers, 0.8); // 0.8 reliability (Deep)
-                const currentPsyche = getPsycheState();
-                const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
-                savePsycheState(newPsyche);
-            } catch (e) {
-                console.error("LME Update failed", e);
+        // Logic for role determination
+        let maxScore = 0;
+        let dominantTrait = 'stability';
+
+        Object.entries(finalScores).forEach(([trait, score]) => {
+            if (score > maxScore) {
+                maxScore = score;
+                dominantTrait = trait;
             }
-        }
+        });
+
+        const roleMapping: Record<string, keyof typeof roles> = {
+            stability: 'rock',
+            fire: 'flame',
+            truth: 'mirror',
+            harbor: 'harbor',
+            compass: 'compass',
+            bridge: 'bridge'
+        };
+        const resultRole = roles[roleMapping[dominantTrait]];
+
+        // LME Update via Ingestion Pipeline
+        import('../../lib/lme/ingestion').then(({ ingestContribution }) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const explicitMarkers: any[] = finalMarkers || [];
+
+            const event = {
+                specVersion: "sp.contribution.v1" as const,
+                eventId: crypto.randomUUID(),
+                occurredAt: new Date().toISOString(),
+                source: {
+                    vertical: "quiz" as const,
+                    moduleId: "quiz.social_role.v1",
+                    domain: window.location.hostname
+                },
+                payload: {
+                    // Start with explicit markers, add derived ones
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    markers: explicitMarkers.map((m: any) => ({ id: m.id || 'unknown', weight: m.weight || 0.5 })),
+                    traits: [
+                        { id: `trait.social_role.${dominantTrait}`, score: 80, confidence: 0.7 }
+                    ],
+                    tags: [{ id: 'tag.social_role.quiz_completed', label: 'Social Role Quiz', kind: 'misc' as const }],
+                    summary: {
+                        title: `Rolle: ${resultRole.name}`,
+                        bullets: [resultRole.tagline],
+                        resultId: resultRole.name
+                    }
+                }
+            };
+
+            try {
+                ingestContribution(event);
+            } catch (e) {
+                console.error("Ingestion failed", e);
+            }
+        });
 
         // Simulate suspense
         setTimeout(() => {
-            const roleMapping: Record<string, keyof typeof roles> = {
-                stability: 'rock',
-                fire: 'flame',
-                truth: 'mirror',
-                harbor: 'harbor',
-                compass: 'compass',
-                bridge: 'bridge'
-            };
-
-            let maxScore = 0;
-            let dominantTrait = 'stability';
-
-            Object.entries(finalScores).forEach(([trait, score]) => {
-                if (score > maxScore) {
-                    maxScore = score;
-                    dominantTrait = trait;
-                }
-            });
-
-            const resultRole = roles[roleMapping[dominantTrait]];
             setResult(resultRole);
             setStage('result');
             setIsAnimating(false);
@@ -124,6 +155,7 @@ export function SocialRoleQuiz() {
             <div className="flex flex-col items-center justify-center min-h-[600px] bg-zinc-900 text-white rounded-3xl">
                 <div className="text-6xl mb-6 animate-pulse">🔮</div>
                 <p className="text-zinc-400 text-lg">Dein soziales Profil nimmt Form an...</p>
+                <p className="text-zinc-500 text-sm mt-2">Berechne Interaktionen...</p>
             </div>
         );
     }

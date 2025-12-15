@@ -3,7 +3,7 @@
 // Calculates the user's affinity to each archetype based on their psyche state.
 
 import { PsycheState } from './psyche-state';
-import { ARCHETYPES, ArchetypeId, Archetype } from './archetypes';
+import { ARCHETYPES, Archetype } from './archetypes';
 
 export interface ArchetypeResult {
     archetypeId: string;
@@ -16,6 +16,7 @@ export type ArchetypeMix = ArchetypeResult[];
 /**
  * Calculates the Euclidean distance between the user's state and an archetype's vector.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function calculateDistance(state: PsycheState, protoVector: any): number {
     let sumSq = 0;
     const dimensions = ['shadow', 'connection', 'structure', 'emergence', 'depth'];

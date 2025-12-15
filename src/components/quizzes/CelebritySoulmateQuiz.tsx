@@ -1,7 +1,10 @@
+
 'use client'
 
 import React, { useState } from 'react';
 import { celebrities, Celebrity } from './celebrity-soulmate/data';
+import { ingestContribution } from '@/lib/lme/ingestion';
+import { ContributionEvent, Marker, TraitScore } from '@/lib/lme/types';
 
 const questions = [
     {
@@ -158,26 +161,82 @@ export function CelebritySoulmateQuiz() {
 
     const calculateResult = (finalScores: typeof scores) => {
         setStage('loading');
+
+        // 1. Calculate Celebrity Match (Frontend logic)
+        const matches = celebrities.map(celeb => {
+            const distance = Math.sqrt(
+                Math.pow(finalScores.E - celeb.E, 2) +
+                Math.pow(finalScores.K - celeb.K, 2) +
+                Math.pow(finalScores.B - celeb.B, 2) +
+                Math.pow(finalScores.A - celeb.A, 2)
+            );
+            const matchPercent = Math.round(Math.max(0, 100 - (distance * 5.5)));
+            return { ...celeb, distance, matchPercent };
+        });
+
+        matches.sort((a, b) => a.distance - b.distance);
+
+        const topMatch = matches[0];
+        const runnerUps = matches.slice(1, 6);
+        const ally = matches.find(c => c.name !== topMatch.name && Math.abs(c.E - topMatch.E) <= 2 && c.category !== topMatch.category) || matches[2];
+        const rival = matches.filter(c => c.name !== topMatch.name && (Math.abs(c.E - topMatch.E) >= 3 || Math.abs(c.A - topMatch.A) >= 3))[0] || matches[matches.length - 5];
+
+        // 2. Prepare LME Contribution Event
+        // Normalize 1-10 scores to -1..1 (Marker) and 1..100 (Trait)
+        // E (1..10) -> Extroversion
+        // K (1..10) -> Creativity
+        // B (1..10) -> Connection
+        // A (1..10) -> Ambition (Structure?)
+
+        const norm = (v: number) => (v - 1) / 9; // 0..1
+        const weight = (v: number) => norm(v) * 2 - 1; // -1..1
+        const percent = (v: number) => Math.round(norm(v) * 99 + 1); // 1..100
+
+        const markers: Marker[] = [
+            { id: 'marker.social.extroversion', weight: weight(finalScores.E) },
+            { id: 'marker.creativity', weight: weight(finalScores.K) },
+            { id: 'marker.love.connection', weight: weight(finalScores.B) },
+            { id: 'marker.cognition.system', weight: weight(finalScores.A) * 0.5 }, // Ambition -> System? Weak link.
+        ];
+
+        const traits: TraitScore[] = [
+            { id: 'trait.social.extroversion', score: percent(finalScores.E) },
+            { id: 'trait.openness.creativity', score: percent(finalScores.K) },
+            { id: 'trait.connection.bonding', score: percent(finalScores.B) },
+            { id: 'trait.lifestyle.ambition', score: percent(finalScores.A) },
+        ];
+
+        const event: ContributionEvent = {
+            specVersion: "sp.contribution.v1",
+            eventId: crypto.randomUUID(),
+            occurredAt: new Date().toISOString(),
+            source: {
+                vertical: "quiz",
+                moduleId: "quiz.celebrity.v1",
+                domain: window.location.hostname
+            },
+            payload: {
+                markers,
+                traits,
+                summary: {
+                    title: `Seelenverwandt mit ${topMatch.name}`,
+                    bullets: [topMatch.tagline, ...topMatch.traits.slice(0, 2)],
+                    resultId: topMatch.name
+                },
+                tags: [
+                    { id: 'tag.celebrity.match', label: topMatch.name, kind: 'misc' } // Simple tag
+                ]
+            }
+        };
+
+        // 3. Ingest
+        try {
+            ingestContribution(event);
+        } catch (e) {
+            console.error("Ingestion failed", e);
+        }
+
         setTimeout(() => {
-            const matches = celebrities.map(celeb => {
-                const distance = Math.sqrt(
-                    Math.pow(finalScores.E - celeb.E, 2) +
-                    Math.pow(finalScores.K - celeb.K, 2) +
-                    Math.pow(finalScores.B - celeb.B, 2) +
-                    Math.pow(finalScores.A - celeb.A, 2)
-                );
-                const matchPercent = Math.round(Math.max(0, 100 - (distance * 5.5)));
-                return { ...celeb, distance, matchPercent };
-            });
-
-            matches.sort((a, b) => a.distance - b.distance);
-
-            const topMatch = matches[0];
-            const runnerUps = matches.slice(1, 6);
-
-            const ally = matches.find(c => c.name !== topMatch.name && Math.abs(c.E - topMatch.E) <= 2 && c.category !== topMatch.category) || matches[2];
-            const rival = matches.filter(c => c.name !== topMatch.name && (Math.abs(c.E - topMatch.E) >= 3 || Math.abs(c.A - topMatch.A) >= 3))[0] || matches[matches.length - 5];
-
             setResult({
                 match: topMatch,
                 runnerUps,
@@ -268,7 +327,12 @@ export function CelebritySoulmateQuiz() {
     if (stage === 'result' && result) {
         return (
             <div className="bg-[#1a1a2e] text-white min-h-[600px] p-6 overflow-y-auto no-scrollbar">
-                <div className="max-w-lg mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 border border-purple-500/30 shadow-2xl">
+                <div className="max-w-lg mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 border border-purple-500/30 shadow-2xl relative overflow-hidden">
+                    {/* Badge */}
+                    <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-lg">
+                        PROFILE UPDATED
+                    </div>
+
                     <p className="text-purple-400 text-xs uppercase tracking-widest text-center mb-2">Dein Celebrity-Seelenverwandter</p>
                     <h1 className="text-4xl font-bold text-center mb-1 bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-purple-400">
                         {result.match.name}
@@ -323,8 +387,14 @@ export function CelebritySoulmateQuiz() {
                         ✨ Ergebnis teilen
                     </button>
                     <button
+                        onClick={() => window.location.href = '/'}
+                        className="w-full py-3 bg-white/10 border border-white/10 hover:bg-white/20 rounded-xl text-white font-bold transition-colors mb-2"
+                    >
+                        Zum neuen Profile →
+                    </button>
+                    <button
                         onClick={() => setStage('intro')}
-                        className="w-full py-3 bg-transparent border border-gray-700 hover:bg-gray-800 rounded-xl text-gray-400 transition-colors"
+                        className="w-full py-2 text-gray-500 text-sm hover:text-gray-300 transition-colors"
                     >
                         Nochmal versuchen
                     </button>

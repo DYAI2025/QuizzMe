@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useState } from 'react';
@@ -27,20 +28,75 @@ export function RpgIdentityQuiz() {
         const d2Pct = d2 / maxD2;
         const d3Pct = d3 / maxD3;
 
-        if (d1Pct > 0.6 && d3Pct > 0.6 && d2Pct > 0.5) return quizData.profiles.find(p => p.id === 'paladin');
-        if (d1Pct < 0.4 && d2Pct < 0.4 && d3Pct < 0.4) return quizData.profiles.find(p => p.id === 'nekromant');
-        if (d1Pct < 0.5 && d2Pct > 0.6) return quizData.profiles.find(p => p.id === 'heiler');
-        if (d1Pct > 0.65 && d2Pct < 0.4) return quizData.profiles.find(p => p.id === 'berserker');
-        if (d3Pct > 0.65 && d1Pct < 0.5) return quizData.profiles.find(p => p.id === 'stratege');
-        if (d3Pct < 0.45 && d1Pct < 0.5) return quizData.profiles.find(p => p.id === 'seher');
+        let foundProfile = quizData.profiles.find(p => p.id === 'paladin'); // default
 
-        if (d1Pct >= 0.5) {
-            return d2Pct >= 0.5 ? quizData.profiles.find(p => p.id === 'paladin') : quizData.profiles.find(p => p.id === 'berserker');
-        } else {
-            return d2Pct >= 0.5 ? quizData.profiles.find(p => p.id === 'heiler') : quizData.profiles.find(p => p.id === 'seher');
+        // Logic from original file
+        if (d1Pct > 0.6 && d3Pct > 0.6 && d2Pct > 0.5) foundProfile = quizData.profiles.find(p => p.id === 'paladin');
+        else if (d1Pct < 0.4 && d2Pct < 0.4 && d3Pct < 0.4) foundProfile = quizData.profiles.find(p => p.id === 'nekromant');
+        else if (d1Pct < 0.5 && d2Pct > 0.6) foundProfile = quizData.profiles.find(p => p.id === 'heiler');
+        else if (d1Pct > 0.65 && d2Pct < 0.4) foundProfile = quizData.profiles.find(p => p.id === 'berserker');
+        else if (d3Pct > 0.65 && d1Pct < 0.5) foundProfile = quizData.profiles.find(p => p.id === 'stratege');
+        else if (d3Pct < 0.45 && d1Pct < 0.5) foundProfile = quizData.profiles.find(p => p.id === 'seher');
+        else {
+            if (d1Pct >= 0.5) {
+                foundProfile = d2Pct >= 0.5 ? quizData.profiles.find(p => p.id === 'paladin') : quizData.profiles.find(p => p.id === 'berserker');
+            } else {
+                foundProfile = d2Pct >= 0.5 ? quizData.profiles.find(p => p.id === 'heiler') : quizData.profiles.find(p => p.id === 'seher');
+            }
         }
+
+        const finalResult = foundProfile || quizData.profiles[0];
+
+        // LME Ingestion
+        import('../../lib/lme/ingestion').then(({ ingestContribution }) => {
+            // Map RPG class to psyche dimensions
+            const mapToDim: Record<string, string> = {
+                paladin: 'structure',
+                nekromant: 'shadow',
+                heiler: 'connection',
+                berserker: 'emergence', // chaotic energy
+                stratege: 'structure',
+                seher: 'depth'
+            };
+            const dim = mapToDim[finalResult.id] || 'structure';
+
+            const event = {
+                specVersion: "sp.contribution.v1" as const,
+                eventId: crypto.randomUUID(),
+                occurredAt: new Date().toISOString(),
+                source: {
+                    vertical: "quiz" as const,
+                    moduleId: "quiz.rpg_identity.v1",
+                    domain: window.location.hostname
+                },
+                payload: {
+                    markers: [
+                        { id: `marker.rpg.${finalResult.id}`, weight: 0.8 },
+                        { id: `marker.psyche.${dim}`, weight: 0.6 }
+                    ],
+                    traits: [
+                        { id: `trait.rpg.class.${finalResult.id}`, score: 100, confidence: 0.8 }
+                    ],
+                    tags: [{ id: 'tag.rpg.result', label: finalResult.title, kind: 'misc' as const }],
+                    summary: {
+                        title: `RPG Klasse: ${finalResult.title}`,
+                        bullets: [finalResult.tagline],
+                        resultId: finalResult.id
+                    }
+                }
+            };
+
+            try {
+                ingestContribution(event);
+            } catch (e) {
+                console.error("Ingestion failed", e);
+            }
+        });
+
+        return finalResult;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleAnswer = (option: any) => {
         const newScores = {
             d1: scores.d1 + (option.scores.d1 || 0),
@@ -53,8 +109,7 @@ export function RpgIdentityQuiz() {
             setCurrentQuestion(currentQuestion + 1);
         } else {
             const finalResult = calculateResult(newScores);
-            // @ts-ignore
-            setResult(finalResult || quizData.profiles[0]);
+            setResult(finalResult);
             setShowResult(true);
         }
     };
@@ -150,7 +205,7 @@ export function RpgIdentityQuiz() {
                                     <div className="space-y-1">
                                         {result.compatibility.allies.map(id => (
                                             <div key={id} className="text-sm text-green-200">
-                                                {/* @ts-ignore */}
+                                                {/* @ts-expect-error type def incomplete */}
                                                 {profileNames[id]}
                                             </div>
                                         ))}
@@ -161,7 +216,7 @@ export function RpgIdentityQuiz() {
                                     <div className="space-y-1">
                                         {result.compatibility.nemesis.map(id => (
                                             <div key={id} className="text-sm text-red-200">
-                                                {/* @ts-ignore */}
+                                                {/* @ts-expect-error type def incomplete */}
                                                 {profileNames[id]}
                                             </div>
                                         ))}
@@ -172,7 +227,9 @@ export function RpgIdentityQuiz() {
                             <button
                                 onClick={() => {
                                     const text = result.share_text;
+                                    // @ts-expect-error nav share types
                                     if (navigator.share) {
+                                        // @ts-expect-error nav share types
                                         navigator.share({ title: 'RPG Identity', text });
                                     } else {
                                         navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));
@@ -199,8 +256,6 @@ export function RpgIdentityQuiz() {
         );
     }
 
-    const question = quizData.questions[currentQuestion];
-
     return (
         <div className="min-h-[600px] bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 text-white p-4 rounded-3xl">
             <div className="max-w-lg mx-auto">
@@ -218,17 +273,17 @@ export function RpgIdentityQuiz() {
                 </div>
 
                 <div className="bg-slate-800/50 rounded-2xl p-6 border border-purple-500/20 mb-4">
-                    {question.narrative && (
+                    {quizData.questions[currentQuestion].narrative && (
                         <p className="text-purple-200 text-sm italic mb-4 pb-4 border-b border-purple-500/20">
-                            {question.narrative}
+                            {quizData.questions[currentQuestion].narrative}
                         </p>
                     )}
                     <h2 className="text-xl font-bold mb-6">
-                        {question.text}
+                        {quizData.questions[currentQuestion].text}
                     </h2>
 
                     <div className="space-y-3">
-                        {question.options.map((option) => (
+                        {quizData.questions[currentQuestion].options.map((option) => (
                             <button
                                 key={option.id}
                                 onClick={() => handleAnswer(option)}

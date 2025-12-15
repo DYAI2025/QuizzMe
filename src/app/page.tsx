@@ -1,58 +1,96 @@
+
 "use client";
 
-import Link from "next/link";
-import { ProfileTeaser } from "../components/home/ProfileTeaser";
+import React, { useEffect, useState } from 'react';
 import { CosmicBackground } from "@/components/ui/CosmicBackground";
-import { QuizSymbol } from "@/components/ui/QuizSymbol";
+import { HeaderSection } from "@/components/character/sections/HeaderSection";
+import { PersonalitySection } from "@/components/character/sections/PersonalitySection";
+import { VerticalNav } from "@/components/character/sections/VerticalNav";
+import { ProfileSnapshot } from '@/lib/lme/types';
+import { getProfileSnapshot } from '@/lib/lme/storage-full';
 
-export default function Home() {
+export default function CharacterSheetPage() {
+  const [snapshot, setSnapshot] = useState<ProfileSnapshot | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+    const data = getProfileSnapshot();
+    setSnapshot(data);
+  }, []);
+
+  if (!mounted || !snapshot) {
+    return (
+      <div className="min-h-screen bg-[#0f0e17] flex items-center justify-center">
+        <div className="animate-pulse text-purple-500 font-mono text-sm">INITIALIZING PSYCHE...</div>
+      </div>
+    );
+  }
+
   return (
     <CosmicBackground animated>
-      <div className="min-h-screen flex flex-col items-center justify-center p-8 font-sans text-white">
-        <ProfileTeaser />
-        <div className="max-w-4xl w-full text-center relative z-10">
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-amber-200 bg-clip-text text-transparent mb-8 drop-shadow-[0_0_25px_rgba(59,130,246,0.3)]">
-            Discover Yourself
-          </h1>
-          <p className="text-slate-300 text-xl mb-16 max-w-2xl mx-auto">
-            Explore your personality, destiny, and social roles through our immersive quizzes.
-          </p>
+      <main className="min-h-screen font-sans text-white pb-24">
+        {/* 1. Header (Identity & Core) */}
+        <HeaderSection snapshot={snapshot} />
 
-          <div className="grid md:grid-cols-2 gap-8">
-            <Link href="/verticals/quiz" className="group relative block p-8 rounded-3xl bg-slate-900/40 border border-slate-700/50 hover:border-purple-500/50 transition-all text-left overflow-hidden backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative z-10">
-                <div className="mb-6">
-                  <QuizSymbol variant="social-role" size="medium" />
-                </div>
-                <h2 className="text-3xl font-bold text-white mb-2">Quiz Vertical</h2>
-                <p className="text-slate-400 group-hover:text-slate-200 transition-colors">Psychological tests, Love Languages, and RPG Identity.</p>
-                <div className="mt-8 flex items-center text-purple-400 font-medium arrow-link group-hover:text-purple-300">
-                  Explore Quizzes <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+
+          {/* Grid Layout for Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
+
+            {/* Left Col (Main Data) */}
+            <div className="md:col-span-8 space-y-8">
+
+              {/* Block D: Personality */}
+              <PersonalitySection snapshot={snapshot} />
+
+              {/* Placeholder for Block C: Values */}
+              <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-8 flex items-center justify-center opacity-50 hover:opacity-80 transition-opacity cursor-pointer border-dashed">
+                <span className="text-slate-400 text-sm">✦ Kernwerte & Motivation (Coming Soon)</span>
+              </div>
+
+              {/* Placeholder for Block E: Relationships */}
+              <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-8 flex items-center justify-center opacity-50 hover:opacity-80 transition-opacity cursor-pointer border-dashed">
+                <span className="text-slate-400 text-sm">♥ Beziehung & Nähe (Coming Soon)</span>
+              </div>
+
+            </div>
+
+            {/* Right Col (Sidebar / Meta) */}
+            <div className="md:col-span-4 space-y-8">
+
+              {/* Unlocks / Badges (Mini Preview) */}
+              <div className="bg-slate-900/60 backdrop-blur rounded-3xl p-6 border border-white/5">
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Achievements</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="aspect-square bg-white/5 rounded-lg border border-white/5 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-slate-700"></div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </Link>
 
-            <Link href="/verticals/horoscope" className="group relative block p-8 rounded-3xl bg-slate-900/40 border border-slate-700/50 hover:border-amber-500/50 transition-all text-left overflow-hidden backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative z-10">
-                <div className="mb-6">
-                  <QuizSymbol variant="destiny" size="medium" />
-                </div>
-                <h2 className="text-3xl font-bold text-white mb-2">Horoscope Vertical</h2>
-                <p className="text-slate-400 group-hover:text-slate-200 transition-colors">Daily insights, Zodiac compatibility, and Destiny checks.</p>
-                <div className="mt-8 flex items-center text-amber-400 font-medium arrow-link group-hover:text-amber-300">
-                  View Stars <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-                </div>
+              {/* Placeholder Block H: Skills */}
+              <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-6 border-dashed text-center">
+                <span className="text-slate-500 text-xs">Skill Radar Area</span>
               </div>
-            </Link>
+
+            </div>
           </div>
 
-          <footer className="mt-24 text-slate-500 text-sm">
-            © 2024 DYAI Quiz Platform. Built with Next.js.
-          </footer>
+          {/* Navigation to Verticals */}
+          <VerticalNav />
+
+          {/* Footer / Debug Info */}
+          <div className="text-center text-slate-600 text-xs mt-12 mb-8 font-mono">
+            PROFILE_ID: {snapshot.meta.lastUpdatedAt ? 'SYNCED' : 'LOCAL'} <br />
+            V1.0.0
+          </div>
+
         </div>
-      </div>
+      </main>
     </CosmicBackground>
   );
 }

@@ -38,7 +38,7 @@ export function aggregateMarkers(
     });
 
     // 2. Calculate average per dimension
-    const markerScores: any = {};
+    const markerScores: Record<string, number> = {};
 
     Object.keys(sums).forEach((dim) => {
         if (counts[dim] > 0) {

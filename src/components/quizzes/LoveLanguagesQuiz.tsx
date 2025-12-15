@@ -1,9 +1,10 @@
+
 'use client'
 
 import React, { useState } from 'react';
-import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
-import { updatePsycheState } from '../../lib/lme/lme-core';
-import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
+// import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
+// import { updatePsycheState } from '../../lib/lme/lme-core';
+// import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
 
 const quizData = {
     meta: {
@@ -286,6 +287,7 @@ export function LoveLanguagesQuiz() {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [result, setResult] = useState<typeof quizData.profiles[0] | undefined>(undefined);
     const [isAnimating, setIsAnimating] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
 
     const handleStart = () => {
@@ -307,7 +309,9 @@ export function LoveLanguagesQuiz() {
 
         // Collect markers if they exist
         const updatedMarkers = [...collectedMarkers];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((option as any).psyche_markers) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             updatedMarkers.push((option as any).psyche_markers);
             setCollectedMarkers(updatedMarkers);
         }
@@ -323,18 +327,48 @@ export function LoveLanguagesQuiz() {
             } else {
                 setIsAnimating(true);
                 setTimeout(() => {
-                    setResult(getProfile(newScores));
+                    const finalProfile = getProfile(newScores) || quizData.profiles[0];
+                    setResult(finalProfile);
 
                     // LME Update
                     if (updatedMarkers.length > 0) {
-                        try {
-                            const aggregated = aggregateMarkers(updatedMarkers, 0.7); // 0.7 reliability
-                            const currentPsyche = getPsycheState();
-                            const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
-                            savePsycheState(newPsyche);
-                        } catch (e) {
-                            console.error("LME Update failed", e);
-                        }
+                        import('../../lib/lme/ingestion').then(({ ingestContribution }) => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const explicitMarkers: any[] = updatedMarkers || [];
+
+                            const event = {
+                                specVersion: "sp.contribution.v1" as const,
+                                eventId: crypto.randomUUID(),
+                                occurredAt: new Date().toISOString(),
+                                source: {
+                                    vertical: "quiz" as const,
+                                    moduleId: "quiz.lovelang.v1",
+                                    domain: window.location.hostname
+                                },
+                                payload: {
+                                    // Flatten explicit markers
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    markers: explicitMarkers.flatMap((m: any) =>
+                                        Object.entries(m).map(([k, v]) => ({ id: `marker.psyche.${k}`, weight: v as number }))
+                                    ),
+                                    traits: [
+                                        { id: `trait.lovelang.${finalProfile.id}`, score: 100, confidence: 0.9 }
+                                    ],
+                                    tags: [{ id: 'tag.lovelang.result', label: finalProfile.title, kind: 'misc' as const }],
+                                    summary: {
+                                        title: `Liebessprache: ${finalProfile.title}`,
+                                        bullets: [finalProfile.tagline],
+                                        resultId: finalProfile.id
+                                    }
+                                }
+                            };
+
+                            try {
+                                ingestContribution(event);
+                            } catch (e) {
+                                console.error("Ingestion failed", e);
+                            }
+                        });
                     }
 
                     setStage('result');
@@ -348,7 +382,6 @@ export function LoveLanguagesQuiz() {
         setIsAnimating(true);
         setTimeout(() => {
             setStage('intro');
-            setCurrentQ(0);
             setCurrentQ(0);
             setScores({ intensity: 0, expression: 0, connection: 0 });
             setCollectedMarkers([]);
@@ -452,7 +485,7 @@ export function LoveLanguagesQuiz() {
                             {result.loveLanguage}
                         </p>
                         <p className="text-white/70 italic text-sm">
-                            "{result.tagline}"
+                            &quot;{result.tagline}&quot;
                         </p>
                     </div>
 
@@ -495,6 +528,7 @@ export function LoveLanguagesQuiz() {
                         </button>
                         <button
                             onClick={() => {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 const nav = navigator as any;
                                 if (nav.share) {
                                     nav.share({

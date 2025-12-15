@@ -2,7 +2,7 @@
 // LME/DUBA - Slice 1: User State Model
 // Defines the structure of the user's psyche state in memory/storage.
 
-import { PSYCHE_DIMENSIONS, PsycheDimensionId } from './psyche-dimensions';
+import { PsycheDimensionId } from './psyche-dimensions';
 
 export interface DimensionState {
     value: number;      // 0.0 - 1.0: Current weighted mean
