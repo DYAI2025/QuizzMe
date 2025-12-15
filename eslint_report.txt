@@ -1,0 +1,97 @@
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/profile/page.tsx
+  15:54  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+  21:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/profile/page.tsx:21:9
+  19 |     // Safety check to ensure localStorage is available
+  20 |     useEffect(() => {
+> 21 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  22 |         const saved = getPsycheState();
+  23 |         setState(saved);
+  24 |         setAvatarParams(mapPsycheToAvatar(saved));  react-hooks/set-state-in-effect
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/verticals/quiz/page.tsx
+   81:25  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/verticals/quiz/page.tsx:81:25
+  79 |             className="absolute rounded-full"
+  80 |             style={{
+> 81 |               width: `${Math.random() * 3 + 1}px`,
+     |                         ^^^^^^^^^^^^^ Cannot call impure function
+  82 |               height: `${Math.random() * 3 + 1}px`,
+  83 |               background: i % 3 === 0 ? '#D2A95A' : i % 3 === 1 ? '#6CA192' : '#A77D38',
+  84 |               opacity: 0.12,                                                                   react-hooks/purity
+   82:26  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/verticals/quiz/page.tsx:82:26
+  80 |             style={{
+  81 |               width: `${Math.random() * 3 + 1}px`,
+> 82 |               height: `${Math.random() * 3 + 1}px`,
+     |                          ^^^^^^^^^^^^^ Cannot call impure function
+  83 |               background: i % 3 === 0 ? '#D2A95A' : i % 3 === 1 ? '#6CA192' : '#A77D38',
+  84 |               opacity: 0.12,
+  85 |               left: `${Math.random() * 100}%`,                                                                 react-hooks/purity
+   85:24  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/verticals/quiz/page.tsx:85:24
+  83 |               background: i % 3 === 0 ? '#D2A95A' : i % 3 === 1 ? '#6CA192' : '#A77D38',
+  84 |               opacity: 0.12,
+> 85 |               left: `${Math.random() * 100}%`,
+     |                        ^^^^^^^^^^^^^ Cannot call impure function
+  86 |               top: `${Math.random() * 100}%`,
+  87 |               animation: `float-quiz ${Math.random() * 15 + 20}s ease-in-out infinite`,
+  88 |               animationDelay: `${Math.random() * 8}s`,  react-hooks/purity
+   86:23  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/verticals/quiz/page.tsx:86:23
+  84 |               opacity: 0.12,
+  85 |               left: `${Math.random() * 100}%`,
+> 86 |               top: `${Math.random() * 100}%`,
+     |                       ^^^^^^^^^^^^^ Cannot call impure function
+  87 |               animation: `float-quiz ${Math.random() * 15 + 20}s ease-in-out infinite`,
+  88 |               animationDelay: `${Math.random() * 8}s`,
+  89 |             }}                                                                             react-hooks/purity
+   87:40  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/verticals/quiz/page.tsx:87:40
+  85 |               left: `${Math.random() * 100}%`,
+  86 |               top: `${Math.random() * 100}%`,
+> 87 |               animation: `float-quiz ${Math.random() * 15 + 20}s ease-in-out infinite`,
+     |                                        ^^^^^^^^^^^^^ Cannot call impure function
+  88 |               animationDelay: `${Math.random() * 8}s`,
+  89 |             }}
+  90 |           />                                                                            react-hooks/purity
+   88:34  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/dyai/Dokumente/Pers.Tests-Page/social-role/DYAI_home/Web/Projekt_Sammelseiten/platform-app/src/app/verticals/quiz/page.tsx:88:34
+  86 |               top: `${Math.random() * 100}%`,
+  87 |               animation: `float-quiz ${Math.random() * 15 + 20}s ease-in-out infinite`,
+> 88 |               animationDelay: `${Math.random() * 8}s`,
+     |                                  ^^^^^^^^^^^^^ Cannot call impure function
+  89 |             }}
+  90 |           />
+  91 |         ))}                                                                                                                     react-hooks/purity
+  248:11  error  An interface declaring no members is equivalent to its supertype                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-empty-object-type
+
+✖ 9 problems (9 errors, 0 warnings)
+

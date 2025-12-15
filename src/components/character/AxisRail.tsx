@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -15,7 +16,6 @@ export function AxisRail({
     leftLabel,
     rightLabel,
     value,
-    delta,
     delay = 0
 }: AxisRailProps) {
     // Clamp value to 0..1

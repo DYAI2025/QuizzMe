@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -17,7 +18,7 @@ export function AfterQuizDeltaBanner({ deltas, visibleDuration = 10000 }: AfterQ
     // Identify significant changes (> 0.01)
     const movers = deltas
         ? Object.entries(deltas)
-            .filter(([_, val]) => Math.abs(val as number) > 0.01)
+            .filter(([, val]) => Math.abs(val as number) > 0.01)
             .sort((a, b) => Math.abs(b[1] as number) - Math.abs(a[1] as number)) // Sort by magnitude
             .slice(0, 3) // Top 3
         : [];

@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { CosmicBackground } from "@/components/ui/CosmicBackground";
 import { HeaderSection } from "@/components/character/sections/HeaderSection";
 import { PersonalitySection } from "@/components/character/sections/PersonalitySection";
+import { ValuesSection } from "@/components/character/sections/ValuesSection";
 import { VerticalNav } from "@/components/character/sections/VerticalNav";
 import { ProfileSnapshot } from '@/lib/lme/types';
 import { getProfileSnapshot } from '@/lib/lme/storage-full';
@@ -45,10 +46,8 @@ export default function CharacterSheetPage() {
               {/* Block D: Personality */}
               <PersonalitySection snapshot={snapshot} />
 
-              {/* Placeholder for Block C: Values */}
-              <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-8 flex items-center justify-center opacity-50 hover:opacity-80 transition-opacity cursor-pointer border-dashed">
-                <span className="text-slate-400 text-sm">✦ Kernwerte & Motivation (Coming Soon)</span>
-              </div>
+              {/* Block C: Values & Motivation */}
+              <ValuesSection snapshot={snapshot} />
 
               {/* Placeholder for Block E: Relationships */}
               <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-8 flex items-center justify-center opacity-50 hover:opacity-80 transition-opacity cursor-pointer border-dashed">

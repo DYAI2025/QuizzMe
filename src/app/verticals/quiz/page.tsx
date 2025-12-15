@@ -1,7 +1,9 @@
+
 "use client";
 
 import Link from "next/link";
 import { QuizSymbol, QuizSymbolVariant } from "@/components/ui/QuizSymbol";
+import { useEffect, useState } from "react";
 
 interface QuizType {
   href: string;
@@ -43,9 +45,34 @@ const quizzes: QuizType[] = [
   },
 ];
 
+interface Particle {
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+  duration: number;
+  delay: number;
+}
+
 export default function QuizLandingPage() {
+  const [particles, setParticles] = useState<Particle[]>([]);
+
+  useEffect(() => {
+    // Generate random particles only on the client
+    const newParticles = Array.from({ length: 12 }).map(() => ({
+      width: Math.random() * 3 + 1,
+      height: Math.random() * 3 + 1,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 15 + 20,
+      delay: Math.random() * 8,
+    }));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setParticles(newParticles);
+  }, []);
+
   return (
-    <div 
+    <div
       className="min-h-screen relative"
       style={{
         background: "linear-gradient(135deg, #F7F0E6 0%, #F2E3CF 50%, #FEFBF5 100%)",
@@ -73,26 +100,26 @@ export default function QuizLandingPage() {
 
       {/* Floating mystical particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(12)].map((_, i) => (
+        {particles.map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 3 + 1}px`,
-              height: `${Math.random() * 3 + 1}px`,
+              width: `${p.width}px`,
+              height: `${p.height}px`,
               background: i % 3 === 0 ? '#D2A95A' : i % 3 === 1 ? '#6CA192' : '#A77D38',
               opacity: 0.12,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animation: `float-quiz ${Math.random() * 15 + 20}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 8}s`,
+              left: `${p.left}%`,
+              top: `${p.top}%`,
+              animation: `float-quiz ${p.duration}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
             }}
           />
         ))}
       </div>
 
       {/* Gold accent line - top decorative */}
-      <div 
+      <div
         className="absolute top-0 left-0 right-0 h-px"
         style={{ background: "linear-gradient(to right, transparent, #D2A95A, transparent)" }}
       />
@@ -115,7 +142,7 @@ export default function QuizLandingPage() {
             </div>
 
             {/* Main heading */}
-            <h1 
+            <h1
               className="text-5xl md:text-7xl font-serif font-light mb-6 tracking-wide"
               style={{ color: "#053B3F", letterSpacing: "0.02em" }}
             >
@@ -123,7 +150,7 @@ export default function QuizLandingPage() {
             </h1>
 
             {/* Subheading */}
-            <p 
+            <p
               className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-8"
               style={{ color: "#6CA192", fontWeight: 400 }}
             >
@@ -148,7 +175,7 @@ export default function QuizLandingPage() {
           {/* Trust/Info Section */}
           <section className="mb-20">
             <div className="text-center mb-12">
-              <h2 
+              <h2
                 className="text-3xl md:text-4xl font-serif font-light mb-3"
                 style={{ color: "#053B3F" }}
               >
@@ -162,17 +189,17 @@ export default function QuizLandingPage() {
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
-              <TrustCard 
+              <TrustCard
                 icon="◆"
                 title="Reflektierte Auswertung"
                 description="Basierend auf bewährten psychologischen Modellen und therapeutischen Ansätzen."
               />
-              <TrustCard 
+              <TrustCard
                 icon="✦"
                 title="Persönliche Tiefe"
                 description="Deine Ergebnisse werden speziell für deine Persönlichkeit generiert."
               />
-              <TrustCard 
+              <TrustCard
                 icon="✧"
                 title="Nachhaltige Einsicht"
                 description="Echte Erkenntnisse für dein Wachstum und deine Selbsterkenntnis."
@@ -202,19 +229,19 @@ export default function QuizLandingPage() {
 
                 {/* Content */}
                 <div className="flex-1 text-center md:text-left">
-                  <h3 
+                  <h3
                     className="text-3xl md:text-4xl font-serif font-light mb-4"
                     style={{ color: "#053B3F" }}
                   >
                     Dein Schicksal im Kosmos
                   </h3>
-                  <p 
+                  <p
                     className="text-base md:text-lg leading-relaxed mb-6"
                     style={{ color: "#6CA192" }}
                   >
                     Tritt in unsere Astrologie-Sphäre ein und entdecke die kosmischen Muster, die dein Leben gestalten. Erkunde Sternzeichen, tägliche Vorhersagen und himmlische Führung.
                   </p>
-                  <div 
+                  <div
                     className="inline-flex items-center font-medium group-hover:translate-x-1 transition-transform"
                     style={{ color: "#A77D38" }}
                   >
@@ -226,7 +253,7 @@ export default function QuizLandingPage() {
           </section>
 
           {/* Footer */}
-          <footer 
+          <footer
             className="text-center py-12 border-t border-opacity-20"
             style={{ borderColor: "#D2A95A", color: "#6CA192" }}
           >
@@ -245,7 +272,7 @@ export default function QuizLandingPage() {
   );
 }
 
-interface QuizCardProps extends QuizType {}
+type QuizCardProps = QuizType;
 
 function QuizCard({ href, title, description, variant }: QuizCardProps) {
   return (
@@ -269,14 +296,14 @@ function QuizCard({ href, title, description, variant }: QuizCardProps) {
 
         {/* Content */}
         <div className="flex-1 flex flex-col">
-          <h3 
+          <h3
             className="text-lg md:text-xl font-serif font-light mb-3 text-center leading-tight"
             style={{ color: "#053B3F" }}
           >
             {title}
           </h3>
 
-          <p 
+          <p
             className="text-sm leading-relaxed flex-1 text-center"
             style={{ color: "#6CA192", lineHeight: 1.6 }}
           >
@@ -285,7 +312,7 @@ function QuizCard({ href, title, description, variant }: QuizCardProps) {
         </div>
 
         {/* CTA */}
-        <div 
+        <div
           className="mt-6 pt-6 text-center text-sm font-medium group-hover:translate-y-(-1) transition-all duration-300"
           style={{ color: "#A77D38", borderTop: "1px solid #D2A95A" }}
         >
@@ -304,26 +331,26 @@ interface TrustCardProps {
 
 function TrustCard({ icon, title, description }: TrustCardProps) {
   return (
-    <div 
+    <div
       className="p-8 rounded-lg text-center group hover:shadow-md transition-all duration-300"
       style={{
         background: "#F7F0E6",
         border: "1px solid #D2A95A",
       }}
     >
-      <div 
+      <div
         className="text-4xl mb-4 group-hover:scale-110 transition-transform"
         style={{ color: "#D2A95A" }}
       >
         {icon}
       </div>
-      <h4 
+      <h4
         className="text-lg font-serif font-light mb-2"
         style={{ color: "#053B3F" }}
       >
         {title}
       </h4>
-      <p 
+      <p
         className="text-sm leading-relaxed"
         style={{ color: "#6CA192" }}
       >
