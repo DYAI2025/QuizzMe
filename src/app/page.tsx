@@ -6,6 +6,8 @@ import { CosmicBackground } from "@/components/ui/CosmicBackground";
 import { HeaderSection } from "@/components/character/sections/HeaderSection";
 import { PersonalitySection } from "@/components/character/sections/PersonalitySection";
 import { ValuesSection } from "@/components/character/sections/ValuesSection";
+import { RelationshipSection } from "@/components/character/sections/RelationshipSection";
+import { SkillsRadarSection } from "@/components/character/sections/SkillsRadarSection";
 import { VerticalNav } from "@/components/character/sections/VerticalNav";
 import { ProfileSnapshot } from '@/lib/lme/types';
 import { getProfileSnapshot } from '@/lib/lme/storage-full';
@@ -49,10 +51,8 @@ export default function CharacterSheetPage() {
               {/* Block C: Values & Motivation */}
               <ValuesSection snapshot={snapshot} />
 
-              {/* Placeholder for Block E: Relationships */}
-              <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-8 flex items-center justify-center opacity-50 hover:opacity-80 transition-opacity cursor-pointer border-dashed">
-                <span className="text-slate-400 text-sm">♥ Beziehung & Nähe (Coming Soon)</span>
-              </div>
+              {/* Block E: Relationships */}
+              <RelationshipSection snapshot={snapshot} />
 
             </div>
 
@@ -71,10 +71,8 @@ export default function CharacterSheetPage() {
                 </div>
               </div>
 
-              {/* Placeholder Block H: Skills */}
-              <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-6 border-dashed text-center">
-                <span className="text-slate-500 text-xs">Skill Radar Area</span>
-              </div>
+              {/* Block H: Skills Radar */}
+              <SkillsRadarSection snapshot={snapshot} />
 
             </div>
           </div>
@@ -85,7 +83,7 @@ export default function CharacterSheetPage() {
           {/* Footer / Debug Info */}
           <div className="text-center text-slate-600 text-xs mt-12 mb-8 font-mono">
             PROFILE_ID: {snapshot.meta.lastUpdatedAt ? 'SYNCED' : 'LOCAL'} <br />
-            V1.0.0
+            V1.0.1
           </div>
 
         </div>
