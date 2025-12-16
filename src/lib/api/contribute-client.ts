@@ -13,12 +13,13 @@
 import { ContributionEvent, ProfileSnapshot } from "@/lib/lme/types";
 import { ingestContribution } from "@/lib/ingestion";
 import { buildProfileSnapshot, createDefaultProfileState, ProfileState } from "@/lib/profile";
+// Import directly from localstorage-store to avoid bundling server-side json-store
 import {
   createLocalStorageStores,
   getLocalUserId,
   LocalStorageProfileStore,
   LocalStorageEventStore,
-} from "@/lib/storage";
+} from "@/lib/storage/localstorage-store";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
