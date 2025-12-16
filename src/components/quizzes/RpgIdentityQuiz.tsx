@@ -227,9 +227,7 @@ export function RpgIdentityQuiz() {
                             <button
                                 onClick={() => {
                                     const text = result.share_text;
-                                    // @ts-expect-error nav share types
                                     if (navigator.share) {
-                                        // @ts-expect-error nav share types
                                         navigator.share({ title: 'RPG Identity', text });
                                     } else {
                                         navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));

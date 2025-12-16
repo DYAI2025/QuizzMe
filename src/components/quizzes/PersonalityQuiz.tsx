@@ -207,7 +207,6 @@ export function PersonalityQuiz() {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Object.values(finalAnswers).forEach((a: any) => {
-            // @ts-expect-error key access
             Object.entries(a.scores).forEach(([dim, score]) => {
                 // @ts-expect-error key access
                 dimSums[dim] += score * a.weight;
@@ -225,7 +224,6 @@ export function PersonalityQuiz() {
         setScores(finalScores);
 
         const sorted = [...profiles].sort((a, b) => b.priority - a.priority);
-        // @ts-expect-error implicit any match
         const match = sorted.find(p => p.match(finalScores)) || profiles.find(p => p.id === 'balancer');
 
         const finalResult = match || profiles[2];
@@ -408,9 +406,7 @@ export function PersonalityQuiz() {
                         <button
                             onClick={() => {
                                 const text = `${result.emoji} Mein Ergebnis: ${result.title} – ${result.subtitle}`;
-                                // @ts-expect-error nav share types
                                 if (navigator.share) {
-                                    // @ts-expect-error nav share types
                                     navigator.share({ title: 'Selbstfürsorge Test', text });
                                 } else {
                                     navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));

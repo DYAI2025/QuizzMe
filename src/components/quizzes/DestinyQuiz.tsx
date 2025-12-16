@@ -193,7 +193,6 @@ const DestinyQuiz = () => {
 
         setTimeout(() => {
             const newScores = { ...scores };
-            // @ts-expect-error simple key access
             Object.entries(option.scores).forEach(([key, value]) => {
                 // @ts-expect-error simple key access
                 newScores[key] += value;
@@ -369,9 +368,7 @@ const DestinyQuiz = () => {
                             <button
                                 onClick={() => {
                                     const text = `${profile.name} - ${profile.subtitle}`;
-                                    // @ts-expect-error nav share types
                                     if (navigator.share) {
-                                        // @ts-expect-error nav share types
                                         navigator.share({ title: 'Destiny Quiz', text });
                                     } else {
                                         navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));
