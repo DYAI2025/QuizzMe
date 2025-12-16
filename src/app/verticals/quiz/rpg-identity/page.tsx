@@ -1,12 +1,11 @@
 'use client'
 
-import { RpgIdentityQuiz } from '@/components/quizzes/RpgIdentityQuiz'
-import { QuizPageShell } from '@/components/quizzes/QuizPageShell'
+import { KrafttierQuiz } from '@/components/quizzes/KrafttierQuiz'
 
 export default function RpgIdentityPage() {
     return (
-        <QuizPageShell title="RPG Charakter Test">
-            <RpgIdentityQuiz />
-        </QuizPageShell>
+        <div className="container mx-auto py-8 px-4">
+            <KrafttierQuiz />
+        </div>
     )
 }

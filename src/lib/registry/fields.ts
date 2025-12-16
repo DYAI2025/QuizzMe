@@ -295,6 +295,25 @@ export const FIELDS: readonly FieldDefinition[] = [
     maxLength: 100,
     block: "meta",
   },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SOCIAL ROLE QUIZ BLOCK
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: "field.social_role.result_title",
+    kind: "text",
+    label_de: "Social Role Ergebnis",
+    label_en: "Social Role Result",
+    maxLength: 100,
+    block: "social_role",
+  },
+  {
+    id: "field.social_role.tagline",
+    kind: "text",
+    label_de: "Social Role Tagline",
+    label_en: "Social Role Tagline",
+    maxLength: 200,
+    block: "social_role",
+  },
 ] as const;
 
 // Lookup helpers

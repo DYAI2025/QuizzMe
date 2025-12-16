@@ -2,7 +2,7 @@ Die Designsprache der Hintergründe kombiniert kosmische Mystik mit vergoldeter 
 
 1. Farbpalette & Lichteffekte
 Hauptfarben:
-Dunkelblau-Gradient: Vom tiefen Marineblau bis hin zu smaragdgrünen Akzenten, um eine nächtliche, sternenumwitterte Stimmung zu erzeugen.
+
 Gold/Türkis-Gold: Verwendet für alle Verzierungen (Linien, Symbole, Blätter), um Luxus und Magie zu unterstreichen.
 Weiß/Creme: Für das Pergamentdesign im Vordergrund, das durch den Kontrast zum Dunklen hervorgehoben wird.
 Licht & Schatten:
@@ -23,8 +23,7 @@ Layout:
 Der Hintergrund bildet einen symmetrischen Rahmen um das zentrale Pergament, das wie ein antikes Manuskript wirkt.
 Die Verzierungen konzentrieren sich auf die Ecken und Ränder, lassen aber Platz für Text oder Illustrationen im Zentrum.
 Kontrast:
-Das dunkle Blau des Hintergrunds hebt das cremefarbene Pergament stark hervor, während die goldenen Akzente auf beiden Ebenen visuelle Verbindungen schaffen.
-Feine Linien auf dem Pergament (z.B. Randverzierungen) spiegeln die Komplexität des Hintergrunds wider, ohne ihn zu übertreffen.
+
 4. Typische Details
 Subtile Texturen:
 Das Pergament zeigt leichte Papierstruktur und Schatten, um三维igkeit zu simulieren.
@@ -33,6 +32,6 @@ Interaktive Elemente:
 Kleine, funkelnde Sterne oder Partikel am Rand des Bildes (oft rechts unten), die Dynamik suggerieren.
 Icons (Auge, Krone) in goldener Umrandung, die zur Interaktion einladen.
 Prompt für exakte Reproduktion
-"Erstelle einen mystischen Hintergrund im Stil alter Sternenkarten. Verwende einen Gradienten von tiefem Marineblau zu smaragdgrün, überlagert mit feinen goldenen Linien für Sternbilder, Monde und pflanzliche Ranken. Füge subtile Glanzpunkte und Partikel hinzu, um Tiefe zu erzeugen. Im Zentrum platziere ein cremefarbenes Pergament mit dekorativen Eckenverzierungen, das durch den Kontrast zum Dunklen hervorsticht. Die Verzierungen sollen symmetrisch sein, mit Fokus auf Ecken und Rändern. Verwende eine Kombination aus dicken und dünnen Linien für Dynamik und füge altersbedingte Texturen (leichte Flecken, Unschärfe) hinzu. Das Gesamtbild soll luxuriös, geheimnisvoll und einladend wirken."
+"Erstelle einen mystischen Hintergrund im Stil alter Sternenkarten. Verwende einen Gradienten von weiß zu smaragdgrün, überlagert mit feinen goldenen Linien für Sternbilder, Monde und pflanzliche Ranken. Füge subtile Glanzpunkte und Partikel hinzu, um Tiefe zu erzeugen. Im Zentrum platziere ein cremefarbenes Pergament mit dekorativen Eckenverzierungen, das durch den Kontrast zum Dunklen hervorsticht. Die Verzierungen sollen symmetrisch sein, mit Fokus auf Ecken und Rändern. Verwende eine Kombination aus dicken und dünnen Linien für Dynamik und füge altersbedingte Texturen (leichte Flecken, Unschärfe) hinzu. Das Gesamtbild soll luxuriös, geheimnisvoll und einladend wirken."
 
 Dieser Stil eignet sich für Quiz-Interfaces, spirituelle Apps oder Coverdesigns – immer mit dem Fokus auf kosmische Verbundenheit und antike Weisheit.
