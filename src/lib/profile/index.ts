@@ -10,3 +10,6 @@
 
 export * from "./profile-state";
 export * from "./snapshot";
+
+// Re-export anchor types for convenience
+export type { AstroAnchor, ProfileAnchors } from "./profile-state";

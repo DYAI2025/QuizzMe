@@ -8,7 +8,6 @@
  */
 
 import { ContributionEvent, ProfileSnapshot, Marker } from "@/lib/lme/types";
-import { PsycheState } from "@/lib/lme/psyche-state";
 import { PsycheDimensionId } from "@/lib/lme/psyche-dimensions";
 import { updatePsycheState } from "@/lib/lme/lme-core";
 import { computeArchetypeMix } from "@/lib/lme/archetype-mix";
@@ -26,10 +25,13 @@ import {
   mergeFields,
   mergeAstro,
   calculateCompletion,
+  AstroAnchor,
 } from "@/lib/profile";
 import { buildProfileSnapshot } from "@/lib/profile";
 import { applyTraitUpdates } from "./trait-updater";
 import { MARKER_BY_ID } from "@/lib/registry/markers";
+import { computeBaseScores, ANCHORABLE_TRAIT_IDS, AstroInput } from "@/lib/astro";
+import { createTraitState } from "@/lib/traits";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MARKER → PSYCHE DIMENSION MAPPING
@@ -187,6 +189,62 @@ function getReliabilityForModule(moduleId: string): number {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// ASTRO ONBOARDING SPECIAL-CASE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Module ID for astro onboarding (runOnce enforcement) */
+const ASTRO_ONBOARDING_MODULE = "onboarding.astro.v1";
+
+/** Current anchor map version */
+const ASTRO_ANCHOR_VERSION = "astro-anchor-map.v1";
+
+/**
+ * Initialize trait baseScores from astro anchor map.
+ * Sets shiftZ=0, shiftStrength=0 for all anchorable traits.
+ */
+function initializeAstroBaseScores(
+  traitStates: Record<string, import("@/lib/traits").TraitState>,
+  astroInput: AstroInput,
+  occurredAt: string
+): Record<string, import("@/lib/traits").TraitState> {
+  // Compute base scores from anchor map
+  const baseScores = computeBaseScores(astroInput);
+
+  // Initialize/overwrite trait states for all anchorable traits
+  const nextStates = { ...traitStates };
+
+  for (const traitId of ANCHORABLE_TRAIT_IDS) {
+    const baseScore = baseScores[traitId] ?? 50;
+    nextStates[traitId] = createTraitState(traitId, baseScore, occurredAt);
+  }
+
+  return nextStates;
+}
+
+/**
+ * Create astro anchor metadata for runOnce enforcement.
+ */
+function createAstroAnchor(
+  event: ContributionEvent,
+  occurredAt: string
+): AstroAnchor {
+  const astro = event.payload.astro;
+
+  return {
+    anchorVersion: ASTRO_ANCHOR_VERSION,
+    createdAt: occurredAt,
+    western: {
+      sunSign: astro?.western?.sunSign ?? "unknown",
+    },
+    chinese: {
+      animal: astro?.chinese?.animal ?? "unknown",
+      element: astro?.chinese?.element ?? "unknown",
+      yinYang: astro?.chinese?.yinYang ?? "unknown",
+    },
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // MAIN INGESTION FUNCTION
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -236,6 +294,68 @@ export function ingestContribution(
   }
 
   const { payload, source, occurredAt } = event;
+
+  // 1.5. Astro onboarding special-case (runOnce + baseScore init)
+  const isAstroOnboarding = source.moduleId === ASTRO_ONBOARDING_MODULE;
+
+  if (isAstroOnboarding) {
+    // Enforce runOnce: reject if anchor already exists
+    if (currentState.anchors.astro) {
+      return {
+        accepted: false,
+        state: currentState,
+        snapshot: buildProfileSnapshot(currentState),
+        validation: {
+          valid: false,
+          shapeErrors: [],
+          idErrors: [],
+          moduleErrors: [
+            {
+              moduleId: source.moduleId,
+              rule: "runOnce",
+              message: "Astro onboarding already completed (runOnce)",
+            },
+          ],
+        },
+      };
+    }
+
+    // Ensure astro payload exists for baseScore computation
+    if (!payload.astro?.western?.sunSign) {
+      return {
+        accepted: false,
+        state: currentState,
+        snapshot: buildProfileSnapshot(currentState),
+        validation: {
+          valid: false,
+          shapeErrors: [
+            {
+              field: "payload.astro.western.sunSign",
+              message: "Missing sunSign for astro onboarding",
+            },
+          ],
+          idErrors: [],
+          moduleErrors: [],
+        },
+      };
+    }
+
+    // Build AstroInput for baseScore computation
+    const astroInput: AstroInput = {
+      sunSign: payload.astro.western.sunSign as import("@/lib/astro").ZodiacSign,
+      chineseAnimal: payload.astro.chinese?.animal as import("@/lib/astro").ChineseAnimal | undefined,
+    };
+
+    // Initialize trait baseScores from anchor map
+    currentState = {
+      ...currentState,
+      traitStates: initializeAstroBaseScores(currentState.traitStates, astroInput, occurredAt),
+      anchors: {
+        ...currentState.anchors,
+        astro: createAstroAnchor(event, occurredAt),
+      },
+    };
+  }
 
   // 2. Update psyche state from markers
   const psycheScores = aggregateMarkersToPsyche(payload.markers);
