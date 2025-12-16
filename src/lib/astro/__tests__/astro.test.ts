@@ -16,6 +16,7 @@ import {
   getYinYang,
 } from "../compute";
 import { computeBaseScores, ANCHORABLE_TRAIT_IDS } from "@/lib/registry/astro-anchor-map.v1";
+import { buildAstroOnboardingEvent } from "@/modules/onboarding/astro/buildEvent";
 
 describe("Astro Compute", () => {
   describe("getSunSign()", () => {
@@ -224,5 +225,90 @@ describe("Astro Anchor Map", () => {
       expect(ANCHORABLE_TRAIT_IDS.length).toBeGreaterThan(10);
       expect(ANCHORABLE_TRAIT_IDS.length).toBeLessThan(50);
     });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUILD EVENT VERIFICATION TESTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe("buildAstroOnboardingEvent", () => {
+  it("VERIFY: always includes element + modality markers", () => {
+    const event = buildAstroOnboardingEvent({
+      birthDate: new Date(1990, 5, 15),
+    });
+
+    const markerIds = event.payload.markers.map((m) => m.id);
+
+    // Must have at least one element marker
+    const hasElement = markerIds.some((id) => id.includes("element."));
+    expect(hasElement).toBe(true);
+
+    // Must have at least one modality marker
+    const hasModality = markerIds.some((id) => id.includes("modality."));
+    expect(hasModality).toBe(true);
+
+    // Markers array must never be empty
+    expect(event.payload.markers.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("VERIFY: marker weights are clamped to 0.05-0.15", () => {
+    const event = buildAstroOnboardingEvent({
+      birthDate: new Date(1985, 0, 15),
+    });
+
+    for (const marker of event.payload.markers) {
+      expect(marker.weight).toBeGreaterThanOrEqual(0.05);
+      expect(marker.weight).toBeLessThanOrEqual(0.15);
+    }
+  });
+
+  it("VERIFY: event has correct moduleId and vertical", () => {
+    const event = buildAstroOnboardingEvent({
+      birthDate: new Date(2000, 6, 20),
+    });
+
+    expect(event.source.vertical).toBe("character");
+    expect(event.source.moduleId).toBe("onboarding.astro.v1");
+  });
+
+  it("VERIFY: event includes astro payload with sunSign", () => {
+    const event = buildAstroOnboardingEvent({
+      birthDate: new Date(1995, 3, 10), // April 10 = Aries
+    });
+
+    expect(event.payload.astro).toBeDefined();
+    expect(event.payload.astro?.western?.sunSign).toBe("aries");
+  });
+
+  it("VERIFY: event includes chinese zodiac data", () => {
+    const event = buildAstroOnboardingEvent({
+      birthDate: new Date(1988, 8, 15), // September 1988 = Dragon
+    });
+
+    expect(event.payload.astro?.chinese).toBeDefined();
+    expect(event.payload.astro?.chinese?.animal).toBe("dragon");
+  });
+
+  it("VERIFY: event includes tags for zodiac and chinese animal", () => {
+    const event = buildAstroOnboardingEvent({
+      birthDate: new Date(1992, 10, 15), // November = Scorpio, 1992 = Monkey
+    });
+
+    const tagIds = event.payload.tags?.map((t) => t.id) ?? [];
+
+    expect(tagIds.some((id) => id.includes("zodiac."))).toBe(true);
+    expect(tagIds.some((id) => id.includes("chinese."))).toBe(true);
+  });
+
+  it("VERIFY: event includes unlocks for zodiac sigil and chinese badge", () => {
+    const event = buildAstroOnboardingEvent({
+      birthDate: new Date(1990, 5, 15),
+    });
+
+    const unlockIds = event.payload.unlocks?.map((u) => u.id) ?? [];
+
+    expect(unlockIds.some((id) => id.includes("zodiac_"))).toBe(true);
+    expect(unlockIds.some((id) => id.includes("chinese_"))).toBe(true);
   });
 });

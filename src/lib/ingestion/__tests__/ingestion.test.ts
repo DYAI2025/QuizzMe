@@ -17,6 +17,7 @@ import { ContributionEvent, TraitScore } from "@/lib/lme/types";
 import { ProfileState, createDefaultProfileState } from "@/lib/profile";
 import { buildProfileSnapshot } from "@/lib/profile";
 import { createTraitState, uiScore } from "@/lib/traits";
+import { ANCHORABLE_TRAIT_IDS } from "@/lib/registry/astro-anchor-map.v1";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TEST HELPERS
@@ -533,5 +534,70 @@ describe("Astro Onboarding", () => {
     expect(result.validation?.shapeErrors?.some(
       (e) => e.field.includes("sunSign")
     )).toBe(true);
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // VERIFICATION CHECKLIST TESTS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  it("VERIFY: runOnce leaves baseScores unchanged on second attempt", () => {
+    // First onboarding
+    const event1 = createAstroOnboardingEvent();
+    const result1 = ingestContribution(null, event1);
+    expect(result1.accepted).toBe(true);
+
+    // Save the trait baseScores from first result
+    const originalTraitStates = { ...result1.state.traitStates };
+
+    // Second onboarding attempt
+    const event2 = createAstroOnboardingEvent();
+    const result2 = ingestContribution(result1.state, event2);
+
+    expect(result2.accepted).toBe(false);
+
+    // baseScores must be IDENTICAL (not recomputed)
+    for (const [traitId, trait] of Object.entries(result2.state.traitStates)) {
+      expect(trait.baseScore).toBe(originalTraitStates[traitId]?.baseScore);
+      expect(trait.shiftZ).toBe(originalTraitStates[traitId]?.shiftZ);
+    }
+
+    // Anchor metadata must be unchanged
+    expect(result2.state.anchors.astro?.createdAt).toBe(
+      result1.state.anchors.astro?.createdAt
+    );
+  });
+
+  it("VERIFY: only ANCHORABLE_TRAIT_IDS are seeded, non-anchorable stay default", () => {
+    const event = createAstroOnboardingEvent();
+    const result = ingestContribution(null, event);
+
+    expect(result.accepted).toBe(true);
+
+    // All initialized traits should be in ANCHORABLE_TRAIT_IDS
+    for (const traitId of Object.keys(result.state.traitStates)) {
+      expect(ANCHORABLE_TRAIT_IDS.includes(traitId)).toBe(true);
+    }
+
+    // Count should match
+    expect(Object.keys(result.state.traitStates).length).toBe(ANCHORABLE_TRAIT_IDS.length);
+  });
+
+  it("VERIFY: snapshot trait scores remain in 1-100 after runOnce rejection", () => {
+    // First onboarding
+    const event1 = createAstroOnboardingEvent();
+    const result1 = ingestContribution(null, event1);
+
+    // Second attempt (rejected)
+    const event2 = createAstroOnboardingEvent();
+    const result2 = ingestContribution(result1.state, event2);
+
+    expect(result2.accepted).toBe(false);
+
+    // Snapshot scores must still be valid 1-100
+    for (const trait of Object.values(result2.snapshot.traits)) {
+      expect(trait.score).toBeGreaterThanOrEqual(1);
+      expect(trait.score).toBeLessThanOrEqual(100);
+      expect(Number.isInteger(trait.score)).toBe(true);
+    }
   });
 });
