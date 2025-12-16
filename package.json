@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "registry:lint": "npx tsx scripts/registry-lint.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "framer-motion": "^12.23.26",
@@ -23,6 +26,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.19.0",
+    "typescript": "^5",
+    "vitest": "^2.1.0"
   }
 }
