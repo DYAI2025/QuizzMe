@@ -1,90 +1,114 @@
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import { usePsycheProfile } from '@/hooks/usePsycheProfile';
-import { calcDerivedStats } from '@/lib/derivedStats';
-import { CoreStatsCard } from '@/components/character/CoreStatsCard';
-import { ClimateCard } from '@/components/character/ClimateCard';
-import { DerivedStatsCard } from '@/components/character/DerivedStatsCard';
-import { ArchetypeStoryCard } from '@/components/character/ArchetypeStoryCard';
+/**
+ * Character Sheet Page v2
+ *
+ * Renders the character sheet from ProfileSnapshot.
+ * Works in both dev (API) and static (localStorage) modes.
+ *
+ * Structure:
+ * - Header: Zodiac wheel, archetype, completion
+ * - Body: Trait blocks A-K
+ */
 
-import { AfterQuizDeltaBanner } from '@/components/character/AfterQuizDeltaBanner';
-import { characterSheetCopy } from '@/content/character-sheet.de';
+import { useProfileSnapshot } from "@/hooks";
+import {
+  CharacterHeader,
+  TraitBlock,
+  UnlocksBlock,
+  BLOCKS,
+} from "@/components/character-v2";
 
 export default function CharacterSheetPage() {
-    const { profile, isLoading, error } = usePsycheProfile();
+  const { snapshot, isLoading, isNew, error, mode } = useProfileSnapshot();
 
-    const derivedStats = useMemo(() => {
-        if (!profile) return null;
-        return calcDerivedStats(profile.stats);
-    }, [profile]);
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-pulse text-gold-primary font-serif text-xl">
-                    Grimoire wird geöffnet...
-                </div>
-            </div>
-        );
-    }
-
-    if (error || !profile) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-red-400 font-sans">
-                    Fehler beim Laden des Profils.
-                </div>
-            </div>
-        );
-    }
-
+  // Loading state
+  if (isLoading) {
     return (
-        <main className="min-h-screen bg-bg-emerald text-text-ink pb-20">
-            {/* Header Section */}
-            <header className="pt-20 pb-10 px-4 text-center">
-                <h1 className="font-serif text-4xl md:text-5xl font-bold text-text-light mb-3 text-gold-gradient">
-                    {characterSheetCopy.header.title}
-                </h1>
-                <p className="font-sans text-text-light-muted max-w-lg mx-auto">
-                    {characterSheetCopy.header.subtitle}
-                </p>
-            </header>
-
-            {/* Main Content Grid */}
-            <div className="container mx-auto px-4 max-w-6xl">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-
-                    {/* LEFT COLUMN (Core & Climate) - Span 7 */}
-                    <div className="lg:col-span-7 space-y-6">
-                        <CoreStatsCard
-                            stats={profile.stats}
-                            deltas={profile.last_delta?.stats_delta}
-                        />
-                        <ClimateCard
-                            state={profile.state}
-                            deltas={profile.last_delta?.state_delta}
-                        />
-                    </div>
-
-                    {/* RIGHT COLUMN (Derived, Story, Meta) - Span 5 */}
-                    <div className="lg:col-span-5 space-y-6">
-                        <ArchetypeStoryCard
-                            archetype={profile.archetype_params?.dominant_archetype}
-                            secondary={profile.archetype_params?.secondary_archetypes}
-                            snippet={profile.narrative_snippet}
-                        />
-
-                        {derivedStats && (
-                            <DerivedStatsCard stats={derivedStats} />
-                        )}
-
-                        {/* Additional spacing or footer CTAs could go here */}
-                    </div>
-                </div>
-            </div>
-
-            <AfterQuizDeltaBanner deltas={profile.last_delta?.stats_delta} />
-        </main>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4 animate-pulse">🔮</div>
+          <p className="text-indigo-400 font-medium">
+            Profil wird geladen...
+          </p>
+        </div>
+      </div>
     );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <div className="text-4xl mb-4">⚠️</div>
+          <p className="text-red-400 font-medium mb-2">
+            Fehler beim Laden
+          </p>
+          <p className="text-slate-500 text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // New user / no data state
+  if (isNew || !snapshot) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <div className="text-6xl mb-6">✨</div>
+          <h1 className="text-2xl font-bold text-slate-100 mb-3">
+            Willkommen!
+          </h1>
+          <p className="text-slate-400 mb-6">
+            Dein Charakterbogen ist noch leer. Mache ein Quiz um dein Profil zu erstellen.
+          </p>
+          <a
+            href="/verticals/quiz"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors"
+          >
+            <span>Quiz starten</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Get trait blocks (exclude unlocks block - handled separately)
+  const traitBlocks = BLOCKS.filter((b) => b.id !== "block.unlocks");
+
+  return (
+    <main className="min-h-screen bg-slate-950">
+      {/* Header Block */}
+      <CharacterHeader snapshot={snapshot} />
+
+      {/* Mode indicator (dev only) */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="max-w-4xl mx-auto px-4 mb-4">
+          <span className="text-xs text-slate-600 bg-slate-800 px-2 py-1 rounded">
+            Mode: {mode}
+          </span>
+        </div>
+      )}
+
+      {/* Trait Blocks Grid */}
+      <div className="max-w-4xl mx-auto px-4 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {traitBlocks.map((block) => (
+            <TraitBlock
+              key={block.id}
+              config={block}
+              traits={snapshot.traits}
+            />
+          ))}
+
+          {/* Unlocks Block (full width) */}
+          <div className="md:col-span-2">
+            <UnlocksBlock unlocks={snapshot.unlocks} />
+          </div>
+        </div>
+      </div>
+    </main>
+  );
 }
