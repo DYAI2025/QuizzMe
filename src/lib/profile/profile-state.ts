@@ -13,6 +13,37 @@ import { TraitState } from "@/lib/traits";
 import { Tag, Unlock, Field, AstroPayload, ArchetypeMixItem } from "@/lib/lme/types";
 
 // ═══════════════════════════════════════════════════════════════════════════
+// ANCHOR TYPES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Astro anchor metadata (runOnce enforcement)
+ */
+export type AstroAnchor = {
+  /** Version of the anchor map used */
+  anchorVersion: string;
+  /** When the anchor was created */
+  createdAt: string;
+  /** Western astro data stored at anchor time */
+  western: {
+    sunSign: string;
+  };
+  /** Chinese astro data stored at anchor time */
+  chinese: {
+    animal: string;
+    element: string;
+    yinYang: string;
+  };
+};
+
+/**
+ * Anchors for runOnce modules (astro onboarding, etc.)
+ */
+export type ProfileAnchors = {
+  astro?: AstroAnchor;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PROFILE STATE (INTERNAL)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -71,6 +102,11 @@ export type ProfileState = {
   fields: Record<string, Field>;
 
   /**
+   * Anchors for runOnce modules (astro, etc.)
+   */
+  anchors: ProfileAnchors;
+
+  /**
    * Metadata
    */
   meta: {
@@ -102,6 +138,7 @@ export function createDefaultProfileState(): ProfileState {
     tags: [],
     unlocks: {},
     fields: {},
+    anchors: {},
     meta: {
       createdAt: now,
       lastUpdatedAt: now,

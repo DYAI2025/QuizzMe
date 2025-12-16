@@ -204,7 +204,7 @@ export function applyMarkerEvidence(
   const tierGain = TIER_Z_GAIN[tier];
   const occurredAt = event.occurredAt;
 
-  let newStates = { ...traitStates };
+  const newStates = { ...traitStates };
 
   for (const marker of payload.markers) {
     const markerDef = MARKER_BY_ID[marker.id];
@@ -263,7 +263,7 @@ export function applyObservationNudge(
   observations: TraitScore[],
   occurredAt: string
 ): Record<string, TraitState> {
-  let newStates = { ...traitStates };
+  const newStates = { ...traitStates };
 
   for (const obs of observations) {
     const traitId = obs.id;

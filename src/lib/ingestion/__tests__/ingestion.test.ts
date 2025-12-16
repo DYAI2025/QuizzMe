@@ -402,3 +402,136 @@ describe("Full Ingestion", () => {
     expect(result.state.psycheState.connection.value).not.toBe(initialConnection);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ASTRO ONBOARDING TESTS (Phase 5)
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe("Astro Onboarding", () => {
+  function createAstroOnboardingEvent(): ContributionEvent {
+    return {
+      specVersion: "sp.contribution.v1",
+      eventId: crypto.randomUUID(),
+      occurredAt: new Date().toISOString(),
+      source: {
+        vertical: "character",
+        moduleId: "onboarding.astro.v1",
+      },
+      payload: {
+        markers: [
+          { id: "marker.astro.element.fire", weight: 0.1 },
+          { id: "marker.astro.modality.cardinal", weight: 0.1 },
+        ],
+        astro: {
+          western: {
+            sunSign: "aries",
+            elementsMix: { fire: 1, earth: 0, air: 0, water: 0 },
+            modalitiesMix: { cardinal: 1, fixed: 0, mutable: 0 },
+          },
+          chinese: {
+            animal: "dragon",
+            element: "wood",
+            yinYang: "yang",
+          },
+        },
+      },
+    };
+  }
+
+  it("accepts astro onboarding event on new profile", () => {
+    const event = createAstroOnboardingEvent();
+    const result = ingestContribution(null, event);
+
+    expect(result.accepted).toBe(true);
+    expect(result.state.anchors.astro).toBeDefined();
+    expect(result.state.anchors.astro?.western.sunSign).toBe("aries");
+    expect(result.state.anchors.astro?.chinese.animal).toBe("dragon");
+  });
+
+  it("rejects second astro onboarding (runOnce enforcement)", () => {
+    // First onboarding
+    const event1 = createAstroOnboardingEvent();
+    const result1 = ingestContribution(null, event1);
+    expect(result1.accepted).toBe(true);
+
+    // Second onboarding should be rejected
+    const event2 = createAstroOnboardingEvent();
+    const result2 = ingestContribution(result1.state, event2);
+
+    expect(result2.accepted).toBe(false);
+    expect(result2.validation?.moduleErrors?.some(
+      (e) => e.rule === "runOnce"
+    )).toBe(true);
+  });
+
+  it("initializes baseScores for anchorable traits", () => {
+    const event = createAstroOnboardingEvent();
+    const result = ingestContribution(null, event);
+
+    expect(result.accepted).toBe(true);
+
+    // Check that anchorable traits have been initialized
+    // Aries should have high adventure score
+    const adventureTrait = result.state.traitStates["trait.lifestyle.adventure"];
+    expect(adventureTrait).toBeDefined();
+    expect(adventureTrait.baseScore).toBeGreaterThan(50); // Aries boosts adventure
+
+    // All anchorable trait scores should be in valid range
+    for (const trait of Object.values(result.state.traitStates)) {
+      expect(trait.baseScore).toBeGreaterThanOrEqual(1);
+      expect(trait.baseScore).toBeLessThanOrEqual(100);
+      // After initial seeding, shiftZ should be 0
+      expect(trait.shiftZ).toBe(0);
+    }
+  });
+
+  it("stores anchor version metadata", () => {
+    const event = createAstroOnboardingEvent();
+    const result = ingestContribution(null, event);
+
+    expect(result.accepted).toBe(true);
+    expect(result.state.anchors.astro?.anchorVersion).toBe("astro-anchor-map.v1");
+    expect(result.state.anchors.astro?.createdAt).toBeDefined();
+  });
+
+  it("applies astro markers to psyche (FLAVOR tier)", () => {
+    const event = createAstroOnboardingEvent();
+    const result = ingestContribution(null, event);
+
+    expect(result.accepted).toBe(true);
+    // Astro should influence psyche dimensions (at low reliability)
+    expect(result.state.psycheState).toBeDefined();
+  });
+
+  it("rejects astro onboarding without sunSign", () => {
+    const event: ContributionEvent = {
+      specVersion: "sp.contribution.v1",
+      eventId: crypto.randomUUID(),
+      occurredAt: new Date().toISOString(),
+      source: {
+        vertical: "character",
+        moduleId: "onboarding.astro.v1",
+      },
+      payload: {
+        markers: [
+          { id: "marker.astro.element.fire", weight: 0.1 },
+        ],
+        astro: {
+          // Missing western.sunSign
+          chinese: {
+            animal: "dragon",
+            element: "wood",
+            yinYang: "yang",
+          },
+        },
+      },
+    };
+
+    const result = ingestContribution(null, event);
+
+    expect(result.accepted).toBe(false);
+    expect(result.validation?.shapeErrors?.some(
+      (e) => e.field.includes("sunSign")
+    )).toBe(true);
+  });
+});
