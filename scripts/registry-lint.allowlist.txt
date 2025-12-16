@@ -79,3 +79,10 @@ trait.skills.resilience
 # These are used only in unit tests, not in production code
 # ═══════════════════════════════════════════════════════════════════════════
 trait.test.
+marker.test.
+tag.test.
+
+# Intentionally invalid IDs for validation testing
+marker.invalid.
+marker.fake.
+trait.invalid.
