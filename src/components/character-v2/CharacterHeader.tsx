@@ -11,7 +11,7 @@
  */
 
 import { ProfileSnapshot } from "@/lib/lme/types";
-import { ZodiacWheel } from "./ZodiacWheel";
+import { ZodiacShield } from "./ZodiacShield";
 
 type CharacterHeaderProps = {
   snapshot: ProfileSnapshot;
@@ -29,9 +29,9 @@ export function CharacterHeader({ snapshot }: CharacterHeaderProps) {
       <div className="max-w-4xl mx-auto">
         {/* Top Row: Zodiac + Identity */}
         <div className="flex flex-col md:flex-row items-center gap-6 mb-6">
-          {/* Zodiac Wheel */}
+          {/* Zodiac Shield (Wappen) - 300% larger */}
           <div className="flex-shrink-0">
-            <ZodiacWheel sunSign={sunSign} size={120} />
+            <ZodiacShield sign={sunSign} size={420} className="-my-12" />
           </div>
 
           {/* Identity Info */}
