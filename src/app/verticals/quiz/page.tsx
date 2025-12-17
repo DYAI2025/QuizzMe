@@ -14,18 +14,6 @@ interface QuizType {
 
 const quizzes: QuizType[] = [
   {
-    href: "/verticals/quiz/love-languages",
-    title: "Die 5 Sprachen der Liebe",
-    description: "Wie liebst du? Entdecke deine primäre Sprache der Liebe.",
-    variant: "love",
-  },
-  {
-    href: "/verticals/quiz/personality",
-    title: "Persönlichkeitstest",
-    description: "Weltverbesserer oder Selbstbewahrer? Finde deine Balance.",
-    variant: "personality",
-  },
-  {
     href: "/verticals/quiz/social-role",
     title: "Soziale Rolle",
     description: "Der Fels, die Flamme, der Spiegel? Wer bist du für andere?",
@@ -33,15 +21,33 @@ const quizzes: QuizType[] = [
   },
   {
     href: "/verticals/quiz/rpg-identity",
-    title: "RPG Identität",
-    description: "Welche Fantasy-Klasse bist du im echten Leben?",
+    title: "Krafttier (RPG Identity)",
+    description: "Entdecke dein inneres Krafttier und deine archetypische Klasse.",
     variant: "rpg",
   },
   {
-    href: "/verticals/quiz/celebrity-soulmate",
-    title: "Celebrity Soulmate",
-    description: "Welcher Star ist dein energetisches Match?",
-    variant: "celebrity",
+    href: "/verticals/quiz/destiny",
+    title: "Career DNA (Destiny)",
+    description: "Entschlüssele deinen karmischen Karriere-Code.",
+    variant: "destiny",
+  },
+  {
+    href: "/verticals/quiz/spotlight",
+    title: "Spotlight",
+    description: "Bist du bereit für die Bühne des Lebens?",
+    variant: "celebrity", // Using 'celebrity' as proxy for Spotlight theme
+  },
+  {
+    href: "/verticals/quiz/party",
+    title: "Party Bedürfnis",
+    description: "Wie viel Feier steckt wirklich in dir?",
+    variant: "personality", // Using 'personality' as proxy for Party theme
+  },
+  {
+    href: "/verticals/quiz/love-languages",
+    title: "Die 5 Sprachen der Liebe",
+    description: "Wie liebst du? Entdecke deine primäre Sprache der Liebe.",
+    variant: "love",
   },
 ];
 
