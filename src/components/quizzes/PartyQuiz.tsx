@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState } from 'react';
@@ -18,8 +17,8 @@ export function PartyQuiz() {
     const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
 
     const calculateResult = (finalScores: Scores) => {
-        let bestProfileId = profiles[0].id;
-        let maxScore = -1;
+        const bestProfileId = profiles[0].id;
+        const maxScore = -1;
 
         // Simple scoring based on matching option marker weights to profile dominant traits? 
         // Actually, the previous logic was just summing up scores?
@@ -40,7 +39,7 @@ export function PartyQuiz() {
         // Each profile in data.ts has `markers`.
         // Let's score each profile based on how many of its markers overlap with collected markers?
         
-        let profileScores: Record<string, number> = {};
+        const profileScores: Record<string, number> = {};
         profiles.forEach(p => profileScores[p.id] = 0);
         
         // This is a naive heuristic but works for 4 distinct profiles
@@ -141,7 +140,7 @@ export function PartyQuiz() {
                     </p>
                     <button
                         onClick={() => setStarted(true)}
-                        className="w-full py-4 px-8 bg-amber-600 hover:bg-amber-500 text-black font-bold text-lg rounded-sm transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(245,158,11,0.5)] uppercase tracking-wider"
+                        className="w-full py-4 px-8 bg-amber-600 hover:bg-amber-500 text-black font-bold text-lg rounded-sm transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
                     >
                         Starten
                     </button>
