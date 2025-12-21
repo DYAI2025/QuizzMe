@@ -46,7 +46,7 @@ export function PartyQuiz() {
         const allCollectedIds = new Set(collectedMarkers.map(m => m.id));
         
         profiles.forEach(p => {
-            p.markers.forEach(pm => {
+            p.markers?.forEach(pm => {
                 if (allCollectedIds.has(pm.id)) {
                     profileScores[p.id] += (pm.weight || 1);
                 }

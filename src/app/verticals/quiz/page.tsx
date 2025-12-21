@@ -14,6 +14,12 @@ interface QuizType {
 
 const quizzes: QuizType[] = [
   {
+    href: "/verticals/quiz/aura-colors",
+    title: "Deine Aurafarben",
+    description: "Welche Farbe hat deine Aura? Entdecke das unsichtbare Licht deiner Seele.",
+    variant: "aura",
+  },
+  {
     href: "/verticals/quiz/social-role",
     title: "Soziale Rolle",
     description: "Der Fels, die Flamme, der Spiegel? Wer bist du für andere?",
