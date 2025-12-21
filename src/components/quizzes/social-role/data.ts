@@ -1,180 +1,450 @@
+
+export const quizMeta = {
+  id: "quiz.social_role.v2",
+  title: "Deine Soziale Rolle",
+  subtitle: "Welche Funktion erfüllst du in Gruppen?",
+  description: "10 Szenarien enthüllen deine natürliche Position in sozialen Gefügen.",
+  questions_count: 10,
+  disclaimer: "Dieser Test dient der spielerischen Selbstreflexion und stellt keine psychologische Diagnose dar."
+};
+
+// Valid Registry IDs mapped from the plan
+// leader: marker.social.dominance, marker.values.achievement
+// connector: marker.eq.empathy, marker.values.connection
+// entertainer: marker.social.extroversion, marker.lifestyle.spontaneity
+// sage: marker.cognition.system_thinking, marker.eq.self_awareness
+// caretaker: marker.values.connection, marker.aura.warmth
+// rebel: marker.values.autonomy, marker.social.dominance
+
 export const questions = [
-    {
-        scenario: "Es ist 2 Uhr nachts. Dein Telefon klingelt. Ein Freund.",
-        text: "Was ist dein erster Gedanke?",
-        options: [
-            { text: "Etwas ist passiert. Ich bin wach.", scores: { harbor: 3, stability: 2 }, vibe: "🛡️", psyche_markers: { structure: 0.8, connection: 0.6 } },
-            { text: "Hoffentlich was Lustiges. Ich nehme ab.", scores: { fire: 2, bridge: 1 }, vibe: "🎉", psyche_markers: { emergence: 0.9, connection: 0.7 } },
-            { text: "Ob alles okay ist? Ich mache mir Sorgen.", scores: { harbor: 2, compass: 1 }, vibe: "💭", psyche_markers: { connection: 0.9, depth: 0.5 } },
-            { text: "Das muss wichtig sein. Sonst würden sie nicht anrufen.", scores: { truth: 2, stability: 1 }, vibe: "🎯", psyche_markers: { structure: 0.7, depth: 0.4 } }
-        ]
-    },
-    {
-        scenario: "Eine Freundin erzählt von ihrer schlechten Beziehung. Zum fünften Mal.",
-        text: "Was tust du?",
-        options: [
-            { text: "Zuhören. So oft sie es braucht.", scores: { harbor: 3, stability: 1 }, vibe: "👂" },
-            { text: "Ehrlich sein: 'Du weißt was du tun musst.'", scores: { truth: 3, compass: 1 }, vibe: "🪞" },
-            { text: "Ablenken. Sie braucht Pause vom Grübeln.", scores: { fire: 2, bridge: 1 }, vibe: "🌈" },
-            { text: "Fragen stellen, die sie selbst zur Antwort führen.", scores: { compass: 3, truth: 1 }, vibe: "🧭" }
-        ]
-    },
-    {
-        scenario: "Gruppenurlaub. Niemand trifft eine Entscheidung wo es hingeht.",
-        text: "Dein Move?",
-        options: [
-            { text: "Drei Optionen vorstellen. Abstimmung. Fertig.", scores: { compass: 3, bridge: 1 }, vibe: "📋" },
-            { text: "Vorschlag machen und Energie reinbringen: 'Das wird episch!'", scores: { fire: 3, bridge: 1 }, vibe: "🔥" },
-            { text: "Vermitteln zwischen den verschiedenen Wünschen.", scores: { bridge: 3 }, vibe: "🤝" },
-            { text: "Warten. Irgendwer wird's schon regeln. Ich bin flexibel.", scores: { stability: 2, harbor: 1 }, vibe: "🌿" }
-        ]
-    },
-    {
-        scenario: "Jemand, den du magst, macht einen offensichtlichen Fehler.",
-        text: "Wie reagierst du?",
-        options: [
-            { text: "Direkt ansprechen. Lieber unbequem als unehrlich.", scores: { truth: 3, compass: 1 }, vibe: "⚡" },
-            { text: "Warten bis sie selbst drauf kommen. Ich bin da wenn sie reden wollen.", scores: { harbor: 2, stability: 2 }, vibe: "🌙" },
-            { text: "Vorsichtig Fragen stellen, die zum Nachdenken anregen.", scores: { compass: 3, bridge: 1 }, vibe: "💬" },
-            { text: "Mit Humor darauf hinweisen. Leichtigkeit hilft mehr als Belehrung.", scores: { fire: 2, bridge: 2 }, vibe: "😄" }
-        ]
-    },
-    {
-        scenario: "Ein Freund zweifelt an sich. 'Ich kann das nicht.'",
-        text: "Deine Antwort?",
-        options: [
-            { text: "'Doch, kannst du. Ich glaube an dich.' Punkt.", scores: { stability: 3, harbor: 1 }, vibe: "💪" },
-            { text: "'Was genau macht dir Angst?' Ursache finden.", scores: { compass: 3, truth: 1 }, vibe: "🔍" },
-            { text: "'Erinnerst du dich, als du X geschafft hast? Same energy.'", scores: { fire: 2, compass: 1 }, vibe: "⭐" },
-            { text: "Erstmal da sein. Manchmal braucht man keine Worte.", scores: { harbor: 3 }, vibe: "🫂" }
-        ]
-    },
-    {
-        scenario: "Stell dir vor: Deine engsten Menschen beschreiben dich, wenn du nicht im Raum bist.",
-        text: "Welchen Satz hörst du am wahrscheinlichsten?",
-        options: [
-            { text: "'Bei ihr/ihm fühl ich mich sicher.'", scores: { harbor: 3, stability: 2 }, vibe: "🏠" },
-            { text: "'Sie/Er sagt dir die Wahrheit, auch wenn's wehtut.'", scores: { truth: 3, compass: 1 }, vibe: "💎" },
-            { text: "'Mit ihr/ihm wird's nie langweilig.'", scores: { fire: 3, bridge: 1 }, vibe: "✨" },
-            { text: "'Sie/Er bringt Menschen zusammen.'", scores: { bridge: 3, fire: 1 }, vibe: "🌉" },
-            { text: "'Wenn ich nicht weiter weiß, frag ich sie/ihn.'", scores: { compass: 3, stability: 1 }, vibe: "🧭" }
-        ]
-    },
-    {
-        scenario: "Konflikt in der Freundesgruppe. Zwei Seiten. Du stehst in der Mitte.",
-        text: "Deine natürliche Reaktion?",
-        options: [
-            { text: "Vermitteln. Beide Seiten haben einen Punkt.", scores: { bridge: 3, compass: 1 }, vibe: "⚖️" },
-            { text: "Klare Kante zeigen, wenn einer eindeutig falsch liegt.", scores: { truth: 3, stability: 1 }, vibe: "🎯" },
-            { text: "Raushalten, aber da sein wenn jemand reden will.", scores: { harbor: 2, stability: 2 }, vibe: "🌊" },
-            { text: "Die Stimmung auflockern. Humor hilft.", scores: { fire: 2, bridge: 2 }, vibe: "🌈" }
-        ]
-    },
-    {
-        scenario: "Jemand, der dich kaum kennt, fragt einen gemeinsamen Freund über dich.",
-        text: "Was glaubst du, wird gesagt?",
-        options: [
-            { text: "'Absolut verlässlich. Fels in der Brandung.'", scores: { stability: 3, harbor: 1 }, vibe: "🪨" },
-            { text: "'Brutal ehrlich, aber auf eine gute Art.'", scores: { truth: 3, compass: 1 }, vibe: "🔮" },
-            { text: "'Bringt gute Energie mit. Macht Spaß.'", scores: { fire: 3, bridge: 1 }, vibe: "☀️" },
-            { text: "'Versteht Menschen. Guter Zuhörer.'", scores: { harbor: 2, bridge: 2 }, vibe: "💫" },
-            { text: "'Hat immer gute Ratschläge.'", scores: { compass: 3 }, vibe: "💡" }
-        ]
-    },
-    {
-        scenario: "Du merkst: Ein Freund hat sich verändert. Zieht sich zurück. Etwas stimmt nicht.",
-        text: "Was tust du?",
-        options: [
-            { text: "Direkt fragen: 'Hey, was ist los? Rede mit mir.'", scores: { truth: 2, harbor: 2 }, vibe: "💬" },
-            { text: "Präsent bleiben ohne Druck. Da sein, wenn sie bereit sind.", scores: { harbor: 3, stability: 1 }, vibe: "🌙" },
-            { text: "Aktivität vorschlagen. Rausbringen. Bewegung hilft.", scores: { fire: 2, compass: 1 }, vibe: "🚀" },
-            { text: "Mit anderen absprechen, ob sie auch was bemerkt haben.", scores: { bridge: 2, compass: 2 }, vibe: "🔗" }
-        ]
-    },
-    {
-        scenario: "Letzte Frage. Sei ehrlich.",
-        text: "Was brauchst DU am meisten von anderen?",
-        options: [
-            { text: "Dass sie genauso für mich da sind, wie ich für sie.", scores: { harbor: 2, stability: 2 }, vibe: "♾️" },
-            { text: "Ehrlichkeit. Auch wenn's unbequem ist.", scores: { truth: 3, compass: 1 }, vibe: "💎" },
-            { text: "Jemanden, der meine Energie matcht.", scores: { fire: 3, bridge: 1 }, vibe: "⚡" },
-            { text: "Raum zum Atmen. Und Wissen, dass sie da sind.", scores: { stability: 2, harbor: 1 }, vibe: "🌬️" },
-            { text: "Menschen, die mich verstehen ohne viele Worte.", scores: { bridge: 2, harbor: 2 }, vibe: "🤝" }
-        ]
-    }
+  {
+    id: "q1",
+    scenario: "Eine Gruppe muss entscheiden, wohin es geht...",
+    text: "Wie verhältst du dich?",
+    options: [
+      { 
+        id: "q1_a", 
+        text: "Ich mache einen klaren Vorschlag", 
+        scores: { leadership: 5, expression: 3 },
+        markers: [{ id: "marker.social.dominance", weight: 0.1 }]
+      },
+      { 
+        id: "q1_b", 
+        text: "Ich frage, was alle wollen", 
+        scores: { harmony: 5, support: 3 },
+        markers: [{ id: "marker.values.connection", weight: 0.1 }]
+      },
+      { 
+        id: "q1_c", 
+        text: "Ich mache einen Witz und lockere die Stimmung", 
+        scores: { expression: 5, harmony: 2 },
+        markers: [{ id: "marker.lifestyle.spontaneity", weight: 0.1 }]
+      },
+      { 
+        id: "q1_d", 
+        text: "Ich beobachte erstmal, was die anderen denken", 
+        scores: { support: 2, harmony: 2 },
+        markers: [{ id: "marker.cognition.system_thinking", weight: 0.05 }]
+      }
+    ]
+  },
+  {
+    id: "q2",
+    scenario: "Jemand in der Gruppe wirkt traurig...",
+    text: "Deine natürliche Reaktion?",
+    options: [
+      { 
+        id: "q2_a", 
+        text: "Ich spreche die Person direkt und einfühlsam an", 
+        scores: { support: 5, harmony: 4 },
+        markers: [{ id: "marker.aura.warmth", weight: 0.1 }]
+      },
+      { 
+        id: "q2_b", 
+        text: "Ich versuche, sie aufzuheitern", 
+        scores: { expression: 4, support: 3 },
+        markers: [{ id: "marker.aura.warmth", weight: 0.05 }]
+      },
+      { 
+        id: "q2_c", 
+        text: "Ich schaffe Raum, falls sie reden möchte", 
+        scores: { harmony: 4, support: 4 },
+        markers: [{ id: "marker.eq.empathy", weight: 0.1 }]
+      },
+      { 
+        id: "q2_d", 
+        text: "Ich nehme es wahr, aber warte ab", 
+        scores: { leadership: 1, harmony: 2 },
+        markers: [{ id: "marker.social.reserve", weight: 0.05 }]
+      }
+    ]
+  },
+  {
+    id: "q3",
+    scenario: "Die Stimmung kippt – es gibt Streit...",
+    text: "Wie reagierst du?",
+    options: [
+      { 
+        id: "q3_a", 
+        text: "Ich greife ein und moderiere", 
+        scores: { leadership: 5, harmony: 4 },
+        markers: [{ id: "marker.social.dominance", weight: 0.1 }] 
+      },
+      { 
+        id: "q3_b", 
+        text: "Ich versuche, die Wogen zu glätten", 
+        scores: { harmony: 5, support: 3 },
+        markers: [{ id: "marker.eq.social_skill", weight: 0.1 }] 
+      },
+      { 
+        id: "q3_c", 
+        text: "Ich mische mich nicht ein – nicht mein Kampf", 
+        scores: { expression: 1, leadership: 0 },
+        markers: [{ id: "marker.values.autonomy", weight: 0.05 }]
+      },
+      { 
+        id: "q3_d", 
+        text: "Ich unterstütze, wen ich für im Recht halte", 
+        scores: { leadership: 3, expression: 2 },
+        markers: [{ id: "marker.values.security", weight: 0.05 }]
+      }
+    ]
+  },
+  {
+    id: "q4",
+    scenario: "Auf einer Party bist du...",
+    text: "Was beschreibt dich am besten?",
+    options: [
+      { 
+        id: "q4_a", 
+        text: "Der, der die Leute zusammenbringt", 
+        scores: { harmony: 5, leadership: 3 },
+        markers: [{ id: "marker.eq.social_skill", weight: 0.1 }]
+      },
+      { 
+        id: "q4_b", 
+        text: "Der, der alle zum Lachen bringt", 
+        scores: { expression: 5, harmony: 2 },
+        markers: [{ id: "marker.social.extroversion", weight: 0.1 }]
+      },
+      { 
+        id: "q4_c", 
+        text: "Der, der tiefe Gespräche führt", 
+        scores: { support: 4, harmony: 3 },
+        markers: [{ id: "marker.love.attachment_secure", weight: 0.05 }]
+      },
+      { 
+        id: "q4_d", 
+        text: "Der, der organisiert, dass alles läuft", 
+        scores: { leadership: 5, support: 2 },
+        markers: [{ id: "marker.values.security", weight: 0.1 }]
+      }
+    ]
+  },
+  {
+    id: "q5",
+    scenario: "In einem Team-Projekt...",
+    text: "Welche Rolle übernimmst du automatisch?",
+    options: [
+      { 
+        id: "q5_a", 
+        text: "Der mit dem Plan – ich strukturiere", 
+        scores: { leadership: 5, support: 2 },
+        markers: [{ id: "marker.cognition.system_thinking", weight: 0.1 }]
+      },
+      { 
+        id: "q5_b", 
+        text: "Der Motivator – ich halte die Stimmung hoch", 
+        scores: { expression: 4, harmony: 4 },
+        markers: [{ id: "marker.eq.motivation", weight: 0.1 }]
+      },
+      { 
+        id: "q5_c", 
+        text: "Der Zuhörer – ich sammle alle Meinungen", 
+        scores: { harmony: 5, support: 4 },
+        markers: [{ id: "marker.eq.empathy", weight: 0.1 }]
+      },
+      { 
+        id: "q5_d", 
+        text: "Der Macher – ich setze um", 
+        scores: { leadership: 3, expression: 2 },
+        markers: [{ id: "marker.values.achievement", weight: 0.1 }]
+      }
+    ]
+  },
+  {
+    id: "q6",
+    scenario: "Du hast eine unpopuläre Meinung...",
+    text: "Wie gehst du damit um?",
+    options: [
+      { 
+        id: "q6_a", 
+        text: "Ich sage sie trotzdem – Ehrlichkeit zählt", 
+        scores: { leadership: 4, expression: 4 },
+        markers: [{ id: "marker.introversion", weight: 0.05 }] // Fallback/Correction
+      },
+      { 
+        id: "q6_b", 
+        text: "Ich warte auf den richtigen Moment", 
+        scores: { harmony: 3, leadership: 2 },
+        markers: [{ id: "marker.eq.self_regulation", weight: 0.05 }]
+      },
+      { 
+        id: "q6_c", 
+        text: "Ich verpacke sie humorvoll", 
+        scores: { expression: 5, harmony: 3 },
+        markers: [{ id: "marker.eq.social_skill", weight: 0.05 }]
+      },
+      { 
+        id: "q6_d", 
+        text: "Ich behalte sie für mich – Frieden ist wichtiger", 
+        scores: { harmony: 5, support: 2 },
+        markers: [{ id: "marker.values.conformity", weight: 0.1 }]
+      }
+    ]
+  },
+  {
+    id: "q7",
+    scenario: "Ein Freund braucht einen Rat...",
+    text: "Wie hilfst du?",
+    options: [
+      { 
+        id: "q7_a", 
+        text: "Ich höre zu und stelle Fragen", 
+        scores: { support: 5, harmony: 4 },
+        markers: [{ id: "marker.eq.empathy", weight: 0.1 }]
+      },
+      { 
+        id: "q7_b", 
+        text: "Ich sage klar, was ich denke", 
+        scores: { leadership: 4, expression: 3 },
+        markers: [{ id: "marker.social.dominance", weight: 0.05 }]
+      },
+      { 
+        id: "q7_c", 
+        text: "Ich teile ähnliche Erfahrungen", 
+        scores: { harmony: 4, expression: 3 },
+        markers: [{ id: "marker.love.attachment_secure", weight: 0.05 }]
+      },
+      { 
+        id: "q7_d", 
+        text: "Ich lenke ab, um den Kopf freizubekommen", 
+        scores: { expression: 4, support: 2 },
+        markers: [{ id: "marker.lifestyle.spontaneity", weight: 0.05 }]
+      }
+    ]
+  },
+  {
+    id: "q8",
+    scenario: "Du kommst in eine neue Gruppe...",
+    text: "Wie findest du deinen Platz?",
+    options: [
+      { 
+        id: "q8_a", 
+        text: "Ich beobachte und passe mich an", 
+        scores: { harmony: 4, support: 3 },
+        markers: [{ id: "marker.social.introversion", weight: 0.1 }]
+      },
+      { 
+        id: "q8_b", 
+        text: "Ich stelle mich vor und bringe mich ein", 
+        scores: { expression: 4, leadership: 4 },
+        markers: [{ id: "marker.social.extroversion", weight: 0.1 }]
+      },
+      { 
+        id: "q8_c", 
+        text: "Ich suche mir einen Gesprächspartner", 
+        scores: { support: 4, harmony: 4 },
+        markers: [{ id: "marker.love.attachment_secure", weight: 0.05 }]
+      },
+      { 
+        id: "q8_d", 
+        text: "Ich schaue, wo ich helfen kann", 
+        scores: { support: 5, harmony: 3 },
+        markers: [{ id: "marker.values.connection", weight: 0.05 }]
+      }
+    ]
+  },
+  {
+    id: "q9",
+    scenario: "Die Gruppe ist ratlos...",
+    text: "Was ist dein Impuls?",
+    options: [
+      { 
+        id: "q9_a", 
+        text: "Ich übernehme und gebe Richtung vor", 
+        scores: { leadership: 5, expression: 3 },
+        markers: [{ id: "marker.social.dominance", weight: 0.1 }]
+      },
+      { 
+        id: "q9_b", 
+        text: "Ich sammle Ideen von allen", 
+        scores: { harmony: 5, support: 4 },
+        markers: [{ id: "marker.eq.social_skill", weight: 0.1 }]
+      },
+      { 
+        id: "q9_c", 
+        text: "Ich mache einen unkonventionellen Vorschlag", 
+        scores: { expression: 5, leadership: 2 },
+        markers: [{ id: "marker.skills.creativity", weight: 0.1 }]
+      },
+      { 
+        id: "q9_d", 
+        text: "Ich unterstütze, wer sich traut", 
+        scores: { support: 5, harmony: 3 },
+        markers: [{ id: "marker.values.connection", weight: 0.05 }]
+      }
+    ]
+  },
+  {
+    id: "q10",
+    scenario: "Was macht dich in Gruppen wertvoll?",
+    text: "Wähle deine Superpower:",
+    options: [
+      { 
+        id: "q10_a", 
+        text: "Ich bringe Struktur und Klarheit", 
+        scores: { leadership: 5, harmony: 2 },
+        markers: [{ id: "marker.cognition.system_thinking", weight: 0.1 }]
+      },
+      { 
+        id: "q10_b", 
+        text: "Ich verbinde Menschen miteinander", 
+        scores: { harmony: 5, support: 4 },
+        markers: [{ id: "marker.values.connection", weight: 0.1 }]
+      },
+      { 
+        id: "q10_c", 
+        text: "Ich bringe Energie und gute Laune", 
+        scores: { expression: 5, harmony: 3 },
+        markers: [{ id: "marker.social.extroversion", weight: 0.1 }]
+      },
+      { 
+        id: "q10_d", 
+        text: "Ich sorge dafür, dass sich alle wohlfühlen", 
+        scores: { support: 5, harmony: 4 },
+        markers: [{ id: "marker.aura.warmth", weight: 0.1 }]
+      }
+    ]
+  }
 ];
 
-export const roles = {
-    rock: {
-        name: "DER FELS",
-        tagline: "In dir finden andere Boden unter den Füßen.",
-        description: "Wenn alles wackelt, stehst du. Nicht weil dir nichts anhaben kann – sondern weil du weißt: Jemand muss der Ruhepol sein. Menschen kommen zu dir, wenn die Welt zu laut wird. Nicht für Ratschläge. Für Ruhe.",
-        superpower: "Stabilität in Chaos bringen",
-        shadow: "Du trägst oft mehr als du zeigst",
-        ingredients: [["85", "Verlässlichkeit"], ["70", "Innere Ruhe"], ["60", "Stille Stärke"]],
-        compatible: "Die Flamme • Der Hafen",
-        challenging: "Der Spiegel",
-        gradient: "from-slate-500 to-zinc-600",
-        emoji: "🪨"
-    },
-    flame: {
-        name: "DIE FLAMME",
-        tagline: "Du bringst Licht in Räume, die es vergessen haben.",
-        description: "Wo du bist, ist Energie. Nicht die laute Art – die ansteckende. Du erinnerst Menschen daran, dass das Leben auch leicht sein darf. Dass Lachen eine Form von Mut ist.",
-        superpower: "Menschen aus ihrer Schwere holen",
-        shadow: "Wer trägt dich, wenn du selbst schwer wirst?",
-        ingredients: [["90", "Lebensenergie"], ["75", "Spontanität"], ["65", "Ansteckende Freude"]],
-        compatible: "Der Fels • Die Brücke",
-        challenging: "Der Kompass",
-        gradient: "from-orange-500 to-amber-500",
-        emoji: "🔥"
-    },
-    mirror: {
-        name: "DER SPIEGEL",
-        tagline: "Du zeigst Menschen, wer sie wirklich sind.",
-        description: "Bullshit hat bei dir keine Chance. Nicht weil du hart bist – weil du ehrlich bist. Menschen kommen zu dir, wenn sie die Wahrheit brauchen, nicht Bestätigung.",
-        superpower: "Klarheit schenken durch Wahrheit",
-        shadow: "Nicht jeder ist bereit für deinen Blick",
-        ingredients: [["95", "Direktheit"], ["80", "Klarsicht"], ["60", "Unbequeme Ehrlichkeit"]],
-        compatible: "Der Kompass • Der Fels",
-        challenging: "Der Hafen",
-        gradient: "from-cyan-500 to-blue-600",
-        emoji: "🪞"
-    },
-    harbor: {
-        name: "DER HAFEN",
-        tagline: "Bei dir kann man anlegen. Ohne Erklärung.",
-        description: "Du bist der Ort, an dem Menschen sein dürfen, wie sie sind. Keine Masken nötig. Du urteilst nicht, du bist da. Menschen verlassen dich leichter, als sie kamen.",
-        superpower: "Bedingungsloser Raum für andere sein",
-        shadow: "Du vergisst manchmal, dass du auch Hafen brauchst",
-        ingredients: [["90", "Akzeptanz"], ["85", "Präsenz"], ["70", "Emotionale Sicherheit"]],
-        compatible: "Der Spiegel • Die Flamme",
-        challenging: "Die Brücke",
-        gradient: "from-teal-500 to-emerald-600",
-        emoji: "⚓"
-    },
-    compass: {
-        name: "DER KOMPASS",
-        tagline: "Du hilfst anderen, ihren Weg zu finden.",
-        description: "Menschen kommen zu dir, wenn sie sich verirrt haben. Nicht für Anweisungen – für Orientierung. Du siehst Muster, wo andere nur Chaos sehen.",
-        superpower: "Richtung geben ohne zu bestimmen",
-        shadow: "Wer zeigt dir den Weg, wenn du suchst?",
-        ingredients: [["85", "Weisheit"], ["80", "Geduld"], ["75", "Strategisches Denken"]],
-        compatible: "Der Spiegel • Der Hafen",
-        challenging: "Die Flamme",
-        gradient: "from-violet-500 to-purple-600",
-        emoji: "🧭"
-    },
-    bridge: {
-        name: "DIE BRÜCKE",
-        tagline: "Du verbindest Menschen, die sich sonst nie gefunden hätten.",
-        description: "Du bist der Grund, warum Fremde Freunde werden. Du siehst, wer zu wem passt. In jeder Gruppe bist du der soziale Klebstoff.",
-        superpower: "Unsichtbare Verbindungen sichtbar machen",
-        shadow: "Du vergisst dich selbst über dem Verbinden",
-        ingredients: [["90", "Soziale Intelligenz"], ["80", "Empathie"], ["70", "Menschenkenntnis"]],
-        compatible: "Die Flamme • Der Kompass",
-        challenging: "Der Fels",
-        gradient: "from-pink-500 to-rose-600",
-        emoji: "🌉"
-    }
-};
+export const profiles = [
+  {
+    id: "leader",
+    title: "Der Anführer",
+    icon: "👑",
+    tagline: "Du gibst Richtung, wenn andere zögern.",
+    description: "Du bist der natürliche Pol, um den sich Gruppen ordnen. Nicht weil du dich aufdrängst, sondern weil andere in dir die Klarheit finden, die sie suchen. Du triffst Entscheidungen, wenn alle anderen noch diskutieren.",
+    stats: [
+      { label: "Führungsinstinkt", value: 95 },
+      { label: "Entscheidungsfreude", value: 92 },
+      { label: "Präsenz", value: 89 },
+      { label: "Geduld", value: 45 }
+    ],
+    compatibility: { allies: ["connector", "caretaker"], nemesis: "rebel" },
+    share_text: "👑 Meine soziale Rolle: Der Anführer – ich gebe Richtung, wenn andere zögern.",
+    // Registry Mapping for Result
+    markers: [
+        { id: "marker.social.dominance", weight: 0.5 },
+        { id: "marker.values.achievement", weight: 0.3 }
+    ]
+  },
+  {
+    id: "connector",
+    title: "Der Brückenbauer",
+    icon: "🌉",
+    tagline: "Du webst das unsichtbare Netz, das alle verbindet.",
+    description: "Du bist der soziale Klebstoff. Du merkst, wer sich unwohl fühlt, wer ausgegrenzt wird, und du baust Brücken. Ohne dich würden Gruppen in Einzelteile zerfallen.",
+    stats: [
+      { label: "Empathie", value: 97 },
+      { label: "Netzwerk-Instinkt", value: 94 },
+      { label: "Konfliktlösung", value: 89 },
+      { label: "Durchsetzung", value: 42 }
+    ],
+    compatibility: { allies: ["leader", "caretaker"], nemesis: "rebel" },
+    share_text: "🌉 Meine soziale Rolle: Der Brückenbauer – ich verbinde Menschen.",
+    markers: [
+        { id: "marker.eq.empathy", weight: 0.5 },
+        { id: "marker.values.connection", weight: 0.4 }
+    ]
+  },
+  {
+    id: "entertainer",
+    title: "Der Entertainer",
+    icon: "🎭",
+    tagline: "Du bringst Licht, wo andere Dunkelheit sehen.",
+    description: "Du bist die Energie im Raum. Du spürst, wann die Stimmung kippt, und du weißt, wie du sie drehst. Dein Humor ist keine Flucht – er ist Medizin für die Seele der Gruppe.",
+    stats: [
+      { label: "Charisma", value: 96 },
+      { label: "Timing", value: 93 },
+      { label: "Spontanität", value: 95 },
+      { label: "Tiefgang", value: 48 }
+    ],
+    compatibility: { allies: ["connector", "sage"], nemesis: "caretaker" },
+    share_text: "🎭 Meine soziale Rolle: Der Entertainer – ich bringe Energie und Freude.",
+    markers: [
+        { id: "marker.social.extroversion", weight: 0.6 },
+        { id: "marker.lifestyle.spontaneity", weight: 0.3 }
+    ]
+  },
+  {
+    id: "sage",
+    title: "Der Weise",
+    icon: "📚",
+    tagline: "Du siehst, was anderen verborgen bleibt.",
+    description: "Du bist der ruhende Pol. Während andere reagieren, beobachtest du. Und wenn du sprichst, hören alle zu – weil sie wissen, dass deine Worte Gewicht haben.",
+    stats: [
+      { label: "Beobachtungsgabe", value: 97 },
+      { label: "Weisheit", value: 94 },
+      { label: "Geduld", value: 96 },
+      { label: "Smalltalk", value: 35 }
+    ],
+    compatibility: { allies: ["leader", "caretaker"], nemesis: "entertainer" },
+    share_text: "📚 Meine soziale Rolle: Der Weise – ich sehe, was anderen verborgen bleibt.",
+    markers: [
+        { id: "marker.cognition.system_thinking", weight: 0.4 },
+        { id: "marker.eq.self_awareness", weight: 0.4 }
+    ]
+  },
+  {
+    id: "caretaker",
+    title: "Der Hüter",
+    icon: "🛡️",
+    tagline: "Du sorgst dafür, dass niemand zurückbleibt.",
+    description: "Du bist das Herz der Gruppe. Du merkst, wer Hunger hat, wer müde ist, wer Unterstützung braucht. Deine Fürsorge ist keine Schwäche – sie ist die Grundlage, auf der alles andere gedeiht.",
+    stats: [
+      { label: "Fürsorge", value: 98 },
+      { label: "Aufmerksamkeit", value: 95 },
+      { label: "Verlässlichkeit", value: 94 },
+      { label: "Selbstpriorisierung", value: 32 }
+    ],
+    compatibility: { allies: ["leader", "connector"], nemesis: "rebel" },
+    share_text: "🛡️ Meine soziale Rolle: Der Hüter – ich sorge für alle.",
+    markers: [
+        { id: "marker.values.connection", weight: 0.4 },
+        { id: "marker.aura.warmth", weight: 0.4 }
+    ]
+  },
+  {
+    id: "rebel",
+    title: "Der Rebell",
+    icon: "🔥",
+    tagline: "Du hinterfragst, was alle akzeptieren.",
+    description: "Du bist der notwendige Störfaktor. Du sagst, was andere denken, aber nicht aussprechen. Gruppen brauchen dich – auch wenn sie es nicht immer zugeben.",
+    stats: [
+      { label: "Unabhängigkeit", "value": 97 },
+      { label: "Ehrlichkeit", "value": 94 },
+      { label: "Mut", "value": 96 },
+      { label: "Diplomatie", "value": 28 }
+    ],
+    compatibility: { allies: ["sage", "entertainer"], nemesis: "caretaker" },
+    share_text: "🔥 Meine soziale Rolle: Der Rebell – ich sage, was andere denken.",
+    markers: [
+        { id: "marker.values.autonomy", weight: 0.6 },
+        { id: "marker.social.dominance", weight: 0.2 }
+    ]
+  }
+];
+
+export const profileNames = Object.fromEntries(profiles.map(p => [p.id, p.title]));

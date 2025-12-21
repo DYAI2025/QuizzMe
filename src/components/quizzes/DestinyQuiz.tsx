@@ -1,9 +1,10 @@
+
 'use client'
 
 import React, { useState } from 'react';
-import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
-import { updatePsycheState } from '../../lib/lme/lme-core';
-import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
+// import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
+// import { updatePsycheState } from '../../lib/lme/lme-core';
+// import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
 
 const DestinyQuiz = () => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -16,6 +17,7 @@ const DestinyQuiz = () => {
     const [showResult, setShowResult] = useState(false);
     const [fadeIn, setFadeIn] = useState(true);
     const [started, setStarted] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
 
     const questions = [
@@ -29,6 +31,8 @@ const DestinyQuiz = () => {
                 { text: "An ein Gefühl, das ich nicht benennen kann – aber es zieht", scores: { innerCall: 3, vision: 1 }, psyche_markers: { depth: 1.0, shadow: 0.7 } },
             ]
         },
+        // ... (truncated questions for brevity in memory but actual file should have all. 
+        // Note: I am rewriting carefully. I will include ALL questions from previous view to safeguard.)
         {
             id: 2,
             text: "Du stößt auf massiven Widerstand gegen deine Idee. Was passiert in dir?",
@@ -123,6 +127,7 @@ const DestinyQuiz = () => {
 
     const profiles = {
         auserwaehlte: {
+            id: "auserwaehlte",
             name: "Der Auserwählte",
             subtitle: "Du bist nicht hier, um das Spiel zu spielen. Du bist hier, um die Regeln zu schreiben.",
             description: "In dir brennt etwas, das sich nicht erklären lässt – ein unbeirrbares Wissen, dass dein Leben für etwas Größeres bestimmt ist. Du siehst weiter als andere, hältst länger durch als andere, und Menschen spüren in deiner Gegenwart, dass du anders bist. Nicht besser. Anders. Als wärst du für eine Aufgabe geboren, die noch niemand definiert hat.",
@@ -132,6 +137,7 @@ const DestinyQuiz = () => {
             affirmation: "Ich bin bereit, den Weg zu gehen, der sich erst beim Gehen zeigt."
         },
         architekt: {
+            id: "architekt",
             name: "Der stille Architekt",
             subtitle: "Du baust Kathedralen, deren Vollendung du nie sehen wirst – und das ist okay.",
             description: "Deine Größe liegt nicht in Applaus, sondern in Wirkung. Du denkst in Jahrzehnten, während andere in Quartalen planen. Du legst Fundamente, pflanzt Samen, konstruierst Systeme – nicht für Ruhm, sondern weil du verstehst, dass wahre Veränderung Zeit braucht. Dein Name wird vielleicht nie in Neonlichtern stehen. Aber dein Werk wird Generationen überdauern.",
@@ -141,6 +147,7 @@ const DestinyQuiz = () => {
             affirmation: "Ich baue für die Ewigkeit, nicht für das Ego."
         },
         katalysator: {
+            id: "katalysator",
             name: "Der Katalysator",
             subtitle: "Du veränderst nicht durch Tun, sondern durch Sein.",
             description: "Deine Superkraft ist nicht Vision oder Ausdauer – es ist Transformation durch Präsenz. Menschen verändern sich in deiner Nähe. Gespräche mit dir werden zu Wendepunkten. Du musst keine Bewegung gründen; du BIST eine Bewegung. Jeder Raum, den du betrittst, ist danach nicht mehr derselbe. Das ist keine Technik. Es ist, wer du bist.",
@@ -150,6 +157,7 @@ const DestinyQuiz = () => {
             affirmation: "Mein Licht wird nicht weniger, wenn ich es teile – es wird mehr."
         },
         seher: {
+            id: "seher",
             name: "Der Seher",
             subtitle: "Du erkennst Wahrheiten, für die die Welt noch nicht bereit ist.",
             description: "Du lebst zeitversetzt. Was du heute siehst, verstehen andere in fünf Jahren. Das macht dich manchmal einsam, oft missverstanden, aber immer wertvoll. Dein Blick durchdringt Oberflächen, erkennt Muster, die sich erst formen. Du bist kein Prophet im mystischen Sinne – du bist einfach jemandem, der die Verbindungen sieht, bevor sie sichtbar werden.",
@@ -159,6 +167,7 @@ const DestinyQuiz = () => {
             affirmation: "Ich vertraue dem Bild, das ich sehe, auch wenn andere noch schlafen."
         },
         diamant: {
+            id: "diamant",
             name: "Der ungeschliffene Diamant",
             subtitle: "Das Rohmaterial für Größe ist da. Der Prozess hat begonnen.",
             description: "Du spürst es, oder? Dieses Ziehen. Dieses Wissen, dass da mehr ist. Du bist nicht am Anfang – du bist im Werden. Der Diamant ist bereits da, unter der Oberfläche. Was noch fehlt, ist nicht Potenzial, sondern Druck, Zeit und die richtigen Umstände. Dein Moment kommt nicht irgendwann. Er formt sich gerade. Mit jeder Entscheidung, die du triffst.",
@@ -171,31 +180,29 @@ const DestinyQuiz = () => {
 
     const getProfile = () => {
         const { vision, resilience, magnetism, innerCall } = scores;
-
-        // Simple logic based on max score, can be refined.
         if (innerCall >= 18 && vision >= 15 && resilience >= 12) return profiles.auserwaehlte;
         if (vision >= 18 && resilience >= 12 && magnetism < 12) return profiles.architekt;
         if (magnetism >= 16 && (innerCall >= 10 || resilience >= 10)) return profiles.katalysator;
         if (vision >= 16 && innerCall >= 14 && magnetism < 14) return profiles.seher;
-
         return profiles.diamant;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleAnswer = (option: any) => {
         setFadeIn(false);
 
         setTimeout(() => {
             const newScores = { ...scores };
-            // @ts-ignore
             Object.entries(option.scores).forEach(([key, value]) => {
-                // @ts-ignore
+                // @ts-expect-error simple key access
                 newScores[key] += value;
             });
             setScores(newScores);
 
-            // Collect markers
             const newMarkers = [...collectedMarkers];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if ((option as any).psyche_markers) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 newMarkers.push((option as any).psyche_markers);
                 setCollectedMarkers(newMarkers);
             }
@@ -203,17 +210,45 @@ const DestinyQuiz = () => {
             if (currentQuestion < questions.length - 1) {
                 setCurrentQuestion(currentQuestion + 1);
             } else {
-                // LME Update on finish
-                if (newMarkers.length > 0) {
+                const finalProfile = getProfile();
+
+                import('../../lib/lme/ingestion').then(({ ingestContribution }) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const explicitMarkers: any[] = newMarkers || [];
+
+                    const event = {
+                        specVersion: "sp.contribution.v1" as const,
+                        eventId: crypto.randomUUID(),
+                        occurredAt: new Date().toISOString(),
+                        source: {
+                            vertical: "quiz" as const,
+                            moduleId: "quiz.destiny.v1",
+                            domain: window.location.hostname
+                        },
+                        payload: {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            markers: explicitMarkers.flatMap((m: any) =>
+                                Object.entries(m).map(([k, v]) => ({ id: `marker.psyche.${k}`, weight: v as number }))
+                            ),
+                            traits: [
+                                { id: `trait.destiny.${finalProfile.id}`, score: 100, confidence: 0.9 }
+                            ],
+                            tags: [{ id: 'tag.destiny.result', label: finalProfile.name, kind: 'misc' as const }],
+                            summary: {
+                                title: `Bestimmung: ${finalProfile.name}`,
+                                bullets: [finalProfile.subtitle],
+                                resultId: finalProfile.id
+                            }
+                        }
+                    };
+
                     try {
-                        const aggregated = aggregateMarkers(newMarkers, 0.6); // 0.6 reliability
-                        const currentPsyche = getPsycheState();
-                        const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
-                        savePsycheState(newPsyche);
+                        ingestContribution(event);
                     } catch (e) {
-                        console.error("LME Update failed", e);
+                        console.error("Ingestion failed", e);
                     }
-                }
+                });
+
                 setShowResult(true);
             }
             setFadeIn(true);
@@ -221,8 +256,6 @@ const DestinyQuiz = () => {
     };
 
     const progress = ((currentQuestion + 1) / questions.length) * 100;
-
-    // Modified Container to fit in shell if needed, but retaining dark theme.
     const containerClass = "min-h-[600px] w-full bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center p-4 rounded-xl shadow-2xl overflow-hidden relative";
 
     if (!started) {
@@ -242,16 +275,14 @@ const DestinyQuiz = () => {
                             10 Fragen. Keine richtigen Antworten. Nur die, die wahr sind.
                         </p>
                     </div>
-
                     <div className="bg-zinc-800/50 backdrop-blur border border-zinc-700/50 rounded-2xl p-6 mb-8 text-left">
                         <p className="text-zinc-300 text-sm leading-relaxed">
                             Dieser Test misst keine Intelligenz, keinen Erfolg, keine Fähigkeit.
                             Er misst etwas anderes: Die Art, wie du denkst, fühlst und durch die Welt gehst.
-                            Manche Menschen sind für bestimmte Wege gemacht. Die Frage ist nicht, ob du "gut genug" bist.
+                            Manche Menschen sind für bestimmte Wege gemacht. Die Frage ist nicht, ob du &quot;gut genug&quot; bist.
                             Die Frage ist: <span className="text-amber-400 font-medium">Hörst du den Ruf?</span>
                         </p>
                     </div>
-
                     <button
                         onClick={() => setStarted(true)}
                         className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl 
@@ -261,7 +292,6 @@ const DestinyQuiz = () => {
                     >
                         Test starten
                     </button>
-
                     <p className="text-zinc-500 text-xs mt-6">
                         Zur Selbstreflexion. Keine Diagnose. Kein Urteil.
                     </p>
@@ -286,12 +316,10 @@ const DestinyQuiz = () => {
                                 {profile.subtitle}
                             </p>
                         </div>
-
                         <div className="bg-zinc-800/50 backdrop-blur border border-zinc-700/50 rounded-2xl p-6 md:p-8 mb-6">
                             <p className="text-zinc-200 text-lg leading-relaxed mb-6">
                                 {profile.description}
                             </p>
-
                             <div className="mb-6">
                                 <h3 className="text-white font-semibold mb-3 text-sm tracking-wide uppercase">Deine Kernmerkmale</h3>
                                 <div className="flex flex-wrap gap-2">
@@ -305,7 +333,6 @@ const DestinyQuiz = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className="border-t border-zinc-700/50 pt-6">
                                 <h3 className="text-amber-400 font-semibold mb-2 text-sm tracking-wide uppercase">Deine Herausforderung</h3>
                                 <p className="text-zinc-300 leading-relaxed">
@@ -316,8 +343,6 @@ const DestinyQuiz = () => {
                                 </p>
                             </div>
                         </div>
-
-                        {/* Score breakdown */}
                         <div className="bg-zinc-800/30 rounded-xl p-4 mb-6">
                             <h4 className="text-zinc-500 text-xs uppercase tracking-wide mb-3">Deine Dimensionen</h4>
                             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -339,7 +364,6 @@ const DestinyQuiz = () => {
                                 </div>
                             </div>
                         </div>
-
                         <div className="flex gap-4">
                             <button
                                 onClick={() => {
@@ -367,7 +391,6 @@ const DestinyQuiz = () => {
                                 Test wiederholen
                             </button>
                         </div>
-
                         <p className="text-zinc-600 text-xs text-center mt-8">
                             Dieser Test dient der Selbstreflexion und Unterhaltung. Er ist keine psychologische Diagnose.
                             <br /><span className="text-amber-500/50">Dein dynamisches Profil wurde aktualisiert.</span>
@@ -383,7 +406,6 @@ const DestinyQuiz = () => {
     return (
         <div className={containerClass}>
             <div className="max-w-2xl w-full">
-                {/* Progress */}
                 <div className="mb-8">
                     <div className="flex justify-between text-xs text-zinc-500 mb-2">
                         <span>Frage {currentQuestion + 1} von {questions.length}</span>
@@ -396,13 +418,10 @@ const DestinyQuiz = () => {
                         />
                     </div>
                 </div>
-
-                {/* Question */}
                 <div className={`transition-all duration-300 ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                     <h2 className="text-2xl md:text-3xl font-semibold text-white mb-8 leading-relaxed">
                         {question.text}
                     </h2>
-
                     <div className="space-y-3">
                         {question.options.map((option, index) => (
                             <button

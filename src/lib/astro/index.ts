@@ -1,0 +1,15 @@
+/**
+ * Astro Module
+ *
+ * Astrological computations and anchor mapping.
+ */
+
+export * from "./compute";
+export {
+  computeBaseScores,
+  isAnchorableTrait,
+  ANCHORABLE_TRAIT_IDS,
+  type ZodiacSign,
+  type ChineseAnimal,
+  type AstroInput,
+} from "@/lib/registry/astro-anchor-map.v1";

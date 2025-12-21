@@ -1,21 +1,8 @@
+
 'use client'
 
 import React, { useState } from 'react';
 import { quizData, profileNames } from './rpg-identity/data';
-
-// Modern Alchemy colors - Dark theme
-const colors = {
-    bgPrimary: '#041726',
-    bgEmerald: '#0D5A5F',
-    goldPrimary: '#D2A95A',
-    goldDark: '#A77D38',
-    sage: '#6CA192',
-    teal: '#1C5B5C',
-    cream: '#F7F0E6',
-    creamDark: '#F2E3CF',
-    textDark: '#271C16',
-    textLight: '#F7F3EA',
-};
 
 type Scores = {
     d1: number;
@@ -23,71 +10,108 @@ type Scores = {
     d3: number;
 };
 
-// Sword icon for intro
-const SwordIcon = () => (
-    <svg viewBox="0 0 120 120" className="w-28 h-28">
-        <circle cx="60" cy="60" r="50" stroke={colors.goldPrimary} strokeWidth="1.5" fill="none" strokeDasharray="4 4" opacity="0.4" />
-        <path d="M60 20 L65 65 L80 70 L65 75 L60 100 L55 75 L40 70 L55 65 Z"
-            stroke={colors.goldPrimary} strokeWidth="1.5" fill={colors.goldPrimary} fillOpacity="0.1" />
-        <circle cx="60" cy="60" r="6" fill={colors.goldPrimary} />
-        <line x1="35" y1="35" x2="85" y2="85" stroke={colors.goldPrimary} strokeWidth="0.5" opacity="0.3" />
-        <line x1="85" y1="35" x2="35" y2="85" stroke={colors.goldPrimary} strokeWidth="0.5" opacity="0.3" />
-    </svg>
-);
-
 export function RpgIdentityQuiz() {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [scores, setScores] = useState<Scores>({ d1: 0, d2: 0, d3: 0 });
     const [showResult, setShowResult] = useState(false);
     const [result, setResult] = useState<typeof quizData.profiles[0] | null>(null);
     const [started, setStarted] = useState(false);
-    const [isAnimating, setIsAnimating] = useState(false);
 
     const calculateResult = (finalScores: Scores) => {
         const d1 = finalScores.d1;
         const d2 = finalScores.d2;
         const d3 = finalScores.d3;
 
+        // Normalize based on max possible score (approximate)
         const maxD1 = 60, maxD2 = 60, maxD3 = 60;
         const d1Pct = d1 / maxD1;
         const d2Pct = d2 / maxD2;
         const d3Pct = d3 / maxD3;
 
-        if (d1Pct > 0.6 && d3Pct > 0.6 && d2Pct > 0.5) return quizData.profiles.find(p => p.id === 'paladin');
-        if (d1Pct < 0.4 && d2Pct < 0.4 && d3Pct < 0.4) return quizData.profiles.find(p => p.id === 'nekromant');
-        if (d1Pct < 0.5 && d2Pct > 0.6) return quizData.profiles.find(p => p.id === 'heiler');
-        if (d1Pct > 0.65 && d2Pct < 0.4) return quizData.profiles.find(p => p.id === 'berserker');
-        if (d3Pct > 0.65 && d1Pct < 0.5) return quizData.profiles.find(p => p.id === 'stratege');
-        if (d3Pct < 0.45 && d1Pct < 0.5) return quizData.profiles.find(p => p.id === 'seher');
+        let foundProfile = quizData.profiles.find(p => p.id === 'paladin'); // default
 
-        if (d1Pct >= 0.5) {
-            return d2Pct >= 0.5 ? quizData.profiles.find(p => p.id === 'paladin') : quizData.profiles.find(p => p.id === 'berserker');
-        } else {
-            return d2Pct >= 0.5 ? quizData.profiles.find(p => p.id === 'heiler') : quizData.profiles.find(p => p.id === 'seher');
+        // Logic from original file
+        if (d1Pct > 0.6 && d3Pct > 0.6 && d2Pct > 0.5) foundProfile = quizData.profiles.find(p => p.id === 'paladin');
+        else if (d1Pct < 0.4 && d2Pct < 0.4 && d3Pct < 0.4) foundProfile = quizData.profiles.find(p => p.id === 'nekromant');
+        else if (d1Pct < 0.5 && d2Pct > 0.6) foundProfile = quizData.profiles.find(p => p.id === 'heiler');
+        else if (d1Pct > 0.65 && d2Pct < 0.4) foundProfile = quizData.profiles.find(p => p.id === 'berserker');
+        else if (d3Pct > 0.65 && d1Pct < 0.5) foundProfile = quizData.profiles.find(p => p.id === 'stratege');
+        else if (d3Pct < 0.45 && d1Pct < 0.5) foundProfile = quizData.profiles.find(p => p.id === 'seher');
+        else {
+            if (d1Pct >= 0.5) {
+                foundProfile = d2Pct >= 0.5 ? quizData.profiles.find(p => p.id === 'paladin') : quizData.profiles.find(p => p.id === 'berserker');
+            } else {
+                foundProfile = d2Pct >= 0.5 ? quizData.profiles.find(p => p.id === 'heiler') : quizData.profiles.find(p => p.id === 'seher');
+            }
         }
+
+        const finalResult = foundProfile || quizData.profiles[0];
+
+        // LME Ingestion
+        import('../../lib/lme/ingestion').then(({ ingestContribution }) => {
+            // Map RPG class to psyche dimensions
+            const mapToDim: Record<string, string> = {
+                paladin: 'structure',
+                nekromant: 'shadow',
+                heiler: 'connection',
+                berserker: 'emergence', // chaotic energy
+                stratege: 'structure',
+                seher: 'depth'
+            };
+            const dim = mapToDim[finalResult.id] || 'structure';
+
+            const event = {
+                specVersion: "sp.contribution.v1" as const,
+                eventId: crypto.randomUUID(),
+                occurredAt: new Date().toISOString(),
+                source: {
+                    vertical: "quiz" as const,
+                    moduleId: "quiz.rpg_identity.v1",
+                    domain: window.location.hostname
+                },
+                payload: {
+                    markers: [
+                        { id: `marker.rpg.${finalResult.id}`, weight: 0.8 },
+                        { id: `marker.psyche.${dim}`, weight: 0.6 }
+                    ],
+                    traits: [
+                        { id: `trait.rpg.class.${finalResult.id}`, score: 100, confidence: 0.8 }
+                    ],
+                    tags: [{ id: 'tag.rpg.result', label: finalResult.title, kind: 'misc' as const }],
+                    summary: {
+                        title: `RPG Klasse: ${finalResult.title}`,
+                        bullets: [finalResult.tagline],
+                        resultId: finalResult.id
+                    }
+                }
+            };
+
+            try {
+                ingestContribution(event);
+            } catch (e) {
+                console.error("Ingestion failed", e);
+            }
+        });
+
+        return finalResult;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleAnswer = (option: any) => {
-        setIsAnimating(true);
-        setTimeout(() => {
-            const newScores = {
-                d1: scores.d1 + (option.scores.d1 || 0),
-                d2: scores.d2 + (option.scores.d2 || 0),
-                d3: scores.d3 + (option.scores.d3 || 0)
-            };
-            setScores(newScores);
+        const newScores = {
+            d1: scores.d1 + (option.scores.d1 || 0),
+            d2: scores.d2 + (option.scores.d2 || 0),
+            d3: scores.d3 + (option.scores.d3 || 0)
+        };
+        setScores(newScores);
 
-            if (currentQuestion < quizData.questions.length - 1) {
-                setCurrentQuestion(currentQuestion + 1);
-                setIsAnimating(false);
-            } else {
-                const finalResult = calculateResult(newScores);
-                // @ts-ignore
-                setResult(finalResult || quizData.profiles[0]);
-                setShowResult(true);
-                setIsAnimating(false);
-            }
-        }, 200);
+        if (currentQuestion < quizData.questions.length - 1) {
+            setCurrentQuestion(currentQuestion + 1);
+        } else {
+            const finalResult = calculateResult(newScores);
+            setResult(finalResult);
+            setShowResult(true);
+        }
     };
 
     const resetQuiz = () => {
@@ -100,68 +124,40 @@ export function RpgIdentityQuiz() {
 
     const progress = ((currentQuestion) / quizData.questions.length) * 100;
 
-    // INTRO SCREEN
     if (!started) {
         return (
-            <div
-                className="min-h-[600px] flex items-center justify-center p-6 rounded-3xl"
-                style={{
-                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
-                    color: colors.textLight
-                }}
-            >
+            <div className="min-h-[600px] bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 text-white p-4 flex items-center justify-center rounded-3xl">
                 <div className="max-w-lg w-full text-center">
-                    <div className="flex justify-center mb-6">
-                        <SwordIcon />
-                    </div>
-
-                    <h1
-                        className="text-3xl font-serif font-semibold mb-3"
-                        style={{ color: colors.goldPrimary }}
-                    >
+                    <div className="text-6xl mb-6">⚔️</div>
+                    <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 bg-clip-text text-transparent">
                         {quizData.meta.title}
                     </h1>
-
-                    <p className="mb-8 text-lg" style={{ color: colors.sage }}>
+                    <p className="text-purple-200 mb-8 text-lg">
                         {quizData.meta.subtitle}
                     </p>
-
-                    <div
-                        className="rounded-xl p-6 mb-8"
-                        style={{
-                            background: 'rgba(210, 169, 90, 0.08)',
-                            border: `1px solid rgba(210, 169, 90, 0.2)`
-                        }}
-                    >
-                        <div className="flex justify-around text-sm" style={{ color: colors.goldDark }}>
+                    <div className="bg-slate-800/50 rounded-xl p-6 mb-8 border border-purple-500/30">
+                        <div className="flex justify-around text-sm text-purple-300">
                             <div className="text-center">
-                                <div className="text-2xl mb-1 font-serif" style={{ color: colors.goldPrimary }}>12</div>
+                                <div className="text-2xl mb-1">12</div>
                                 <div>Fragen</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl mb-1 font-serif" style={{ color: colors.goldPrimary }}>~3</div>
+                                <div className="text-2xl mb-1">~3</div>
                                 <div>Minuten</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl mb-1 font-serif" style={{ color: colors.goldPrimary }}>6</div>
+                                <div className="text-2xl mb-1">6</div>
                                 <div>Klassen</div>
                             </div>
                         </div>
                     </div>
-
                     <button
                         onClick={() => setStarted(true)}
-                        className="w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all hover:translate-y-[-2px]"
-                        style={{
-                            background: `linear-gradient(135deg, ${colors.goldPrimary} 0%, ${colors.goldDark} 100%)`,
-                            color: colors.textDark,
-                            boxShadow: '0 4px 20px rgba(210, 169, 90, 0.25)'
-                        }}
+                        className="w-full py-4 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg shadow-purple-500/25"
                     >
                         Beginne deine Reise
                     </button>
-
-                    <p className="text-xs mt-6" style={{ color: colors.teal }}>
+                    <p className="text-xs text-slate-500 mt-6">
                         {quizData.meta.disclaimer}
                     </p>
                 </div>
@@ -169,156 +165,88 @@ export function RpgIdentityQuiz() {
         );
     }
 
-    // RESULT SCREEN
     if (showResult && result) {
         return (
-            <div
-                className="min-h-[600px] rounded-3xl overflow-hidden p-6"
-                style={{
-                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
-                    color: colors.textLight
-                }}
-            >
-                <div className="max-w-lg mx-auto">
-                    {/* Result Card */}
-                    <div
-                        className="rounded-2xl overflow-hidden"
-                        style={{
-                            background: colors.cream,
-                            border: `1px solid ${colors.goldPrimary}`,
-                            boxShadow: '0 8px 50px rgba(0, 0, 0, 0.35)'
-                        }}
-                    >
-                        {/* Header */}
-                        <div
-                            className="p-6 text-center"
-                            style={{
-                                background: `linear-gradient(135deg, ${colors.goldPrimary}15 0%, ${colors.goldPrimary}05 100%)`,
-                                borderBottom: `1px solid ${colors.goldPrimary}`
-                            }}
-                        >
-                            <div className="text-sm mb-2" style={{ color: colors.teal }}>
-                                Deine Rollenspiel-Seele ist...
+            <div className="min-h-[600px] bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 text-white rounded-3xl overflow-hidden">
+                <div className="max-w-lg mx-auto p-4">
+                    <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl overflow-hidden border border-purple-500/30 shadow-2xl">
+                        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 p-1">
+                            <div className="bg-slate-900 p-6 text-center">
+                                <div className="text-sm text-purple-300 mb-2">Deine Rollenspiel-Seele ist...</div>
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 bg-clip-text text-transparent mb-2">
+                                    {result.title}
+                                </h1>
+                                <p className="text-purple-200 italic text-sm">
+                                    &quot;{result.tagline}&quot;
+                                </p>
                             </div>
-                            <h1
-                                className="text-2xl font-serif font-bold mb-2"
-                                style={{ color: colors.textDark }}
-                            >
-                                {result.title}
-                            </h1>
-                            <p className="italic text-sm font-serif" style={{ color: colors.teal }}>
-                                „{result.tagline}"
-                            </p>
                         </div>
 
-                        <div className="p-6 space-y-5 max-h-[500px] overflow-y-auto">
-                            <p
-                                className="text-sm leading-relaxed whitespace-pre-line"
-                                style={{ color: colors.textDark, opacity: 0.85 }}
-                            >
+                        <div className="p-6 space-y-6 max-h-[600px] overflow-y-auto no-scrollbar">
+                            <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
                                 {result.description}
-                            </p>
+                            </div>
 
-                            {/* Stats */}
-                            <div
-                                className="rounded-xl p-4"
-                                style={{
-                                    background: 'rgba(28, 91, 92, 0.08)',
-                                    border: '1px solid rgba(28, 91, 92, 0.15)'
-                                }}
-                            >
-                                <h3 className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: colors.teal }}>
-                                    Deine Stats
-                                </h3>
+                            <div className="bg-slate-800/50 rounded-xl p-4 border border-purple-500/20">
+                                <h3 className="text-xs font-bold text-purple-400 mb-3 uppercase tracking-wider">Deine Stats</h3>
                                 <div className="space-y-2">
                                     {result.stats.map((stat, i) => (
                                         <div key={i} className="flex justify-between text-sm">
-                                            <span style={{ color: colors.textDark, opacity: 0.7 }}>{stat.label}</span>
-                                            <span className="font-mono" style={{ color: colors.goldDark }}>{stat.value}</span>
+                                            <span className="text-slate-400">{stat.label}</span>
+                                            <span className="text-amber-300 font-mono">{stat.value}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Compatibility */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div
-                                    className="rounded-xl p-4"
-                                    style={{
-                                        background: 'rgba(108, 161, 146, 0.12)',
-                                        border: '1px solid rgba(108, 161, 146, 0.25)'
-                                    }}
-                                >
-                                    <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: colors.sage }}>
-                                        ⚔️ Allies
-                                    </h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-green-900/30 rounded-xl p-4 border border-green-500/30">
+                                    <h3 className="text-xs font-bold text-green-400 mb-2 uppercase tracking-wider">⚔️ Allies</h3>
                                     <div className="space-y-1">
                                         {result.compatibility.allies.map(id => (
-                                            <div key={id} className="text-sm" style={{ color: colors.textDark }}>
-                                                {/* @ts-ignore */}
+                                            <div key={id} className="text-sm text-green-200">
+                                                {/* @ts-expect-error type def incomplete */}
                                                 {profileNames[id]}
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div
-                                    className="rounded-xl p-4"
-                                    style={{
-                                        background: 'rgba(167, 125, 56, 0.1)',
-                                        border: '1px solid rgba(167, 125, 56, 0.25)'
-                                    }}
-                                >
-                                    <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: colors.goldDark }}>
-                                        💀 Nemesis
-                                    </h3>
+                                <div className="bg-red-900/30 rounded-xl p-4 border border-red-500/30">
+                                    <h3 className="text-xs font-bold text-red-400 mb-2 uppercase tracking-wider">💀 Nemesis</h3>
                                     <div className="space-y-1">
                                         {result.compatibility.nemesis.map(id => (
-                                            <div key={id} className="text-sm" style={{ color: colors.textDark }}>
-                                                {/* @ts-ignore */}
+                                            <div key={id} className="text-sm text-red-200">
+                                                {/* @ts-expect-error type def incomplete */}
                                                 {profileNames[id]}
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
+
+                            <button
+                                onClick={() => {
+                                    const text = result.share_text;
+                                    if (navigator.share) {
+                                        navigator.share({ title: 'RPG Identity', text });
+                                    } else {
+                                        navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));
+                                    }
+                                }}
+                                className="w-full py-3 bg-purple-600 hover:bg-purple-500 rounded-xl text-sm font-bold shadow-lg shadow-purple-500/20 transition-all"
+                            >
+                                Ergebnis teilen
+                            </button>
+
+                            <button
+                                onClick={resetQuiz}
+                                className="w-full py-3 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition-all"
+                            >
+                                Erneut spielen
+                            </button>
                         </div>
                     </div>
-
-                    {/* Action Buttons */}
-                    <div className="mt-4 space-y-3">
-                        <button
-                            onClick={() => {
-                                const text = result.share_text;
-                                if (navigator.share) {
-                                    navigator.share({ title: 'RPG Identity', text });
-                                } else {
-                                    navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));
-                                }
-                            }}
-                            className="w-full py-4 rounded-xl font-semibold transition-all hover:translate-y-[-2px]"
-                            style={{
-                                background: `linear-gradient(135deg, ${colors.goldPrimary} 0%, ${colors.goldDark} 100%)`,
-                                color: colors.textDark,
-                                boxShadow: '0 6px 25px rgba(210, 169, 90, 0.35)'
-                            }}
-                        >
-                            Ergebnis teilen
-                        </button>
-
-                        <button
-                            onClick={resetQuiz}
-                            className="w-full py-3 rounded-xl transition-all"
-                            style={{
-                                background: 'transparent',
-                                border: '1px solid rgba(210, 169, 90, 0.4)',
-                                color: colors.cream
-                            }}
-                        >
-                            Erneut spielen
-                        </button>
-                    </div>
-
-                    <p className="text-xs text-center mt-4" style={{ color: colors.teal, opacity: 0.7 }}>
+                    <p className="text-xs text-slate-600 text-center mt-4 mb-8">
                         {quizData.meta.disclaimer}
                     </p>
                 </div>
@@ -326,80 +254,40 @@ export function RpgIdentityQuiz() {
         );
     }
 
-    // QUIZ SCREEN
-    const question = quizData.questions[currentQuestion];
-
     return (
-        <div
-            className="min-h-[600px] p-6 rounded-3xl"
-            style={{
-                background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
-                color: colors.textLight
-            }}
-        >
+        <div className="min-h-[600px] bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 text-white p-4 rounded-3xl">
             <div className="max-w-lg mx-auto">
-                {/* Progress */}
                 <div className="mb-6">
-                    <div className="flex justify-between text-xs mb-2" style={{ color: colors.goldDark }}>
+                    <div className="flex justify-between text-xs text-purple-300 mb-2">
                         <span>Frage {currentQuestion + 1} von {quizData.questions.length}</span>
                         <span>{Math.round(progress)}%</span>
                     </div>
-                    <div
-                        className="h-1 rounded-full overflow-hidden"
-                        style={{ background: 'rgba(210, 169, 90, 0.2)' }}
-                    >
+                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                         <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                                width: `${progress}%`,
-                                background: `linear-gradient(90deg, ${colors.goldDark} 0%, ${colors.goldPrimary} 100%)`,
-                                boxShadow: '0 0 8px rgba(210, 169, 90, 0.4)'
-                            }}
+                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                            style={{ width: `${progress}%` }}
                         />
                     </div>
                 </div>
 
-                {/* Question Card */}
-                <div
-                    className={`rounded-2xl p-6 transition-opacity duration-200 ${isAnimating ? 'opacity-50' : 'opacity-100'}`}
-                    style={{
-                        background: colors.cream,
-                        border: `1px solid ${colors.goldPrimary}`,
-                        boxShadow: '0 4px 40px rgba(0, 0, 0, 0.3)'
-                    }}
-                >
-                    {question.narrative && (
-                        <p
-                            className="text-sm italic mb-4 pb-4 font-serif"
-                            style={{
-                                color: colors.teal,
-                                borderBottom: `1px solid rgba(28, 91, 92, 0.2)`
-                            }}
-                        >
-                            {question.narrative}
+                <div className="bg-slate-800/50 rounded-2xl p-6 border border-purple-500/20 mb-4">
+                    {quizData.questions[currentQuestion].narrative && (
+                        <p className="text-purple-200 text-sm italic mb-4 pb-4 border-b border-purple-500/20">
+                            {quizData.questions[currentQuestion].narrative}
                         </p>
                     )}
-
-                    <h2
-                        className="text-xl font-serif font-semibold mb-6"
-                        style={{ color: colors.textDark }}
-                    >
-                        {question.text}
+                    <h2 className="text-xl font-bold mb-6">
+                        {quizData.questions[currentQuestion].text}
                     </h2>
 
                     <div className="space-y-3">
-                        {question.options.map((option) => (
+                        {quizData.questions[currentQuestion].options.map((option) => (
                             <button
                                 key={option.id}
                                 onClick={() => handleAnswer(option)}
-                                className="w-full text-left p-4 rounded-xl transition-all duration-200 hover:translate-y-[-1px]"
-                                style={{
-                                    background: 'rgba(247, 240, 230, 0.6)',
-                                    border: '1px solid rgba(167, 125, 56, 0.3)',
-                                    color: colors.textDark
-                                }}
+                                className="w-full text-left p-4 bg-slate-700/50 hover:bg-purple-600/30 border border-slate-600 hover:border-purple-500 rounded-xl transition-all duration-200 text-sm"
                             >
-                                <span className="text-sm">{option.text}</span>
+                                {option.text}
                             </button>
                         ))}
                     </div>

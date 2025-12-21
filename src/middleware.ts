@@ -17,6 +17,7 @@ export function middleware(request: NextRequest) {
         !url.pathname.startsWith('/verticals') &&
         !url.pathname.startsWith('/_next') &&
         !url.pathname.startsWith('/api') &&
+        !url.pathname.startsWith('/character') && // exclude character sheet
         !url.pathname.includes('.') // exclude files
     ) {
         const newUrl = url.clone()

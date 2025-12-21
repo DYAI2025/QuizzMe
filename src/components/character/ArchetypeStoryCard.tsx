@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -11,7 +12,7 @@ interface ArchetypeStoryCardProps {
     className?: string;
 }
 
-export function ArchetypeStoryCard({ archetype, secondary, snippet, className = '' }: ArchetypeStoryCardProps) {
+export function ArchetypeStoryCard({ archetype, snippet, className = '' }: ArchetypeStoryCardProps) {
     if (!archetype && !snippet) return null;
 
     return (
@@ -26,12 +27,7 @@ export function ArchetypeStoryCard({ archetype, secondary, snippet, className = 
                         </div>
                     )}
 
-                    {/* Secondary Archetypes (Optional) */}
-                    {/* {secondary && secondary.length > 0 && (
-                        <div className="text-sm text-text-ink-muted">
-                            <span className="italic">Resonanz mit:</span> {secondary.join(', ')}
-                        </div>
-                    )} */}
+                    {/* Secondary Archetypes (Optional - currently unused props removed from destructuring) */}
 
                     {/* Divider */}
                     <div className="w-16 h-px bg-gold-muted/50 my-2"></div>

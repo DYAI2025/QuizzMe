@@ -1,458 +1,249 @@
+
 'use client'
 
 import React, { useState } from 'react';
-import { questions, roles } from './social-role/data';
-import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
-import { updatePsycheState } from '../../lib/lme/lme-core';
-import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
+import { questions, profiles, quizMeta } from './social-role/data';
+import { contributeClient as contribute } from '@/lib/api';
+import { AlchemyButton, AlchemyLinkButton } from '@/components/ui/AlchemyButton';
 
-// Modern Alchemy colors
-const colors = {
-    bgPrimary: '#041726',
-    bgEmerald: '#0D5A5F',
-    goldPrimary: '#D2A95A',
-    goldDark: '#A77D38',
-    sage: '#6CA192',
-    teal: '#1C5B5C',
-    cream: '#F7F0E6',
-    creamDark: '#F2E3CF',
-    textDark: '#271C16',
-    textLight: '#F7F3EA',
+// Weights derived from JSON definition
+const ROLE_WEIGHTS: Record<string, Record<string, number>> = {
+    leader: { leadership: 2, harmony: 0.5, expression: 1, support: 0.5 },
+    connector: { leadership: 0.5, harmony: 2, expression: 1, support: 1.5 },
+    entertainer: { leadership: 0.5, harmony: 0.5, expression: 2, support: 0.5 },
+    sage: { leadership: 1, harmony: 1, expression: 0.5, support: 1 },
+    caretaker: { leadership: 0.5, harmony: 1.5, expression: 0.5, support: 2 },
+    rebel: { leadership: 1.5, harmony: 0, expression: 1.5, support: 0 }
 };
 
-type Scores = {
-    stability: number;
-    fire: number;
-    truth: number;
-    harbor: number;
-    compass: number;
-    bridge: number;
-};
-
-// Social connections icon
-const ConnectionsIcon = () => (
-    <svg viewBox="0 0 120 120" className="w-28 h-28">
-        <circle cx="60" cy="60" r="50" stroke={colors.goldPrimary} strokeWidth="1.5" fill="none" strokeDasharray="4 4" opacity="0.4" />
-        <circle cx="60" cy="35" r="10" stroke={colors.goldPrimary} strokeWidth="1.5" fill={colors.goldPrimary} fillOpacity="0.2" />
-        <circle cx="35" cy="75" r="10" stroke={colors.goldPrimary} strokeWidth="1.5" fill={colors.goldPrimary} fillOpacity="0.2" />
-        <circle cx="85" cy="75" r="10" stroke={colors.goldPrimary} strokeWidth="1.5" fill={colors.goldPrimary} fillOpacity="0.2" />
-        <line x1="60" y1="45" x2="40" y2="67" stroke={colors.goldPrimary} strokeWidth="1" opacity="0.5" />
-        <line x1="60" y1="45" x2="80" y2="67" stroke={colors.goldPrimary} strokeWidth="1" opacity="0.5" />
-        <line x1="45" y1="75" x2="75" y2="75" stroke={colors.goldPrimary} strokeWidth="1" opacity="0.5" />
-    </svg>
-);
-
-// Loading spinner
-const LoadingSpinner = () => (
-    <svg viewBox="0 0 80 80" className="w-20 h-20 animate-spin" style={{ animationDuration: '3s' }}>
-        <circle cx="40" cy="40" r="35" stroke={colors.goldPrimary} strokeWidth="1.5" fill="none" strokeDasharray="8 4" opacity="0.4" />
-        <circle cx="40" cy="40" r="6" fill={colors.goldPrimary} opacity="0.4" />
-        <circle cx="40" cy="40" r="3" fill={colors.goldPrimary} />
-    </svg>
-);
+type Scores = Record<string, number>;
 
 export function SocialRoleQuiz() {
-    const [stage, setStage] = useState<'intro' | 'quiz' | 'loading' | 'result'>('intro');
-    const [currentQ, setCurrentQ] = useState(0);
-    const [scores, setScores] = useState<Scores>({ stability: 0, fire: 0, truth: 0, harbor: 0, compass: 0, bridge: 0 });
-    const [result, setResult] = useState<typeof roles[keyof typeof roles] | null>(null);
-    const [isAnimating, setIsAnimating] = useState(false);
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [scores, setScores] = useState<Scores>({ leadership: 0, harmony: 0, expression: 0, support: 0 });
+    const [showResult, setShowResult] = useState(false);
+    const [result, setResult] = useState<typeof profiles[0] | null>(null);
+    const [started, setStarted] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
 
-    const startQuiz = () => setStage('quiz');
+    const calculateResult = (finalScores: Scores) => {
+        let bestProfileId = 'leader';
+        let maxScore = -1;
 
-    const handleAnswer = (option: typeof questions[0]['options'][0]) => {
-        setIsAnimating(true);
-        setTimeout(() => {
-            const newScores = { ...scores };
-            Object.entries(option.scores).forEach(([key, val]) => {
-                newScores[key as keyof Scores] += val as number;
+        Object.entries(ROLE_WEIGHTS).forEach(([roleId, weights]) => {
+            let roleScore = 0;
+            // Dot product: User Scores * Role Weights
+            Object.entries(finalScores).forEach(([dim, val]) => {
+                roleScore += val * (weights[dim] || 0);
             });
-            setScores(newScores);
 
-            const newMarkers = [...collectedMarkers];
-            if ((option as any).psyche_markers) {
-                newMarkers.push((option as any).psyche_markers);
-                setCollectedMarkers(newMarkers);
+            if (roleScore > maxScore) {
+                maxScore = roleScore;
+                bestProfileId = roleId;
             }
+        });
 
-            if (currentQ < questions.length - 1) {
-                setCurrentQ(currentQ + 1);
-                setIsAnimating(false);
-            } else {
-                calculateResult(newScores, newMarkers);
+        const foundProfile = profiles.find(p => p.id === bestProfileId) || profiles[0];
+        
+        // Final Markers
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const finalMarkers = [...collectedMarkers, ...(foundProfile.markers || [])];
+
+        const event = {
+            specVersion: "sp.contribution.v1" as const,
+            eventId: crypto.randomUUID(),
+            occurredAt: new Date().toISOString(),
+            source: {
+                vertical: "quiz" as const,
+                moduleId: quizMeta.id,
+                domain: window.location.hostname
+            },
+            payload: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                markers: finalMarkers.map((m: any) => ({
+                    id: m.id,
+                    weight: m.weight || 0.1
+                })),
+                fields: [
+                    { id: 'field.social_role.result_title', value: foundProfile.title, kind: 'text' as const, label: 'Soziale Rolle' },
+                    { id: 'field.social_role.tagline', value: foundProfile.tagline, kind: 'text' as const, label: 'Tagline' }
+                ],
+                tags: [{ id: 'tag.social_role.result', label: foundProfile.title, kind: 'misc' as const }]
             }
-        }, 300);
+        };
+
+        // Fire and forget (optimistic UI)
+        void contribute(event);
+        return foundProfile;
     };
 
-    const calculateResult = (finalScores: Scores, finalMarkers: any[]) => {
-        setStage('loading');
-
-        // LME Update immediately
-        if (finalMarkers.length > 0) {
-            try {
-                const aggregated = aggregateMarkers(finalMarkers, 0.8);
-                const currentPsyche = getPsycheState();
-                const newPsyche = updatePsycheState(currentPsyche, aggregated.markerScores, aggregated.reliabilityWeight);
-                savePsycheState(newPsyche);
-            } catch (e) {
-                console.error("LME Update failed", e);
-            }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleAnswer = (option: any) => {
+        // Accumulate scores
+        const newScores = { ...scores };
+        if (option.scores) {
+            Object.entries(option.scores).forEach(([key, value]) => {
+                newScores[key] = (newScores[key] || 0) + (value as number);
+            });
         }
+        setScores(newScores);
 
-        setTimeout(() => {
-            const roleMapping: Record<string, keyof typeof roles> = {
-                stability: 'rock',
-                fire: 'flame',
-                truth: 'mirror',
-                harbor: 'harbor',
-                compass: 'compass',
-                bridge: 'bridge'
-            };
+        // Collect markers
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const newMarkers = [...collectedMarkers];
+        if (option.markers) {
+            newMarkers.push(...option.markers);
+        }
+        setCollectedMarkers(newMarkers);
 
-            let maxScore = 0;
-            let dominantTrait = 'stability';
-
-            Object.entries(finalScores).forEach(([trait, score]) => {
-                if (score > maxScore) {
-                    maxScore = score;
-                    dominantTrait = trait;
-                }
-            });
-
-            const resultRole = roles[roleMapping[dominantTrait]];
-            setResult(resultRole);
-            setStage('result');
-            setIsAnimating(false);
-        }, 2000);
+        if (currentQuestion < questions.length - 1) {
+            setCurrentQuestion(currentQuestion + 1);
+        } else {
+            const finalResult = calculateResult(newScores);
+            setResult(finalResult);
+            setShowResult(true);
+        }
     };
 
-    const progress = ((currentQ + 1) / questions.length) * 100;
+    const resetQuiz = () => {
+        setCurrentQuestion(0);
+        setScores({ leadership: 0, harmony: 0, expression: 0, support: 0 });
+        setCollectedMarkers([]);
+        setShowResult(false);
+        setResult(null);
+        setStarted(false);
+    };
 
-    // INTRO SCREEN
-    if (stage === 'intro') {
+    const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+    if (!started) {
         return (
-            <div
-                className="flex flex-col items-center justify-center min-h-[600px] text-center p-8 rounded-3xl"
-                style={{
-                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
-                    color: colors.textLight
-                }}
-            >
-                <div className="flex justify-center mb-6">
-                    <ConnectionsIcon />
+            <div className="min-h-[600px] bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 text-white p-4 flex items-center justify-center rounded-3xl">
+                <div className="max-w-lg w-full text-center">
+                    <div className="text-6xl mb-6">🎭</div>
+                    <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 bg-clip-text text-transparent">
+                        {quizMeta.title}
+                    </h1>
+                    <p className="text-purple-200 mb-8 text-lg">
+                        {quizMeta.subtitle}
+                    </p>
+                    <button
+                        onClick={() => setStarted(true)}
+                        className="w-full py-4 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg shadow-purple-500/25"
+                    >
+                        Starten
+                    </button>
+                    <p className="text-xs text-slate-500 mt-6">
+                        {quizMeta.disclaimer}
+                    </p>
                 </div>
-
-                <h1
-                    className="text-3xl font-serif font-semibold mb-4"
-                    style={{ color: colors.goldPrimary }}
-                >
-                    Wer bist du für andere?
-                </h1>
-
-                <p className="text-lg mb-8 max-w-md" style={{ color: colors.sage }}>
-                    Der Fels? Die Flamme? Der Spiegel?<br />
-                    Finde heraus, welche Rolle du unbewusst in deinem Umfeld spielst.
-                </p>
-
-                <button
-                    onClick={startQuiz}
-                    className="px-10 py-4 rounded-xl font-semibold text-lg transition-all hover:translate-y-[-2px]"
-                    style={{
-                        background: `linear-gradient(135deg, ${colors.goldPrimary} 0%, ${colors.goldDark} 100%)`,
-                        color: colors.textDark,
-                        boxShadow: '0 4px 20px rgba(210, 169, 90, 0.25)'
-                    }}
-                >
-                    Entdecken
-                </button>
-
-                <p className="text-xs mt-6" style={{ color: colors.teal }}>
-                    Zur Selbstreflexion. Keine Diagnose. <span style={{ color: colors.sage }}>Syncts mit deinem Profil.</span>
-                </p>
             </div>
         );
     }
 
-    // LOADING SCREEN
-    if (stage === 'loading') {
+    if (showResult && result) {
         return (
-            <div
-                className="flex flex-col items-center justify-center min-h-[600px] rounded-3xl"
-                style={{
-                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
-                    color: colors.textLight
-                }}
-            >
-                <LoadingSpinner />
-                <p className="text-lg mt-6 font-serif" style={{ color: colors.cream }}>
-                    Dein soziales Profil nimmt Form an...
-                </p>
+            <div className="min-h-[600px] bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 text-white rounded-3xl overflow-hidden">
+                <div className="max-w-lg mx-auto p-4">
+                    <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl overflow-hidden border border-purple-500/30 shadow-2xl">
+                        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 p-1">
+                            <div className="bg-slate-900 p-6 text-center">
+                                <div className="text-sm text-purple-300 mb-2">Deine Soziale Rolle</div>
+                                <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 bg-clip-text text-transparent mb-2">
+                                    {result.title}
+                                </h1>
+                                <p className="text-purple-200 italic text-sm">
+                                    &quot;{result.tagline}&quot;
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-6 max-h-[600px] overflow-y-auto no-scrollbar">
+                            <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+                                {result.description}
+                            </div>
+
+                            <div className="bg-slate-800/50 rounded-xl p-4 border border-purple-500/20">
+                                <h3 className="text-xs font-bold text-purple-400 mb-3 uppercase tracking-wider">Deine Stats</h3>
+                                <div className="space-y-2">
+                                    {result.stats.map((stat, i) => (
+                                        <div key={i} className="flex justify-between text-sm">
+                                            <span className="text-slate-400">{stat.label}</span>
+                                            <span className="text-amber-300 font-mono">{stat.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-4 pt-4 flex-col sm:flex-row">
+                                <AlchemyButton 
+                                    className="flex-1" 
+                                    onClick={() => {
+                                        if (navigator.share) {
+                                            navigator.share({ title: 'Social Role Quiz', text: result.share_text });
+                                        } else {
+                                            navigator.clipboard.writeText(result.share_text).then(() => alert('Kopiert!'));
+                                        }
+                                    }}
+                                >
+                                    Teilen
+                                </AlchemyButton>
+                                <AlchemyLinkButton href="/character" variant="secondary" className="flex-1 text-center">
+                                    Zum Profil
+                                </AlchemyLinkButton>
+                            </div>
+                            
+                            <button
+                                onClick={resetQuiz}
+                                className="w-full py-3 text-slate-500 hover:text-slate-300 text-sm transition-all"
+                            >
+                                Test wiederholen
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
 
-    // QUIZ SCREEN
-    if (stage === 'quiz') {
-        const q = questions[currentQ];
-
-        return (
-            <div
-                className={`min-h-[600px] p-6 rounded-3xl flex flex-col transition-opacity duration-300 ${isAnimating ? 'opacity-50' : 'opacity-100'}`}
-                style={{
-                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
-                    color: colors.textLight
-                }}
-            >
-                {/* Progress */}
-                <div className="mb-8">
-                    <div className="flex justify-between text-xs mb-2" style={{ color: colors.goldDark }}>
-                        <span>Frage {currentQ + 1} von {questions.length}</span>
+    return (
+        <div className="min-h-[600px] bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 text-white p-4 rounded-3xl">
+            <div className="max-w-lg mx-auto">
+                <div className="mb-6">
+                    <div className="flex justify-between text-xs text-purple-300 mb-2">
+                        <span>Frage {currentQuestion + 1} von {questions.length}</span>
                         <span>{Math.round(progress)}%</span>
                     </div>
-                    <div
-                        className="h-1 rounded-full overflow-hidden"
-                        style={{ background: 'rgba(210, 169, 90, 0.2)' }}
-                    >
+                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                         <div
-                            className="h-full rounded-full transition-all duration-300"
-                            style={{
-                                width: `${progress}%`,
-                                background: `linear-gradient(90deg, ${colors.goldDark} 0%, ${colors.goldPrimary} 100%)`
-                            }}
+                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                            style={{ width: `${progress}%` }}
                         />
                     </div>
                 </div>
 
-                {/* Question Card */}
-                <div
-                    className="flex-grow flex flex-col justify-center rounded-2xl p-6"
-                    style={{
-                        background: colors.cream,
-                        border: `1px solid ${colors.goldPrimary}`,
-                        boxShadow: '0 4px 40px rgba(0, 0, 0, 0.3)'
-                    }}
-                >
-                    <p
-                        className="text-sm italic mb-4 font-serif"
-                        style={{ color: colors.teal }}
-                    >
-                        {q.scenario}
+                <div className="bg-slate-800/50 rounded-2xl p-6 border border-purple-500/20 mb-4">
+                    <p className="text-purple-200 text-sm italic mb-4 pb-4 border-b border-purple-500/20">
+                        {questions[currentQuestion].scenario}
                     </p>
-
-                    <h2
-                        className="text-xl font-serif font-semibold mb-8 leading-snug"
-                        style={{ color: colors.textDark }}
-                    >
-                        {q.text}
+                    <h2 className="text-xl font-bold mb-6">
+                        {questions[currentQuestion].text}
                     </h2>
 
                     <div className="space-y-3">
-                        {q.options.map((opt, i) => (
+                        {questions[currentQuestion].options.map((option, i) => (
                             <button
                                 key={i}
-                                onClick={() => handleAnswer(opt)}
-                                className="w-full text-left p-4 rounded-xl transition-all duration-200 hover:translate-y-[-1px] flex items-center gap-4 group"
-                                style={{
-                                    background: 'rgba(247, 240, 230, 0.6)',
-                                    border: '1px solid rgba(167, 125, 56, 0.3)',
-                                    color: colors.textDark
-                                }}
+                                onClick={() => handleAnswer(option)}
+                                className="w-full text-left p-4 bg-slate-700/50 hover:bg-purple-600/30 border border-slate-600 hover:border-purple-500 rounded-xl transition-all duration-200 text-sm"
                             >
-                                <span
-                                    className="text-xl opacity-70 group-hover:opacity-100 transition-opacity"
-                                >
-                                    {opt.vibe}
-                                </span>
-                                <span className="text-sm">{opt.text}</span>
+                                {option.text}
                             </button>
                         ))}
                     </div>
                 </div>
             </div>
-        );
-    }
-
-    // RESULT SCREEN
-    if (stage === 'result' && result) {
-        return (
-            <div
-                className="rounded-3xl overflow-hidden p-6"
-                style={{
-                    background: `linear-gradient(165deg, ${colors.bgEmerald} 0%, ${colors.bgPrimary} 50%, #031119 100%)`,
-                    color: colors.textLight
-                }}
-            >
-                <div className="max-w-lg mx-auto">
-                    {/* Result Card */}
-                    <div
-                        className="rounded-2xl overflow-hidden"
-                        style={{
-                            background: colors.cream,
-                            border: `1px solid ${colors.goldPrimary}`,
-                            boxShadow: '0 8px 50px rgba(0, 0, 0, 0.35)'
-                        }}
-                    >
-                        {/* Header */}
-                        <div
-                            className="p-6 text-center"
-                            style={{
-                                background: `linear-gradient(135deg, ${colors.goldPrimary}15 0%, ${colors.goldPrimary}05 100%)`,
-                                borderBottom: `1px solid ${colors.goldPrimary}`
-                            }}
-                        >
-                            <div className="text-5xl mb-4">{result.emoji}</div>
-                            <h1
-                                className="text-2xl font-serif font-bold mb-2"
-                                style={{ color: colors.textDark }}
-                            >
-                                {result.name}
-                            </h1>
-                            <p className="italic text-sm" style={{ color: colors.teal }}>
-                                „{result.tagline}"
-                            </p>
-                        </div>
-
-                        <div className="p-6 space-y-5 max-h-[500px] overflow-y-auto">
-                            <p
-                                className="leading-relaxed text-center"
-                                style={{ color: colors.textDark, opacity: 0.9 }}
-                            >
-                                {result.description}
-                            </p>
-
-                            {/* Superpower & Shadow */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div
-                                    className="rounded-xl p-4"
-                                    style={{
-                                        background: 'rgba(108, 161, 146, 0.12)',
-                                        border: '1px solid rgba(108, 161, 146, 0.25)'
-                                    }}
-                                >
-                                    <div className="text-xl mb-2">⚡</div>
-                                    <h3 className="text-xs uppercase tracking-wider mb-1" style={{ color: colors.sage }}>
-                                        Superkraft
-                                    </h3>
-                                    <p className="font-medium text-sm" style={{ color: colors.textDark }}>{result.superpower}</p>
-                                </div>
-                                <div
-                                    className="rounded-xl p-4"
-                                    style={{
-                                        background: 'rgba(167, 125, 56, 0.1)',
-                                        border: '1px solid rgba(167, 125, 56, 0.25)'
-                                    }}
-                                >
-                                    <div className="text-xl mb-2">🌑</div>
-                                    <h3 className="text-xs uppercase tracking-wider mb-1" style={{ color: colors.goldDark }}>
-                                        Schattenseite
-                                    </h3>
-                                    <p className="font-medium text-sm" style={{ color: colors.textDark }}>{result.shadow}</p>
-                                </div>
-                            </div>
-
-                            {/* Ingredients */}
-                            <div
-                                className="rounded-xl p-5"
-                                style={{
-                                    background: 'rgba(28, 91, 92, 0.08)',
-                                    border: '1px solid rgba(28, 91, 92, 0.15)'
-                                }}
-                            >
-                                <h3 className="text-xs uppercase tracking-wider mb-4" style={{ color: colors.teal }}>
-                                    Deine Zutaten
-                                </h3>
-                                <div className="space-y-3">
-                                    {result.ingredients.map(([pct, label], i) => (
-                                        <div key={i} className="flex items-center gap-4">
-                                            <div
-                                                className="flex-1 h-2 rounded-full overflow-hidden"
-                                                style={{ background: 'rgba(28, 91, 92, 0.15)' }}
-                                            >
-                                                <div
-                                                    className="h-full rounded-full"
-                                                    style={{
-                                                        width: `${pct}%`,
-                                                        background: `linear-gradient(90deg, ${colors.goldDark} 0%, ${colors.goldPrimary} 100%)`
-                                                    }}
-                                                />
-                                            </div>
-                                            <span className="text-sm w-32 text-right" style={{ color: colors.textDark }}>{label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Dynamics */}
-                            <div
-                                className="rounded-xl p-5"
-                                style={{
-                                    background: 'rgba(28, 91, 92, 0.05)',
-                                    border: '1px solid rgba(28, 91, 92, 0.1)'
-                                }}
-                            >
-                                <h3 className="text-xs uppercase tracking-wider mb-4 text-center" style={{ color: colors.teal }}>
-                                    Deine Dynamiken
-                                </h3>
-                                <div className="flex justify-between text-center">
-                                    <div>
-                                        <p className="text-xs mb-1" style={{ color: colors.teal }}>Verstärkt durch</p>
-                                        <p className="font-medium text-sm" style={{ color: colors.sage }}>{result.compatible}</p>
-                                    </div>
-                                    <div
-                                        className="w-px mx-4"
-                                        style={{ background: 'rgba(28, 91, 92, 0.2)' }}
-                                    />
-                                    <div>
-                                        <p className="text-xs mb-1" style={{ color: colors.teal }}>Herausfordernd</p>
-                                        <p className="font-medium text-sm" style={{ color: colors.goldDark }}>{result.challenging}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-3 mt-4">
-                        <button
-                            onClick={() => {
-                                const text = `${result.emoji} Ich bin ${result.name}\n\n"${result.tagline}"\n\nFinde heraus, wer DU für andere bist.`;
-                                if (navigator.share) {
-                                    navigator.share({ title: 'Wer bist du für andere?', text });
-                                } else {
-                                    navigator.clipboard.writeText(text).then(() => alert('Kopiert!'));
-                                }
-                            }}
-                            className="flex-1 py-4 rounded-xl font-semibold transition-all hover:translate-y-[-2px]"
-                            style={{
-                                background: `linear-gradient(135deg, ${colors.goldPrimary} 0%, ${colors.goldDark} 100%)`,
-                                color: colors.textDark,
-                                boxShadow: '0 6px 25px rgba(210, 169, 90, 0.35)'
-                            }}
-                        >
-                            Teilen
-                        </button>
-                        <button
-                            onClick={() => {
-                                setStage('intro');
-                                setCurrentQ(0);
-                                setScores({ stability: 0, fire: 0, truth: 0, harbor: 0, compass: 0, bridge: 0 });
-                                setCollectedMarkers([]);
-                            }}
-                            className="px-6 py-4 rounded-xl font-medium transition-colors"
-                            style={{
-                                background: 'transparent',
-                                border: '1px solid rgba(210, 169, 90, 0.4)',
-                                color: colors.cream
-                            }}
-                        >
-                            Nochmal
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    return null;
+        </div>
+    );
 }
