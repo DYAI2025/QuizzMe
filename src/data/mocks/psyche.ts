@@ -16,6 +16,12 @@ export const MOCK_PSYCHE_PROFILE: PsycheProfileV1 = {
         me_we: 0.6,
         mind_heart: 0.4
     },
+    meta_stats: {
+        intensity: 'noticeable',
+        tempo: 'dynamic',
+        shadow_confidence: 0.72,
+        shadow_confirmed: true
+    },
     narrative_snippet: "Du navigierst mit offenem Herzen, doch deine Wurzeln suchen noch nach festem Halt im Chaos.",
     archetype_params: {
         dominant_archetype: "Der Leuchtturm",

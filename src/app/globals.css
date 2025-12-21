@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./styles/light-grimoire-tokens.css";
+@import "./styles/light-grimoire-typography.css";
 
 @theme {
   /* Colors */

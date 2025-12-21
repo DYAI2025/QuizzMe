@@ -1,74 +1,87 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PsycheCoreStats } from '@/types/psyche';
-
+import { usePsycheProfile } from '@/hooks/usePsycheProfile';
 import { characterSheetCopy } from '@/content/character-sheet.de';
+import { toPercent01 } from '@/domain/derivedStats';
 
-interface AfterQuizDeltaBannerProps {
-    deltas?: Partial<PsycheCoreStats>;
-    visibleDuration?: number; // ms, default 10000
-}
+/**
+ * AfterQuizDeltaBanner Component
+ *
+ * Displays a temporary notification at the top of the page showing
+ * the top 1-3 dimensions that changed after quiz completion.
+ *
+ * Features:
+ * - Auto-dismiss after 8-12s (configurable, default 10s)
+ * - Manual dismiss via close button
+ * - Shows top movers with delta values
+ * - Slide down + fade in animation
+ *
+ * Based on spec T4.1 and Phase 4 requirements
+ */
+export function AfterQuizDeltaBanner() {
+    const { showBanner, dismissBanner, movers } = usePsycheProfile();
 
-export function AfterQuizDeltaBanner({ deltas, visibleDuration = 10000 }: AfterQuizDeltaBannerProps) {
-    const [isVisible, setIsVisible] = useState(false);
-
-    // Identify significant changes (> 0.01)
-    const movers = deltas
-        ? Object.entries(deltas)
-            .filter(([_, val]) => Math.abs(val as number) > 0.01)
-            .sort((a, b) => Math.abs(b[1] as number) - Math.abs(a[1] as number)) // Sort by magnitude
-            .slice(0, 3) // Top 3
-        : [];
-
-    useEffect(() => {
-        if (movers.length > 0) {
-            // Show banner after small delay
-            const timer = setTimeout(() => setIsVisible(true), 1000);
-
-            // Auto hide
-            const hideTimer = setTimeout(() => setIsVisible(false), 1000 + visibleDuration);
-
-            return () => {
-                clearTimeout(timer);
-                clearTimeout(hideTimer);
-            };
-        }
-    }, [deltas, visibleDuration, movers.length]);
-
-    if (movers.length === 0) return null;
+    if (!showBanner || movers.length === 0) return null;
 
     return (
         <AnimatePresence>
-            {isVisible && (
+            {showBanner && (
                 <motion.div
-                    initial={{ y: 100, opacity: 0 }}
+                    initial={{ y: -100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 100, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4"
+                    exit={{ y: -100, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4"
                 >
-                    <div className="bg-alchemy-bg-midnight border border-gold-primary rounded-xl shadow-2xl p-4 flex items-center justify-between text-text-light">
+                    <div className="bg-bg-parchment/95 backdrop-blur-sm border-2 border-gold-primary rounded-lg shadow-xl p-4 flex items-start justify-between">
                         <div className="flex-1">
-                            <h4 className="text-sm font-serif text-gold-primary mb-1">{characterSheetCopy.banner.title}</h4>
+                            <h4 className="text-base font-serif font-semibold text-text-ink mb-2">
+                                {characterSheetCopy.banner.title}
+                            </h4>
                             <div className="flex gap-2 flex-wrap">
-                                {movers.map(([key, val]) => (
-                                    <span key={key} className="text-xs bg-white/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        <span className="capitalize">{key}</span>
-                                        <span className={val! > 0 ? 'text-emerald-400' : 'text-red-300'}>
-                                            {val! > 0 ? '+' : ''}{Math.round(val! * 100)}%
+                                {movers.slice(0, 3).map((mover) => (
+                                    <span
+                                        key={mover.dimension}
+                                        className="inline-flex items-center gap-1.5 text-sm bg-parchment-dark px-3 py-1 rounded-full border border-gold-subtle/50"
+                                    >
+                                        <span className="font-medium text-text-ink capitalize">
+                                            {mover.dimension}
+                                        </span>
+                                        <span
+                                            className={`font-bold tabular-nums ${
+                                                mover.delta > 0
+                                                    ? 'text-emerald-600'
+                                                    : 'text-red-600'
+                                            }`}
+                                        >
+                                            {mover.delta > 0 ? '+' : ''}
+                                            {toPercent01(Math.abs(mover.delta))}%
                                         </span>
                                     </span>
                                 ))}
                             </div>
                         </div>
                         <button
-                            onClick={() => setIsVisible(false)}
-                            className="ml-4 p-2 text-gold-muted hover:text-gold-light transition-colors"
-                            aria-label="Schließen"
+                            onClick={dismissBanner}
+                            className="ml-4 p-2 text-text-ink-muted hover:text-text-ink hover:bg-gold-muted/10 rounded transition-colors"
+                            aria-label="Banner schließen"
                         >
-                            ✕
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
                         </button>
                     </div>
                 </motion.div>

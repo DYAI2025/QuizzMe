@@ -5,6 +5,8 @@ import { AlchemyCard, AlchemyCardHeader, AlchemyCardTitle, AlchemyCardContent } 
 import { AxisRail } from './AxisRail';
 import { PsycheState } from '@/types/psyche';
 import { characterSheetCopy } from '@/content/character-sheet.de';
+import { usePsycheProfile } from '@/hooks/usePsycheProfile';
+import { isTopMover } from '@/utils/deltaAnimations';
 
 interface ClimateCardProps {
     state: PsycheState;
@@ -12,7 +14,17 @@ interface ClimateCardProps {
     className?: string;
 }
 
+/**
+ * ClimateCard Component
+ *
+ * Displays 5 climate axes with bipolar rails
+ * Highlights top movers when delta is present
+ *
+ * Based on spec T3.3 with Phase 4 highlight rules
+ */
 export function ClimateCard({ state, deltas, className = '' }: ClimateCardProps) {
+    const { movers } = usePsycheProfile();
+
     return (
         <AlchemyCard className={className}>
             <AlchemyCardHeader>
@@ -26,6 +38,7 @@ export function ClimateCard({ state, deltas, className = '' }: ClimateCardProps)
                         value={state.shadow_light}
                         delta={deltas?.shadow_light}
                         delay={0.1}
+                        isTopMover={isTopMover(movers, 'shadow_light')}
                     />
                     <AxisRail
                         leftLabel={characterSheetCopy.axes.cold}
@@ -33,15 +46,14 @@ export function ClimateCard({ state, deltas, className = '' }: ClimateCardProps)
                         value={state.cold_warm}
                         delta={deltas?.cold_warm}
                         delay={0.2}
+                        isTopMover={isTopMover(movers, 'cold_warm')}
                     />
                     <AxisRail
                         leftLabel={characterSheetCopy.axes.surface}
                         rightLabel={characterSheetCopy.axes.depth}
-                        value={state.surface_depth} // Caution: Label semantics might need checking 0=Deep or 0=Surface? Assuming 0=Surface usually, but let's stick to spec. 
-                        // Let's assume 0=Surface (Left), 1=Depth (Right) or vice versa. 
-                        // Renaming for clarity based on typical RPG stats:
-                        // Usually "Depth" is favored. Let's map 0->Surface, 1->Depth for now.
+                        value={state.surface_depth}
                         delay={0.3}
+                        isTopMover={isTopMover(movers, 'surface_depth')}
                     />
                     <AxisRail
                         leftLabel={characterSheetCopy.axes.me}
@@ -49,6 +61,7 @@ export function ClimateCard({ state, deltas, className = '' }: ClimateCardProps)
                         value={state.me_we}
                         delta={deltas?.me_we}
                         delay={0.4}
+                        isTopMover={isTopMover(movers, 'me_we')}
                     />
                     <AxisRail
                         leftLabel={characterSheetCopy.axes.mind}
@@ -56,6 +69,7 @@ export function ClimateCard({ state, deltas, className = '' }: ClimateCardProps)
                         value={state.mind_heart}
                         delta={deltas?.mind_heart}
                         delay={0.5}
+                        isTopMover={isTopMover(movers, 'mind_heart')}
                     />
                 </div>
             </AlchemyCardContent>
