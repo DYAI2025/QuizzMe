@@ -1,9 +1,9 @@
-
 'use client'
 
 import React, { useState } from 'react';
 import { questions, profiles, quizMeta, calculateProfileScores, type DimensionScores } from './krafttier/data';
 import { contributeClient as contribute } from '@/lib/api';
+import { useClusterProgress } from '@/lib/stores/useClusterProgress';
 import { AlchemyButton, AlchemyLinkButton } from '@/components/ui/AlchemyButton';
 
 
@@ -16,6 +16,8 @@ export function KrafttierQuiz() {
     const [result, setResult] = useState<typeof profiles[0] | null>(null);
     const [started, setStarted] = useState(false);
     const [microWin, setMicroWin] = useState<string | null>(null);
+
+    const { completeQuiz } = useClusterProgress();
 
     const calculateResult = (finalDimensionScores: DimensionScores) => {
         // V2: Use matrix multiplication
@@ -93,6 +95,9 @@ export function KrafttierQuiz() {
                 const finalResult = calculateResult(newDimensionScores);
                 setResult(finalResult);
                 setShowResult(true);
+
+                // Mark completion in Cluster Store
+                completeQuiz("cluster.naturkind.v1", quizMeta.id, finalResult.id, finalResult.title);
             }, 500);
         }
     };
