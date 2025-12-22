@@ -4,7 +4,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { toPercent01, calcDerivedStats } from './derivedStats';
-import { PsycheCoreStats } from '@/types/psyche';
+import { PsycheCoreStats } from '@/lib/types/psyche';
 
 describe('toPercent01', () => {
     it('should convert 0 to 0', () => {

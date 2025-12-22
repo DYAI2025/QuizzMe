@@ -1,4 +1,4 @@
-import { PsycheProfileV1 } from '@/types/psyche';
+import { PsycheProfileV1 } from '@/lib/types/psyche';
 
 export const MOCK_PSYCHE_PROFILE: PsycheProfileV1 = {
     id: 'mock-user-123',

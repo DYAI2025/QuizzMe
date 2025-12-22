@@ -3,7 +3,7 @@
  * Provides various configurations for testing graceful degradation
  */
 
-import { PsycheProfileV1 } from '@/types/psyche';
+import { PsycheProfileV1 } from '@/lib/types/psyche';
 
 /**
  * Complete profile with all optional fields populated
