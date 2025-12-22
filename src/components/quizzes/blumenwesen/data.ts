@@ -1,5 +1,5 @@
 
-import { QuizMeta, Question, ValidationProfile, Marker } from '../types';
+import { QuizMeta, Question, ValidationProfile } from '../types';
 
 export const quizMeta: QuizMeta = {
   id: "quiz.blumenwesen.v1",
@@ -255,37 +255,11 @@ const patterns: Record<string, DimensionScores> = {
 };
 
 export function calculateProfile(scores: DimensionScores): ValidationProfile {
-   // Simple distance calculation
-   let minDistance = Infinity;
-   let bestMatch = "sunflower";
-
-   for (const [id, pattern] of Object.entries(patterns)) {
-     // Euclidean distance
-     const dist = Math.sqrt(
-       Math.pow(scores.licht - pattern.licht * 2, 2) + // scaling factor approx check
-       Math.pow(scores.wurzeln - pattern.wurzeln * 2, 2) + 
-       Math.pow(scores.rhythmus - pattern.rhythmus * 2, 2) +
-       Math.pow(scores.wasser - pattern.wasser * 2, 2) 
-     );
-     
-     // Note: The scores from questions sum up to ~50 max per dimension.
-     // The patterns above are like "average per question".
-     // Better approach: Normalize scores to 0-1 range relative to max possible.
-     // OR: Use dot product.
-     
-     // Let's rely on a simpler 'Trait Dominance' approach if logic is complex.
-     // Or just standard comparison.
-     
-     // Let's try a direct comparison with normalized user scores.
-     // Max score per dim is approx 50.
-     // User score: 30. Normalized: 0.6.
-     // Pattern value 5 -> 1.0. Pattern value 1 -> 0.2.
-   }
-   
-   // REVISED LOGIC: Dot Product similarity
-   // We find the profile vector that aligns best with user vector.
-   
-   let maxSimilarity = -Infinity;
+    // Dot Product similarity
+    // We find the profile vector that aligns best with user vector.
+    
+    let bestMatch = "sunflower";
+    let maxSimilarity = -Infinity;
    
    for (const [id, pattern] of Object.entries(patterns)) {
       const dotProduct = 

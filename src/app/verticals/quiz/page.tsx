@@ -61,24 +61,21 @@ interface Particle {
 }
 
 export default function QuizLandingPage() {
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const { initCluster, getClusterProgress, isLoaded } = useClusterProgress();
-
-  useEffect(() => {
-    initCluster(NATURKIND_CLUSTER.id);
-  }, [initCluster]);
-
-  useEffect(() => {
-    const newParticles = Array.from({ length: 12 }).map(() => ({
+  const [particles] = useState<Particle[]>(() => 
+    Array.from({ length: 12 }).map(() => ({
       width: Math.random() * 3 + 1,
       height: Math.random() * 3 + 1,
       left: Math.random() * 100,
       top: Math.random() * 100,
       duration: Math.random() * 15 + 20,
       delay: Math.random() * 8,
-    }));
-    setParticles(newParticles);
-  }, []);
+    }))
+  );
+  const { initCluster, getClusterProgress, isLoaded } = useClusterProgress();
+
+  useEffect(() => {
+    initCluster(NATURKIND_CLUSTER.id);
+  }, [initCluster]);
 
   const naturkindProgress = isLoaded ? getClusterProgress(NATURKIND_CLUSTER.id) : null;
   const isClusterComplete = naturkindProgress?.isComplete;

@@ -34,7 +34,7 @@ describe('Reduced Motion Accessibility', () => {
       addEventListener: () => {},
       removeEventListener: () => {},
       dispatchEvent: () => true,
-    })) as any;
+    })) as unknown as typeof window.matchMedia;
   };
 
   describe('StatBarRow Motion', () => {

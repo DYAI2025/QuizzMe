@@ -47,7 +47,7 @@ export interface ValidationProfile {
   share_text?: string;
   emoji?: string;
   color?: string;
-  matchCondition?: any;
+  matchCondition?: unknown;
   compatibility?: {
     allies?: string[];
     nemesis?: string | string[];

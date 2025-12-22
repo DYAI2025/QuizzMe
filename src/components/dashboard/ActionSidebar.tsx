@@ -15,8 +15,8 @@ interface ActionSidebarProps {
 export function ActionSidebar({ snapshot }: ActionSidebarProps) {
   
   // Logic to determine recommendations
-  const hasNoArchetype = !snapshot.archetype;
-  const hasNoElement = !snapshot.traits['trait.astro.element']; // Example check
+  const hasNoArchetype = !snapshot?.psyche?.archetypeMix?.[0];
+  const hasNoElement = !snapshot?.traits?.['trait.astro.element']; // Example check
   
   return (
     <div className="space-y-6 animate-in fade-in duration-700 delay-300 slide-in-from-right-4">

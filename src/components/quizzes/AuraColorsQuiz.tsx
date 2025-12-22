@@ -133,8 +133,9 @@ export function AuraColorsQuiz() {
     }
     setCollectedMarkers(newMarkers);
 
-    // Show micro-win
-    const winMessage = microWinMessages[Math.floor(Math.random() * microWinMessages.length)];
+    // Show micro-win with deterministic variety
+    const msgIndex = (currentQuestion + scores.energiefluss) % microWinMessages.length;
+    const winMessage = microWinMessages[msgIndex];
     setMicroWin(winMessage);
     setTimeout(() => setMicroWin(null), 800);
 

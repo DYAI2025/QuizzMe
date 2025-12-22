@@ -6,7 +6,7 @@ import { SocialRoleQuiz } from './SocialRoleQuiz';
 // Mock ingestion
 const ingestContributionMock = vi.fn();
 vi.mock('../../lib/ingestion', () => ({
-  ingestContribution: (...args: any[]) => ingestContributionMock(...args),
+  ingestContribution: (...args: unknown[]) => ingestContributionMock(...args),
 }));
 
 // Mock crypto.randomUUID
@@ -72,7 +72,7 @@ describe('SocialRoleQuiz Ingestion Migration', () => {
     const markers = event.payload.markers;
     expect(Array.isArray(markers)).toBe(true);
     // Ensure IDs start with 'marker.'
-    markers.forEach((m: any) => {
+    markers.forEach((m: { id: string }) => {
         expect(m.id).toMatch(/^marker\./);
     });
 

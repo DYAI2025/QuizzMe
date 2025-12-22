@@ -16,7 +16,7 @@
  *   npx playwright test
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 test.describe('Character Sheet - After Quiz Flow (FR-4)', () => {
   test.beforeEach(async ({ page }) => {
@@ -319,7 +319,7 @@ test.describe('Character Sheet - Error Handling', () => {
 
 test.describe.skip('Test Utilities - Example Helpers', () => {
   // Helper function to complete a quiz
-  async function completeQuiz(page: any, quizSlug: string) {
+  async function completeQuiz(page: Page, quizSlug: string) {
     await page.goto(`/verticals/quiz/${quizSlug}`);
 
     // Answer all questions randomly
@@ -343,7 +343,7 @@ test.describe.skip('Test Utilities - Example Helpers', () => {
   }
 
   // Helper to get stat value
-  async function getStatValue(page: any, statName: string): Promise<number> {
+  async function getStatValue(page: Page, statName: string): Promise<number> {
     const statRow = page.locator(`text=${statName}`).locator('..');
     const valueText = await statRow.locator('text=/\\d+/').first().textContent();
     return parseInt(valueText || '0', 10);
