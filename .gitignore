@@ -43,3 +43,6 @@ next-env.d.ts
 
 # local data storage (Phase 4)
 .data/
+
+# Auto Claude data directory
+.auto-claude/
