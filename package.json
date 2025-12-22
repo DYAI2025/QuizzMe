@@ -13,6 +13,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.87.1",
+    "better-sqlite3": "^12.5.0",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.561.0",
     "next": "16.0.8",
@@ -26,6 +29,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/coverage-v8": "^4.0.15",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "jsdom": "^27.3.0",

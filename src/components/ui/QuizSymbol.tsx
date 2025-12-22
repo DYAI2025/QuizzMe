@@ -6,7 +6,8 @@ export type QuizSymbolVariant =
     | 'rpg'
     | 'personality'
     | 'celebrity'
-    | 'destiny';
+    | 'destiny'
+    | 'aura';
 
 export type QuizSymbolSize = 'small' | 'medium' | 'large' | 'hero';
 export type QuizSymbolState = 'default' | 'muted' | 'interactive' | 'cta';

@@ -3,16 +3,9 @@
 
 import React from 'react';
 import { AlchemyCard, AlchemyCardHeader, AlchemyCardTitle, AlchemyCardContent } from '@/components/ui/AlchemyCard';
+import { StatPill } from './StatPill';
 import { DerivedStats } from '@/types/psyche';
 import { characterSheetCopy } from '@/content/character-sheet.de';
-
-// Sub-component for individual derived stat
-const StatPill = ({ label, value }: { label: string; value: number; delay?: number }) => (
-    <div className="flex flex-col items-center p-3 bg-parchment rounded-lg border border-gold-subtle/50 text-center">
-        <span className="text-xs uppercase tracking-widest text-text-ink-muted mb-1 font-sans">{label}</span>
-        <span className="text-2xl font-serif font-bold text-text-ink tabular-nums">{value}</span>
-    </div>
-);
 
 interface DerivedStatsCardProps {
     stats: DerivedStats;

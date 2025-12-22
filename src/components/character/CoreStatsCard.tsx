@@ -5,6 +5,8 @@ import { AlchemyCard, AlchemyCardHeader, AlchemyCardTitle, AlchemyCardContent } 
 import { StatBarRow } from './StatBarRow';
 import { PsycheCoreStats } from '@/types/psyche';
 import { characterSheetCopy } from '@/content/character-sheet.de';
+import { usePsycheProfile } from '@/hooks/usePsycheProfile';
+import { isTopMover } from '@/utils/deltaAnimations';
 
 interface CoreStatsCardProps {
     stats: PsycheCoreStats;
@@ -12,46 +14,44 @@ interface CoreStatsCardProps {
     className?: string;
 }
 
+/**
+ * CoreStatsCard Component
+ *
+ * Displays 5 core personality stats with bars
+ * Highlights top movers when delta is present
+ *
+ * Based on spec T3.1 with Phase 4 highlight rules
+ */
 export function CoreStatsCard({ stats, deltas, className = '' }: CoreStatsCardProps) {
+    const { movers } = usePsycheProfile();
+
+    const statKeys: Array<keyof PsycheCoreStats> = [
+        'clarity',
+        'courage',
+        'connection',
+        'order',
+        'shadow',
+    ];
+
     return (
         <AlchemyCard className={className} cornerOrnaments>
             <AlchemyCardHeader>
-                <AlchemyCardTitle as="h3" className="text-lg">{characterSheetCopy.sections.coreStats}</AlchemyCardTitle>
+                <AlchemyCardTitle as="h3" className="text-lg">
+                    {characterSheetCopy.sections.coreStats}
+                </AlchemyCardTitle>
             </AlchemyCardHeader>
             <AlchemyCardContent>
                 <div className="space-y-1">
-                    <StatBarRow
-                        label={characterSheetCopy.stats.clarity}
-                        value={stats.clarity}
-                        delta={deltas?.clarity}
-                        delay={0.1}
-                    />
-                    <StatBarRow
-                        label={characterSheetCopy.stats.courage}
-                        value={stats.courage}
-                        delta={deltas?.courage}
-                        colorClass="bg-gold-light"
-                        delay={0.2}
-                    />
-                    <StatBarRow
-                        label={characterSheetCopy.stats.connection}
-                        value={stats.connection}
-                        delta={deltas?.connection}
-                        delay={0.3}
-                    />
-                    <StatBarRow
-                        label={characterSheetCopy.stats.order}
-                        value={stats.order}
-                        delta={deltas?.order}
-                        colorClass="bg-gold-light"
-                        delay={0.4}
-                    />
-                    <StatBarRow
-                        label={characterSheetCopy.stats.shadow}
-                        value={stats.shadow}
-                        delta={deltas?.shadow}
-                        delay={0.5}
-                    />
+                    {statKeys.map((key, index) => (
+                        <StatBarRow
+                            key={key}
+                            label={characterSheetCopy.stats[key]}
+                            value={stats[key]}
+                            delta={deltas?.[key]}
+                            delay={0.1 * (index + 1)}
+                            isTopMover={isTopMover(movers, key)}
+                        />
+                    ))}
                 </div>
             </AlchemyCardContent>
         </AlchemyCard>
