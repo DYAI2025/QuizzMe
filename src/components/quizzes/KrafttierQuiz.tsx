@@ -2,26 +2,30 @@
 'use client'
 
 import React, { useState } from 'react';
-import { questions, profiles, quizMeta } from './krafttier/data';
+import { questions, profiles, quizMeta, calculateProfileScores, type DimensionScores } from './krafttier/data';
 import { contributeClient as contribute } from '@/lib/api';
 import { AlchemyButton, AlchemyLinkButton } from '@/components/ui/AlchemyButton';
 
-type Scores = Record<string, number>;
+
 
 export function KrafttierQuiz() {
+    // V2: We track scores per dimension (e.g. 'mut': 15, 'sozial': 10)
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [scores, setScores] = useState<Scores>({});
+    const [dimensionScores, setDimensionScores] = useState<DimensionScores>({});
     const [showResult, setShowResult] = useState(false);
     const [result, setResult] = useState<typeof profiles[0] | null>(null);
     const [started, setStarted] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
+    const [microWin, setMicroWin] = useState<string | null>(null);
 
-    const calculateResult = (finalScores: Scores) => {
+    const calculateResult = (finalDimensionScores: DimensionScores) => {
+        // V2: Use matrix multiplication
+        const profileScores = calculateProfileScores(finalDimensionScores);
+        
+        // Find best profile
         let bestProfileId = profiles[0].id;
         let maxScore = -1;
 
-        Object.entries(finalScores).forEach(([id, score]) => {
+        Object.entries(profileScores).forEach(([id, score]) => {
             if (score > maxScore) {
                 maxScore = score;
                 bestProfileId = id;
@@ -30,9 +34,9 @@ export function KrafttierQuiz() {
 
         const foundProfile = profiles.find(p => p.id === bestProfileId) || profiles[0];
         
-        // Final Markers
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const finalMarkers = [...collectedMarkers, ...(foundProfile.markers || [])];
+        // V2 Markers: Just the profile markers (no option markers in this version, or minimal)
+        // Since options just map to dimensions, we rely on the Profile's markers for the final persona
+        const finalMarkers = foundProfile.markers.map(id => ({ id, weight: 1.0 }));
 
         const event = {
             specVersion: "sp.contribution.v1" as const,
@@ -41,19 +45,21 @@ export function KrafttierQuiz() {
             source: {
                 vertical: "quiz" as const,
                 moduleId: quizMeta.id,
-                domain: window.location.hostname
+                domain: window.location.hostname,
+                locale: "de-DE"
             },
             payload: {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                markers: finalMarkers.map((m: any) => ({
-                    id: m.id,
-                    weight: m.weight || 0.1
-                })),
+                markers: finalMarkers,
                 fields: [
-                    { id: 'field.krafttier.result_title', value: foundProfile.title, kind: 'text' as const, label: 'Krafttier' },
-                    { id: 'field.krafttier.tagline', value: foundProfile.tagline, kind: 'text' as const, label: 'Tagline' }
+                    { id: 'field.krafttier.result_title', value: foundProfile.title, kind: 'text' as const },
+                    { id: 'field.krafttier.tagline', value: foundProfile.tagline, kind: 'text' as const }
                 ],
-                tags: [{ id: 'tag.krafttier.result', label: foundProfile.title, kind: 'misc' as const }]
+                tags: [{ id: 'tag.krafttier.result', label: foundProfile.title, kind: 'archetype' as const }],
+                summary: {
+                    title: `Krafttier: ${foundProfile.title}`,
+                    bullets: [foundProfile.tagline, foundProfile.subtitle],
+                    resultId: foundProfile.id
+                }
             }
         };
 
@@ -62,38 +68,38 @@ export function KrafttierQuiz() {
         return foundProfile;
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleAnswer = (option: any) => {
-        // Accumulate scores
-        const newScores = { ...scores };
+    const handleAnswer = (option: typeof questions[0]['options'][0]) => {
+        // Accumulate dimension scores
+        const newDimensionScores = { ...dimensionScores };
         if (option.scores) {
-            Object.entries(option.scores).forEach(([key, value]) => {
-                newScores[key] = (newScores[key] || 0) + (value as number);
+            Object.entries(option.scores).forEach(([dimId, val]) => {
+                newDimensionScores[dimId] = (newDimensionScores[dimId] || 0) + (val as number);
             });
         }
-        setScores(newScores);
+        setDimensionScores(newDimensionScores);
 
-        // Collect markers
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const newMarkers = [...collectedMarkers];
-        if (option.markers) {
-            newMarkers.push(...option.markers);
-        }
-        setCollectedMarkers(newMarkers);
+        // Micro-win feedback
+        const wins = ["Gut gefühlt!", "Interessant...", "Das passt zu dir.", "Notiert.", "Tiefgründig."];
+        // eslint-disable-next-line
+        setMicroWin(wins[Math.floor(Math.random() * wins.length)]);
+        setTimeout(() => setMicroWin(null), 800);
 
         if (currentQuestion < questions.length - 1) {
-            setCurrentQuestion(currentQuestion + 1);
+            setTimeout(() => {
+                setCurrentQuestion(currentQuestion + 1);
+            }, 300);
         } else {
-            const finalResult = calculateResult(newScores);
-            setResult(finalResult);
-            setShowResult(true);
+            setTimeout(() => {
+                const finalResult = calculateResult(newDimensionScores);
+                setResult(finalResult);
+                setShowResult(true);
+            }, 500);
         }
     };
 
     const resetQuiz = () => {
         setCurrentQuestion(0);
-        setScores({});
-        setCollectedMarkers([]);
+        setDimensionScores({});
         setShowResult(false);
         setResult(null);
         setStarted(false);
@@ -248,6 +254,14 @@ export function KrafttierQuiz() {
                         ))}
                     </div>
                 </div>
+                
+                {microWin && (
+                    <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50 animate-in fade-in zoom-in duration-300">
+                        <div className="text-3xl font-serif font-bold text-emerald-200 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] bg-emerald-950/80 px-8 py-4 rounded-full border border-emerald-500/30 backdrop-blur-md">
+                            {microWin}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
