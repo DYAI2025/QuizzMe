@@ -4,16 +4,22 @@ import Link from "next/link";
 import { QuizSymbol, QuizSymbolVariant } from "@/components/ui/QuizSymbol";
 import { useEffect, useState } from "react";
 import { useClusterProgress } from "@/lib/stores/useClusterProgress";
-import { NATURKIND_CLUSTER } from "@/lib/clusters/registry";
+import { NATURKIND_CLUSTER, MENTALIST_CLUSTER } from "@/lib/clusters/registry";
 import { aggregateCluster } from "@/lib/clusters/aggregator";
 import { ClusterResultCard } from "@/components/clusters/ClusterResultCard";
+import { MentalistClusterCard } from "@/components/clusters/MentalistClusterCard";
 
 // Mapping from quiz ID to variant and href
 const QUIZ_MAPPING: Record<string, { variant: QuizSymbolVariant; href: string }> = {
+  // Naturkind Cluster
   "quiz.aura_colors.v1": { variant: "aura", href: "/verticals/quiz/aura-colors" },
   "quiz.krafttier.v1": { variant: "rpg", href: "/verticals/quiz/rpg-identity" },
-  "quiz.blumenwesen.v1": { variant: "personality", href: "/verticals/quiz/blumenwesen" }, 
-  "quiz.energiestein.v1": { variant: "destiny", href: "/verticals/quiz/energiestein" }     
+  "quiz.blumenwesen.v1": { variant: "personality", href: "/verticals/quiz/blumenwesen" },
+  "quiz.energiestein.v1": { variant: "destiny", href: "/verticals/quiz/energiestein" },
+  // Mentalist Cluster
+  "quiz.lovelang.v1": { variant: "love", href: "/verticals/quiz/love-languages" },
+  "quiz.charme.v1": { variant: "celebrity", href: "/verticals/quiz/charme" },
+  "quiz.eq.v1": { variant: "social-role", href: "/verticals/quiz/eq" }
 };
 
 interface QuizType {
@@ -61,7 +67,7 @@ interface Particle {
 }
 
 export default function QuizLandingPage() {
-  const [particles] = useState<Particle[]>(() => 
+  const [particles] = useState<Particle[]>(() =>
     Array.from({ length: 12 }).map(() => ({
       width: Math.random() * 3 + 1,
       height: Math.random() * 3 + 1,
@@ -75,12 +81,20 @@ export default function QuizLandingPage() {
 
   useEffect(() => {
     initCluster(NATURKIND_CLUSTER.id);
+    initCluster(MENTALIST_CLUSTER.id);
   }, [initCluster]);
 
   const naturkindProgress = isLoaded ? getClusterProgress(NATURKIND_CLUSTER.id) : null;
   const isClusterComplete = naturkindProgress?.isComplete;
-  const clusterPayload = isClusterComplete && naturkindProgress 
-    ? aggregateCluster(NATURKIND_CLUSTER, naturkindProgress) 
+  const clusterPayload = isClusterComplete && naturkindProgress
+    ? aggregateCluster(NATURKIND_CLUSTER, naturkindProgress)
+    : null;
+
+  // Mentalist Cluster
+  const mentalistProgress = isLoaded ? getClusterProgress(MENTALIST_CLUSTER.id) : null;
+  const isMentalistComplete = mentalistProgress?.isComplete;
+  const mentalistPayload = isMentalistComplete && mentalistProgress
+    ? aggregateCluster(MENTALIST_CLUSTER, mentalistProgress)
     : null;
 
   return (
@@ -172,14 +186,14 @@ export default function QuizLandingPage() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-12 text-[#D2A95A]/20 text-9xl font-serif pointer-events-none select-none">
               NATUR
             </div>
-            
+
             <div className="text-center mb-12 relative z-10">
               <span className="text-xs font-bold tracking-[0.2em] text-[#A77D38] uppercase mb-2 block">Cluster</span>
               <h2 className="text-4xl md:text-5xl font-serif mb-4" style={{ color: "#2D5A4C" }}>Naturkind</h2>
               <p className="max-w-xl mx-auto text-[#6CA192] italic">
                 {NATURKIND_CLUSTER.description}
               </p>
-              
+
               {/* Progress Bar */}
               <div className="max-w-xs mx-auto mt-6">
                 <div className="flex justify-between text-xs font-medium text-[#2D5A4C] mb-2 uppercase tracking-wide">
@@ -187,8 +201,8 @@ export default function QuizLandingPage() {
                   <span>{Math.round(naturkindProgress?.percentComplete || 0)}%</span>
                 </div>
                 <div className="h-1.5 bg-[#D2A95A]/20 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-[#2D5A4C] transition-all duration-1000 ease-out" 
+                  <div
+                    className="h-full bg-[#2D5A4C] transition-all duration-1000 ease-out"
                     style={{ width: `${naturkindProgress?.percentComplete || 0}%` }}
                   ></div>
                 </div>
@@ -204,14 +218,67 @@ export default function QuizLandingPage() {
                 {NATURKIND_CLUSTER.quizzes.map((quiz) => {
                   const mapping = QUIZ_MAPPING[quiz.id];
                   const isCompleted = naturkindProgress?.completedQuizzes.some(q => q.quizId === quiz.id);
-                  
+
                   return (
-                    <QuizCard 
+                    <QuizCard
                       key={quiz.id}
                       href={mapping?.href || '#'}
                       title={quiz.displayName}
                       description={quiz.teaserText || ''}
                       variant={mapping?.variant || 'aura'}
+                      isCompleted={isCompleted}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* CLUSTER SECTION: MENTALIST */}
+          <section className="mb-24 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-12 text-[#4A0E4E]/10 text-9xl font-serif pointer-events-none select-none">
+              SEELE
+            </div>
+
+            <div className="text-center mb-12 relative z-10">
+              <span className="text-xs font-bold tracking-[0.2em] text-[#4A0E4E] uppercase mb-2 block">Cluster</span>
+              <h2 className="text-4xl md:text-5xl font-serif mb-4" style={{ color: "#4A0E4E" }}>Mentalist</h2>
+              <p className="max-w-xl mx-auto text-[#8B5A8B] italic">
+                {MENTALIST_CLUSTER.description}
+              </p>
+
+              {/* Progress Bar */}
+              <div className="max-w-xs mx-auto mt-6">
+                <div className="flex justify-between text-xs font-medium text-[#4A0E4E] mb-2 uppercase tracking-wide">
+                  <span>Fortschritt</span>
+                  <span>{Math.round(mentalistProgress?.percentComplete || 0)}%</span>
+                </div>
+                <div className="h-1.5 bg-[#4A0E4E]/20 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#4A0E4E] transition-all duration-1000 ease-out"
+                    style={{ width: `${mentalistProgress?.percentComplete || 0}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {isMentalistComplete && mentalistPayload ? (
+              <div className="mb-12 animate-in fade-in zoom-in duration-700">
+                <MentalistClusterCard payload={mentalistPayload} />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {MENTALIST_CLUSTER.quizzes.map((quiz) => {
+                  const mapping = QUIZ_MAPPING[quiz.id];
+                  const isCompleted = mentalistProgress?.completedQuizzes.some(q => q.quizId === quiz.id);
+
+                  return (
+                    <QuizCard
+                      key={quiz.id}
+                      href={mapping?.href || '#'}
+                      title={quiz.displayName}
+                      description={quiz.teaserText || ''}
+                      variant={mapping?.variant || 'love'}
                       isCompleted={isCompleted}
                     />
                   );
