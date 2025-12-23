@@ -80,6 +80,77 @@ export const NATURKIND_CLUSTER: ClusterDefinition = {
   }
 };
 
+export const MENTALIST_CLUSTER: ClusterDefinition = {
+  id: "cluster.mentalist.v1",
+  name: "Mentalist",
+  description: "Die Essenz deiner emotionalen und sozialen Intelligenz – verdichtet in drei Dimensionen: deine Liebessprache, deine Charme-Signatur und deine emotionale Alchemie.",
+  theme: {
+    icon: "🔮",
+    color: "#4A0E4E",
+    aesthetic: "mystical"
+  },
+  quizzes: [
+    {
+      id: "quiz.lovelang.v1",
+      order: 1,
+      unlockCondition: null,
+      weight: 1.0,
+      displayName: "Die 5 Sprachen der Liebe",
+      dimension: "Beziehungsresonanz",
+      teaserText: "Welche Sprache spricht dein Herz?"
+    },
+    {
+      id: "quiz.charme.v1",
+      order: 2,
+      unlockCondition: "previous",
+      weight: 1.2,
+      displayName: "Die Kunst des Charmes",
+      dimension: "Soziale Magie",
+      teaserText: "Wie verzauberst du die Menschen um dich?"
+    },
+    {
+      id: "quiz.eq.v1",
+      order: 3,
+      unlockCondition: "previous",
+      weight: 1.1,
+      displayName: "Deine Emotionale Signatur",
+      dimension: "Emotionale Alchemie",
+      teaserText: "Wie transformierst du Gefühle in Kraft?"
+    }
+  ],
+  completionReward: {
+    attributeId: "attribute.mentalist",
+    attributeName: "Mentalist",
+    attributeDescription: "Du hast alle drei Dimensionen emotionaler Meisterschaft erkundet und deine psychologische Tiefe freigeschaltet.",
+    unlockId: "unlock.badges.mentalist_complete",
+    unlockLevel: 3
+  },
+  aggregation: {
+    method: "weighted_average",
+    outputTraits: [
+      "trait.mentalist.empathy",
+      "trait.mentalist.influence",
+      "trait.mentalist.equilibrium",
+      "trait.mentalist.insight"
+    ],
+    outputMarkers: [
+      "marker.mentalist.social_mastery",
+      "marker.mentalist.emotional_depth",
+      "marker.mentalist.charismatic_presence"
+    ]
+  },
+  narrativeTemplate: {
+    format: "Deine Mentalist-Signatur ist {rarity}: Deine Liebessprache ist {lovelang}, während dein Charme als {charme} wirkt. Emotional navigierst du als {eq}. Du bist kein Beobachter des Lebens. Du bist ein Meister der unsichtbaren Fäden – {adjectives}.",
+    rarityThresholds: {
+      "common": [0, 40],
+      "uncommon": [41, 60],
+      "rare": [61, 80],
+      "legendary": [81, 100]
+    }
+  }
+};
+
 export const CLUSTER_REGISTRY: Record<string, ClusterDefinition> = {
-  [NATURKIND_CLUSTER.id]: NATURKIND_CLUSTER
+  [NATURKIND_CLUSTER.id]: NATURKIND_CLUSTER,
+  [MENTALIST_CLUSTER.id]: MENTALIST_CLUSTER
 };
