@@ -11,6 +11,7 @@ import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { buildAstroOnboardingEvent, previewAstro, BuildAstroEventInput } from "@/modules/onboarding/astro/buildEvent";
 import { contributeClient, getSnapshotClient } from "@/lib/api";
+import { MAJOR_CITIES } from "@/lib/astro/cities";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -29,6 +30,7 @@ export default function AstroOnboardingPage() {
   const [birthDate, setBirthDate] = useState<string>("");
   const [birthTime, setBirthTime] = useState<string>("");
   const [knowsTime, setKnowsTime] = useState<boolean>(false);
+  const [birthPlaceCity, setBirthPlaceCity] = useState<string>("");
 
   // UI state
   const [step, setStep] = useState<Step>("input");
@@ -62,10 +64,17 @@ export default function AstroOnboardingPage() {
       if (!isNaN(hours) && !isNaN(minutes)) {
         input.birthTime = { hour: hours, minute: minutes };
       }
+
+      if (birthPlaceCity && birthPlaceCity !== "other") {
+        const city = MAJOR_CITIES.find(c => c.name === birthPlaceCity);
+        if (city) {
+          input.birthPlace = { lat: city.lat, lng: city.lng };
+        }
+      }
     }
 
     return input;
-  }, [birthDate, birthTime, knowsTime]);
+  }, [birthDate, birthTime, knowsTime, birthPlaceCity]);
 
   // Preview the astro data
   const preview = useMemo(() => {
@@ -302,16 +311,16 @@ export default function AstroOnboardingPage() {
                   <p className="text-sm text-slate-400">Element</p>
                   <p className="text-lg font-semibold capitalize">
                     {sunSign === "aries" ||
-                    sunSign === "leo" ||
-                    sunSign === "sagittarius"
+                      sunSign === "leo" ||
+                      sunSign === "sagittarius"
                       ? "Fire"
                       : sunSign === "taurus" ||
-                          sunSign === "virgo" ||
-                          sunSign === "capricorn"
+                        sunSign === "virgo" ||
+                        sunSign === "capricorn"
                         ? "Earth"
                         : sunSign === "gemini" ||
-                            sunSign === "libra" ||
-                            sunSign === "aquarius"
+                          sunSign === "libra" ||
+                          sunSign === "aquarius"
                           ? "Air"
                           : "Water"}
                   </p>

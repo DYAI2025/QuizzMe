@@ -12,44 +12,16 @@
  */
 
 import { ContributionEvent, AstroPayload, Marker, Tag, Unlock } from "@/lib/lme/types";
-import { computeAstro, BirthInput, AstroResult } from "@/lib/astro";
+import { computeAstro, BirthInput, AstroResult, SIGN_ELEMENT, SIGN_MODALITY } from "@/lib/astro";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ELEMENT/MODALITY MAPPINGS
 // ═══════════════════════════════════════════════════════════════════════════
 
-type Element = "fire" | "earth" | "air" | "water";
-type Modality = "cardinal" | "fixed" | "mutable";
 
-const SIGN_ELEMENT: Record<string, Element> = {
-  aries: "fire",
-  leo: "fire",
-  sagittarius: "fire",
-  taurus: "earth",
-  virgo: "earth",
-  capricorn: "earth",
-  gemini: "air",
-  libra: "air",
-  aquarius: "air",
-  cancer: "water",
-  scorpio: "water",
-  pisces: "water",
-};
 
-const SIGN_MODALITY: Record<string, Modality> = {
-  aries: "cardinal",
-  cancer: "cardinal",
-  libra: "cardinal",
-  capricorn: "cardinal",
-  taurus: "fixed",
-  leo: "fixed",
-  scorpio: "fixed",
-  aquarius: "fixed",
-  gemini: "mutable",
-  virgo: "mutable",
-  sagittarius: "mutable",
-  pisces: "mutable",
-};
+
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MARKER WEIGHT CONSTANTS (FLAVOR tier)
@@ -171,7 +143,8 @@ function buildAstroPayload(astro: AstroResult, input: BirthInput): AstroPayload 
   return {
     western: {
       sunSign: astro.western.sunSign,
-      // ascendant and moonSign would be added here if birth time is known
+      ascendant: astro.western.ascendant,
+      moonSign: astro.western.moonSign,
       elementsMix: {
         fire: element === "fire" ? 1 : 0,
         earth: element === "earth" ? 1 : 0,

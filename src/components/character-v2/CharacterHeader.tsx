@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 /**
  * Character Header (Block A)
  *
@@ -12,6 +14,7 @@
 
 import { ProfileSnapshot } from "@/lib/lme/types";
 import { ZodiacShield } from "./ZodiacShield";
+import { SIGN_ELEMENT } from "@/lib/astro";
 
 type CharacterHeaderProps = {
   snapshot: ProfileSnapshot;
@@ -35,23 +38,50 @@ export function CharacterHeader({ snapshot }: CharacterHeaderProps) {
           </div>
 
           {/* Identity Info */}
-          <div className="text-center md:text-left flex-1">
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-100 mb-2">
+          <div className="text-center md:text-left flex-1 space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-100">
               Character Sheet
             </h1>
+
             {sunSign && (
-              <p className="text-lg text-indigo-400 capitalize">
-                {sunSign}
-                {chineseAnimal && ` / ${chineseAnimal}`}
-              </p>
+              <div className="text-lg">
+                <span className="text-indigo-400 capitalize font-bold">{sunSign}</span>
+                {chineseAnimal && <span className="text-slate-500"> / {chineseAnimal}</span>}
+              </div>
             )}
-            {primaryArchetype && (
-              <p className="text-slate-400 mt-1">
-                Primary Archetype:{" "}
-                <span className="text-slate-200">
-                  {primaryArchetype.archetype?.name ?? primaryArchetype.archetypeId}
-                </span>
-              </p>
+
+            {/* Extended Astro Details */}
+            {snapshot.astro?.western && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-300">
+                {snapshot.astro.western.ascendant && (
+                  <span>
+                    <span className="text-slate-500">ASC:</span> <span className="capitalize">{snapshot.astro.western.ascendant}</span>
+                  </span>
+                )}
+                {snapshot.astro.western.moonSign && (
+                  <span>
+                    <span className="text-slate-500">Moon:</span> <span className="capitalize">{snapshot.astro.western.moonSign}</span>
+                  </span>
+                )}
+                {/* Element derived from Sun Sign primarily for now, or Mix */}
+                {sunSign && (
+                  <span>
+                    <span className="text-slate-500">Element:</span> <span className="capitalize">{SIGN_ELEMENT[sunSign]}</span>
+                  </span>
+                )}
+              </div>
+            )}
+
+            {sunSign && (
+              <div className="pt-2">
+                <a
+                  href="/verticals/horoscope/daily"
+                  className="inline-flex items-center gap-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-full text-sm transition-colors"
+                >
+                  <span>🔮</span>
+                  <span>Zum Tageshoroskop</span>
+                </a>
+              </div>
             )}
           </div>
 
