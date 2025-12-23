@@ -5,6 +5,7 @@
  */
 
 export * from "./compute";
+export * from "./astronomy";
 export {
   computeBaseScores,
   isAnchorableTrait,

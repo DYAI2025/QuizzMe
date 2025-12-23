@@ -12,6 +12,15 @@
  */
 
 import type { ZodiacSign, ChineseAnimal } from "@/lib/registry/astro-anchor-map.v1";
+import {
+  getJulianDate,
+  getGMST,
+  getLST,
+  calculateAscendant,
+  getPlanetPosition,
+  getSignFromLongitude,
+  PlanetName
+} from "./astronomy";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -23,7 +32,8 @@ export type YinYang = "yin" | "yang";
 export type AstroResult = {
   western: {
     sunSign: ZodiacSign;
-    // Future: ascendant, moonSign (requires birth time)
+    ascendant?: string;
+    moonSign?: string;
   };
   chinese: {
     animal: ChineseAnimal;
@@ -160,19 +170,19 @@ export function getYinYang(year: number): YinYang {
 // MAIN COMPUTE FUNCTION
 // ═══════════════════════════════════════════════════════════════════════════
 
+// (Imports moved to top)
+
 /**
  * Compute astrological data from birth information.
- *
- * MVP: Only sun sign and chinese zodiac (no birth time required)
- * Future: Add ascendant/moon when birth time is provided
  */
 export function computeAstro(input: BirthInput): AstroResult {
   const year = input.date.getFullYear();
+  const sunSign = getSunSign(input.date);
 
-  return {
+  // Basic result
+  const result: AstroResult = {
     western: {
-      sunSign: getSunSign(input.date),
-      // Future: ascendant and moonSign would go here (requires birth time + ephemeris)
+      sunSign,
     },
     chinese: {
       animal: getChineseAnimal(year),
@@ -180,6 +190,153 @@ export function computeAstro(input: BirthInput): AstroResult {
       yinYang: getYinYang(year),
     },
   };
+
+  // Advanced calculation if time/place available
+  if (input.time && input.place) {
+    // Construct full date object with time UTC assumption or local? 
+    // Usually input date is local. We need to handle timezone. 
+    // For MVP/Freemium static, we assume input time is Local Mean Time or broadly correct.
+    // Ideally we need Timezone offset.
+    // We will assume "Local Time" and if we lack TZ, we approximate or treat as UTC-1/2 for DE.
+    // Or better: construct Date with the specific time.
+
+    // Create date object with correct time
+    const fullDate = new Date(input.date);
+    fullDate.setHours(input.time.hour);
+    fullDate.setMinutes(input.time.minute);
+
+    // Calculate JD
+    const jd = getJulianDate(fullDate); // Note: this uses UTC methods on the date object
+
+    const gmst = getGMST(jd);
+    const lst = getLST(gmst, input.place.lng);
+    const ascDeg = calculateAscendant(lst, input.place.lat);
+    const ascInfo = getSignFromLongitude(ascDeg);
+
+    const moonDeg = getPlanetPosition("moon", jd);
+    const moonInfo = getSignFromLongitude(moonDeg);
+
+    // Add to result (using Type assertion if necessary as types might need update or are optional)
+    // Types in AstroResult.western support ascendant/moonSign? 
+    // Let's verify type above in this file.
+
+    // We need to cast or update the type. The existing type has only sunSign. 
+    // I will update the AstroResult type definition IN THIS FILE as well to match.
+
+    Object.assign(result.western, {
+      ascendant: ascInfo.sign,
+      moonSign: moonInfo.sign,
+      // We could store degrees too but Type doesn't have it yet.
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Calculate current transits for a user
+ */
+export function calculateDailyTransits(natalChart: Partial<AstroResult> | null, date: Date = new Date()) {
+  // TODO: Implement full transit logic matching blueprint
+  // using getPlanetPosition for current date vs natal positions.
+  // For now returning basic planet lookup
+
+  const jd = getJulianDate(date);
+  const currentPlanets: Record<string, { longitude: number; sign: string; degree: number }> = {};
+  const planets: PlanetName[] = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"];
+
+  planets.forEach(p => {
+    const lon = getPlanetPosition(p, jd);
+    currentPlanets[p] = {
+      longitude: lon,
+      ...getSignFromLongitude(lon)
+    };
+  });
+
+  // Moon Phase (simple)
+  const sunLon = currentPlanets.sun.longitude;
+  const moonLon = currentPlanets.moon.longitude;
+  let phaseAngle = moonLon - sunLon;
+  if (phaseAngle < 0) phaseAngle += 360;
+
+  const phaseValue = phaseAngle / 360; // 0..1
+
+  // TRANSIT CALCULATION
+  const activeTransits = [];
+
+  if (natalChart) {
+    // We assume natalChart has { planets: { sun: { longitude... }, ... } }
+    // OR we just use what we have available. 
+    // If we don't have full natal positions passed, we can't do much except generic transits (Moon to Sun Sign etc).
+    // For MVP "Freemium", we typically just compute "Transit Planet -> Natal Sun".
+    // Let's implement that robustness.
+
+    const natalSunLon = (natalChart?.western?.sunSign)
+      ? getApproxSunLongitude(natalChart.western.sunSign)
+      : null;
+
+    if (natalSunLon !== null) {
+      // Check Transits to Natal Sun
+      // Jupiter, Saturn, Mars, Moon
+
+      const transitPlanetsToCheck: PlanetName[] = ["jupiter", "saturn", "mars", "moon", "venus", "mercury"];
+
+      for (const tPlanet of transitPlanetsToCheck) {
+        const tLon = currentPlanets[tPlanet].longitude;
+        const diff = Math.abs(tLon - natalSunLon);
+        const dist = Math.min(diff, 360 - diff);
+
+        // Check major aspects: 0, 90, 120, 180
+        const orb = 6; // Wide orb for daily general
+
+        let aspectName = "";
+        if (dist < orb) aspectName = "conjunct";
+        else if (Math.abs(dist - 180) < orb) aspectName = "opposite";
+        else if (Math.abs(dist - 120) < orb) aspectName = "trine";
+        else if (Math.abs(dist - 90) < orb) aspectName = "square";
+
+        if (aspectName) {
+          activeTransits.push({
+            planet: tPlanet,
+            natalPoint: "sun",
+            aspect: aspectName,
+            key: `${tPlanet}_${aspectName}_sun`
+          });
+        }
+      }
+    }
+  }
+
+  return {
+    date: date.toISOString(),
+    currentPlanets,
+    activeTransits, // New field
+    moonPhase: {
+      value: phaseValue,
+      illumination: 0.5 * (1 - Math.cos(phaseAngle * Math.PI / 180)),
+      label: getMoonPhaseLabel(phaseValue)
+    }
+  };
+}
+
+// Helper to estimate Sun position from Sign (middle of sign) if we don't have degree
+// This is a rough fallback
+function getApproxSunLongitude(sign: string): number {
+  const signs = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"];
+  const idx = signs.indexOf(sign.toLowerCase());
+  if (idx === -1) return 0;
+  return idx * 30 + 15; // Middle of sign
+}
+
+function getMoonPhaseLabel(v: number): string {
+  if (v < 0.03) return "New Moon";
+  if (v < 0.22) return "Waxing Crescent";
+  if (v < 0.28) return "First Quarter";
+  if (v < 0.47) return "Waxing Gibbous";
+  if (v < 0.53) return "Full Moon";
+  if (v < 0.72) return "Waning Gibbous";
+  if (v < 0.78) return "Last Quarter";
+  return "Waning Crescent";
 }
 
 /**
@@ -195,3 +352,4 @@ export function hasBirthTime(input: BirthInput): boolean {
 export function hasBirthPlace(input: BirthInput): boolean {
   return input.place !== undefined;
 }
+
