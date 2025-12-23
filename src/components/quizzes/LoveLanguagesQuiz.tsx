@@ -1,10 +1,11 @@
 
 'use client'
 
-import React, { useState } from 'react';
-// import { aggregateMarkers } from '../../lib/lme/marker-aggregator';
-// import { updatePsycheState } from '../../lib/lme/lme-core';
-// import { getPsycheState, savePsycheState } from '../../lib/lme/storage';
+import React, { useState, useEffect } from 'react';
+import { useClusterProgress } from '../../lib/stores/useClusterProgress';
+
+const CLUSTER_ID = 'cluster.mentalist.v1';
+const QUIZ_ID = 'quiz.lovelang.v1';
 
 const quizData = {
     meta: {
@@ -290,6 +291,17 @@ export function LoveLanguagesQuiz() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [collectedMarkers, setCollectedMarkers] = useState<any[]>([]);
 
+    // Cluster integration
+    const { initCluster, completeQuiz, isLoaded } = useClusterProgress();
+
+    // Initialize cluster on mount
+    useEffect(() => {
+        if (isLoaded) {
+            initCluster(CLUSTER_ID);
+        }
+    }, [isLoaded, initCluster]);
+
+
     const handleStart = () => {
         setIsAnimating(true);
         setTimeout(() => {
@@ -370,6 +382,9 @@ export function LoveLanguagesQuiz() {
                             }
                         });
                     }
+
+                    // Track cluster progress
+                    completeQuiz(CLUSTER_ID, QUIZ_ID, finalProfile.id, finalProfile.title);
 
                     setStage('result');
                     setIsAnimating(false);

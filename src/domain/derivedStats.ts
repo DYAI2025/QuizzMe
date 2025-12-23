@@ -4,7 +4,7 @@
  *
  * All formulas follow the specification in feature-char-sheet-impl.md (FR-3)
  */
-import { PsycheCoreStats, DerivedStatsV1 } from '@/types/psyche';
+import { PsycheCoreStats, DerivedStatsV1 } from '@/lib/types/psyche';
 
 /**
  * Maps a 0..1 value to a 0..100 integer percentage

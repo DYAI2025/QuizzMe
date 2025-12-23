@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MetaStats } from '@/types/psyche';
+import { MetaStats } from '@/lib/types/psyche';
 import { characterSheetCopy } from '@/content/character-sheet.de';
 
 interface MetaBadgesRowProps {

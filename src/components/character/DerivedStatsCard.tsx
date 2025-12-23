@@ -4,7 +4,7 @@
 import React from 'react';
 import { AlchemyCard, AlchemyCardHeader, AlchemyCardTitle, AlchemyCardContent } from '@/components/ui/AlchemyCard';
 import { StatPill } from './StatPill';
-import { DerivedStats } from '@/types/psyche';
+import { DerivedStats } from '@/lib/types/psyche';
 import { characterSheetCopy } from '@/content/character-sheet.de';
 
 interface DerivedStatsCardProps {

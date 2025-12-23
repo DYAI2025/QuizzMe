@@ -45,6 +45,9 @@ export interface ValidationProfile {
   stats: ProfileStat[];
   markers?: Marker[];
   share_text?: string;
+  emoji?: string;
+  color?: string;
+  matchCondition?: unknown;
   compatibility?: {
     allies?: string[];
     nemesis?: string | string[];

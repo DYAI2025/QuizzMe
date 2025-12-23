@@ -1,249 +1,302 @@
 
 export const quizMeta = {
   id: "quiz.krafttier.v2",
-  title: "Dein Krafttier",
-  subtitle: "Welcher Instinkt lenkt dich?",
-  description: "Entdecke deine natürliche Energiequelle und deinen Seelengefährten.",
-  questions_count: 10,
-  disclaimer: "Spirituelle Inspiration, basierend auf Persönlichkeits-Archetypen."
+  title: "Welches Krafttier führt dich?",
+  subtitle: "Eine Reise zu deinem spirituellen Begleiter",
+  description: "12 mystische Szenarien enthüllen, welches Tier deine Seele am tiefsten widerspiegelt.",
+  questions_count: 12,
+  disclaimer: "Dieser Test dient der spielerischen Selbstreflexion und stellt keine psychologische Diagnose dar."
 };
 
-// Valid Registry IDs mapped from the plan
-// wolf: marker.values.connection, marker.values.security
-// owl: marker.cognition.system_thinking, marker.eq.self_awareness
-// eagle: marker.values.autonomy, marker.values.risk_taking
-// bear: marker.values.security, marker.aura.authority
-// fox: marker.skills.curiosity, marker.lifestyle.spontaneity
-// dolphin: marker.lifestyle.spontaneity, marker.aura.warmth
+// V2 Dimensions
+export const dimensions = [
+    { id: "mut", name: "Mut" },
+    { id: "instinkt", name: "Instinkt" },
+    { id: "sozial", name: "Sozial" },
+    { id: "weisheit", name: "Weisheit" },
+    { id: "schatten", name: "Schatten" },
+    { id: "klarheit", name: "Klarheit" },
+    { id: "freiheit", name: "Freiheit" },
+    { id: "neugier", name: "Neugier" },
+    { id: "anpassung", name: "Anpassung" },
+    { id: "erdung", name: "Erdung" },
+    { id: "flow", name: "Flow" },
+    { id: "freude", name: "Freude" },
+    { id: "vorsicht", name: "Vorsicht" }
+] as const;
+
+export type DimensionId = typeof dimensions[number]['id'];
+
+// Animal Weights (Matrix for scoring)
+const animalWeights: Record<string, Partial<Record<DimensionId, number>>> = {
+    wolf: { sozial: 2, instinkt: 1.5, mut: 1, erdung: 0.8 },
+    owl: { weisheit: 2, schatten: 1.5, klarheit: 1, vorsicht: 0.8 },
+    eagle: { freiheit: 2, klarheit: 1.5, mut: 1, weisheit: 0.5 },
+    bear: { erdung: 2, mut: 1.5, weisheit: 1, sozial: 0.5 },
+    fox: { neugier: 2, anpassung: 1.5, weisheit: 1, flow: 0.8 },
+    dolphin: { freude: 2, flow: 1.5, anpassung: 1, sozial: 0.5 }
+};
 
 export const questions = [
   {
-    id: "kq1",
-    scenario: "Ein unbekannter Pfad zweigt ab...",
-    text: "Was fühlst du?",
+    id: "q1",
+    scenario: "Die Morgendämmerung bricht an...",
+    text: "Was weckt dich wirklich auf?",
     options: [
-      { text: "Neugier – was gibt es zu entdecken?", scores: { fox: 5, eagle: 3 }, markers: [{ id: "marker.skills.curiosity", weight: 0.1 }] },
-      { text: "Vorsicht – ist es sicher?", scores: { bear: 5, wolf: 3 }, markers: [{ id: "marker.values.security", weight: 0.1 }] },
-      { text: "Freiheit – endlich raus aus dem Alltag", scores: { eagle: 5, dolphin: 3 }, markers: [{ id: "marker.values.autonomy", weight: 0.1 }] },
-      { text: "Analyse – wohin führt er wohl?", scores: { owl: 5, fox: 2 }, markers: [{ id: "marker.cognition.system_thinking", weight: 0.1 }] }
+      { id: "q1_a", text: "Der Ruf des Abenteuers – etwas Neues wartet", scores: { neugier: 5, freiheit: 4, mut: 3 } },
+      { id: "q1_b", text: "Die Stille vor dem ersten Licht", scores: { weisheit: 4, schatten: 5, vorsicht: 3 } },
+      { id: "q1_c", text: "Das Wissen, dass meine Liebsten sicher sind", scores: { sozial: 5, erdung: 4, mut: 2 } },
+      { id: "q1_d", text: "Die Vorfreude auf spielerische Momente", scores: { freude: 5, flow: 4, anpassung: 3 } }
     ]
   },
   {
-    id: "kq2",
-    scenario: "Du bist in einer Gruppe...",
-    text: "Deine natürliche Position?",
+    id: "q2",
+    scenario: "Der Wald ruft...",
+    text: "Wie bewegst du dich durch unbekanntes Terrain?",
     options: [
-      { text: "Im Zentrum, wo der Spaß ist", scores: { dolphin: 5, wolf: 2 }, markers: [{ id: "marker.social.extroversion", weight: 0.1 }] },
-      { text: "Beobachtend am Rand", scores: { owl: 5, bear: 3 }, markers: [{ id: "marker.social.introversion", weight: 0.1 }] },
-      { text: "Schützend für die anderen", scores: { bear: 5, wolf: 4 }, markers: [{ id: "marker.aura.warmth", weight: 0.1 }] },
-      { text: "Unabhängig, komme und gehe", scores: { eagle: 5, fox: 3 }, markers: [{ id: "marker.values.autonomy", weight: 0.1 }] }
+      { id: "q2_a", text: "Mit wachsamen Sinnen – ich spüre jede Veränderung", scores: { instinkt: 5, vorsicht: 4, klarheit: 3 } },
+      { id: "q2_b", text: "Von oben betrachtet – ich verschaffe mir zuerst Überblick", scores: { klarheit: 5, freiheit: 4, weisheit: 3 } },
+      { id: "q2_c", text: "Mit spielerischer Neugier – jeder Pfad ist eine Entdeckung", scores: { neugier: 5, flow: 4, anpassung: 4 } },
+      { id: "q2_d", text: "Bedächtig und verwurzelt – Schritt für Schritt", scores: { erdung: 5, mut: 4, weisheit: 3 } }
     ]
   },
   {
-    id: "kq3",
-    scenario: "Ein Sturm zieht auf...",
-    text: "Dein erster Gedanke?",
+    id: "q3",
+    scenario: "Ein Fremder taucht auf...",
+    text: "Wie reagierst du auf unerwartete Begegnungen?",
     options: [
-      { text: "Wo sind meine Liebsten?", scores: { wolf: 5, bear: 4 }, markers: [{ id: "marker.values.connection", weight: 0.1 }] },
-      { text: "Wie nutze ich die Energie?", scores: { eagle: 5, fox: 3 }, markers: [{ id: "marker.aura.energy", weight: 0.1 }] },
-      { text: "Ich baue einen sicheren Unterschlupf", scores: { bear: 5, owl: 3 }, markers: [{ id: "marker.values.security", weight: 0.1 }] },
-      { text: "Ich spiele im Regen!", scores: { dolphin: 5, fox: 2 }, markers: [{ id: "marker.lifestyle.spontaneity", weight: 0.1 }] }
+      { id: "q3_a", text: "Prüfend, aber offen – mein Instinkt wird mir zeigen, ob ich vertrauen kann", scores: { instinkt: 4, sozial: 5, mut: 3 } },
+      { id: "q3_b", text: "Aus sicherer Distanz beobachtend", scores: { vorsicht: 5, weisheit: 4, schatten: 3 } },
+      { id: "q3_c", text: "Neugierig – jede Begegnung trägt eine Geschichte", scores: { neugier: 5, anpassung: 4, freude: 3 } },
+      { id: "q3_d", text: "Direkt und selbstbewusst – ich zeige, wer ich bin", scores: { mut: 5, freiheit: 4, erdung: 3 } }
     ]
   },
   {
-    id: "kq4",
-    scenario: "Du musst ein Problem lösen...",
-    text: "Deine Strategie?",
+    id: "q4",
+    scenario: "Die Nacht bricht herein...",
+    text: "Wo findest du Frieden?",
     options: [
-      { text: "Ich denke lange und tief nach", scores: { owl: 5, eagle: 2 }, markers: [{ id: "marker.cognition.system_thinking", weight: 0.1 }] },
-      { text: "Ich probiere einfach aus", scores: { fox: 5, dolphin: 3 }, markers: [{ id: "marker.method.trial_and_error", weight: 0.1 }] },
-      { text: "Ich hole Hilfe von Freunden", scores: { wolf: 5, dolphin: 4 }, markers: [{ id: "marker.eq.social_skill", weight: 0.1 }] },
-      { text: "Ich vertraue meinem Instinkt", scores: { bear: 5, eagle: 3 }, markers: [{ id: "marker.cognition.intuition", weight: 0.1 }] }
+      { id: "q4_a", text: "Im Kreise derer, die mir am Herzen liegen", scores: { sozial: 5, erdung: 4, freude: 3 } },
+      { id: "q4_b", text: "In der Stille meiner eigenen Gedanken", scores: { weisheit: 5, schatten: 4, klarheit: 3 } },
+      { id: "q4_c", text: "Im Gefühl absoluter Freiheit", scores: { freiheit: 5, mut: 4, flow: 3 } },
+      { id: "q4_d", text: "Im spielerischen Moment des Hier und Jetzt", scores: { freude: 5, flow: 5, anpassung: 3 } }
     ]
   },
   {
-    id: "kq5",
-    scenario: "Was ist dir am wichtigsten?",
-    text: "Wähle einen Wert:",
+    id: "q5",
+    scenario: "Gefahr nähert sich...",
+    text: "Wie reagierst du auf Bedrohungen?",
     options: [
-      { text: "Weisheit und Wissen", scores: { owl: 5, fox: 2 }, markers: [{ id: "marker.skills.intellect", weight: 0.1 }] },
-      { text: "Gemeinschaft und Loyalität", scores: { wolf: 5, bear: 3 }, markers: [{ id: "marker.values.loyalty", weight: 0.1 }] },
-      { text: "Freiheit und Weitblick", scores: { eagle: 5, wolf: 1 }, markers: [{ id: "marker.values.autonomy", weight: 0.1 }] },
-      { text: "Freude und Spiel", scores: { dolphin: 5, fox: 3 }, markers: [{ id: "marker.values.joy", weight: 0.1 }] }
+      { id: "q5_a", text: "Ich stelle mich schützend vor die Meinen", scores: { mut: 5, sozial: 5, instinkt: 3 } },
+      { id: "q5_b", text: "Ich analysiere die Lage mit klarem Verstand", scores: { weisheit: 5, klarheit: 4, vorsicht: 4 } },
+      { id: "q5_c", text: "Ich vertraue meinen Instinkten und handle blitzschnell", scores: { instinkt: 5, mut: 4, freiheit: 3 } },
+      { id: "q5_d", text: "Ich finde einen kreativen Ausweg", scores: { anpassung: 5, neugier: 4, flow: 4 } }
     ]
   },
   {
-    id: "kq6",
-    scenario: "Jemand lügt dich an...",
-    text: "Wie reagierst du?",
+    id: "q6",
+    scenario: "Ein Traum ruft...",
+    text: "Was treibt dich wirklich an?",
     options: [
-      { text: "Ich durchschaue es sofort", scores: { fox: 5, owl: 4 }, markers: [{ id: "marker.skills.perception", weight: 0.1 }] },
-      { text: "Ich bin tief verletzt", scores: { wolf: 5, dolphin: 3 }, markers: [{ id: "marker.eq.empathy", weight: 0.1 }] },
-      { text: "Ich distanziere mich", scores: { eagle: 5, bear: 2 }, markers: [{ id: "marker.social.reserve", weight: 0.1 }] },
-      { text: "Ich konfrontiere kraftvoll", scores: { bear: 5, wolf: 3 }, markers: [{ id: "marker.social.dominance", weight: 0.1 }] }
+      { id: "q6_a", text: "Die Sehnsucht nach wahrer Verbundenheit", scores: { sozial: 5, erdung: 4, freude: 3 } },
+      { id: "q6_b", text: "Die Suche nach tieferer Wahrheit", scores: { weisheit: 5, schatten: 4, klarheit: 4 } },
+      { id: "q6_c", text: "Die Freiheit, meinen eigenen Weg zu gehen", scores: { freiheit: 5, mut: 4, neugier: 3 } },
+      { id: "q6_d", text: "Der Wunsch, etwas Bleibendes zu schaffen", scores: { erdung: 5, mut: 3, klarheit: 4 } }
     ]
   },
   {
-    id: "kq7",
-    scenario: "Urlaubszeit! Wohin geht es?",
-    text: "Dein Traumziel?",
+    id: "q7",
+    scenario: "Die Schatten werden länger...",
+    text: "Wie verarbeitest du schwierige Zeiten?",
     options: [
-      { text: "Berge mit Weitblick", scores: { eagle: 5, bear: 2 }, markers: [{ id: "marker.values.freedom", weight: 0.1 }] },
-      { text: "Hütte im tiefen Wald", scores: { bear: 5, owl: 3 }, markers: [{ id: "marker.preference.nature", weight: 0.1 }] },
-      { text: "Strandparty mit Vielen", scores: { dolphin: 5, wolf: 2 }, markers: [{ id: "marker.social.extroversion", weight: 0.1 }] },
-      { text: "Rucksack-Trip ins Unbekannte", scores: { fox: 5, eagle: 3 }, markers: [{ id: "marker.values.adventure", weight: 0.1 }] }
+      { id: "q7_a", text: "Ich ziehe mich zurück und reflektiere", scores: { weisheit: 4, schatten: 5, vorsicht: 4 } },
+      { id: "q7_b", text: "Ich suche Trost bei meinen Liebsten", scores: { sozial: 5, erdung: 4, freude: 2 } },
+      { id: "q7_c", text: "Ich handle – Bewegung heilt", scores: { mut: 4, instinkt: 5, flow: 3 } },
+      { id: "q7_d", text: "Ich finde Humor und Leichtigkeit", scores: { freude: 5, anpassung: 4, flow: 3 } }
     ]
   },
   {
-    id: "kq8",
-    scenario: "Deine größte Stärke?",
-    text: "Worauf bist du stolz?",
+    id: "q8",
+    scenario: "Der Wind trägt Geschichten...",
+    text: "Welche Eigenschaft bewunderst du am meisten?",
     options: [
-      { text: "Ich gebe niemals auf", scores: { wolf: 5, bear: 4 }, markers: [{ id: "marker.values.perseverance", weight: 0.1 }] },
-      { text: "Ich sehe das große Ganze", scores: { eagle: 5, owl: 4 }, markers: [{ id: "marker.cognition.system_thinking", weight: 0.1 }] },
-      { text: "Ich finde immer eine Lösung", scores: { fox: 5, owl: 3 }, markers: [{ id: "marker.skills.problem_solving", weight: 0.1 }] },
-      { text: "Ich mache andere glücklich", scores: { dolphin: 5, wolf: 3 }, markers: [{ id: "marker.aura.warmth", weight: 0.1 }] }
+      { id: "q8_a", text: "Unerschütterliche Loyalität", scores: { sozial: 5, erdung: 4, mut: 2 } },
+      { id: "q8_b", text: "Scharfsinnige Weisheit", scores: { weisheit: 5, klarheit: 4, schatten: 3 } },
+      { id: "q8_c", text: "Grenzenlose Freiheit", scores: { freiheit: 5, mut: 4, instinkt: 3 } },
+      { id: "q8_d", text: "Ansteckende Lebensfreude", scores: { freude: 5, flow: 4, sozial: 3 } }
     ]
   },
   {
-    id: "kq9",
-    scenario: "Nachtaktiv oder Frühaufsteher?",
-    text: "Dein Rhythmus?",
+    id: "q9",
+    scenario: "Am Scheideweg...",
+    text: "Wie triffst du wichtige Entscheidungen?",
     options: [
-      { text: "Nacht - da ist es ruhig", scores: { owl: 5, fox: 3 }, markers: [{ id: "marker.lifestyle.night_owl", weight: 0.1 }] },
-      { text: "Früh - der Tag gehört mir", scores: { eagle: 5, dolphin: 2 }, markers: [{ id: "marker.lifestyle.early_bird", weight: 0.1 }] },
-      { text: "Immer bereit, wenn nötig", scores: { wolf: 5, bear: 4 }, markers: [{ id: "marker.values.duty", weight: 0.1 }] },
-      { text: "Ich schlafe, wenn ich müde bin", scores: { bear: 5, dolphin: 3 }, markers: [{ id: "marker.lifestyle.intuition", weight: 0.1 }] }
+      { id: "q9_a", text: "Aus dem Bauch heraus – mein Instinkt täuscht selten", scores: { instinkt: 5, mut: 4, flow: 3 } },
+      { id: "q9_b", text: "Nach gründlicher Analyse aller Optionen", scores: { weisheit: 5, vorsicht: 4, klarheit: 4 } },
+      { id: "q9_c", text: "Im Gespräch mit Menschen, denen ich vertraue", scores: { sozial: 5, erdung: 3, anpassung: 3 } },
+      { id: "q9_d", text: "Ich probiere einfach aus und lerne daraus", scores: { neugier: 5, anpassung: 4, freude: 3 } }
     ]
   },
   {
-    id: "kq10",
-    scenario: "Wähle ein Element.",
-    text: "Was zieht dich an?",
+    id: "q10",
+    scenario: "Das Echo deiner Seele...",
+    text: "Was ist deine größte Gabe?",
     options: [
-      { text: "Luft und Weite", scores: { eagle: 5, owl: 2 }, markers: [{ id: "marker.values.freedom", weight: 0.1 }] },
-      { text: "Erde und Stabilität", scores: { bear: 5, wolf: 3 }, markers: [{ id: "marker.values.security", weight: 0.1 }] },
-      { text: "Wasser und Flow", scores: { dolphin: 5, owl: 1 }, markers: [{ id: "marker.lifestyle.flexibility", weight: 0.1 }] },
-      { text: "Feuer und Wandel", scores: { fox: 5, eagle: 2 }, markers: [{ id: "marker.lifestyle.change", weight: 0.1 }] }
+      { id: "q10_a", text: "Mut – ich gehe, wohin andere nicht wagen", scores: { mut: 5, freiheit: 4, instinkt: 3 } },
+      { id: "q10_b", text: "Empathie – ich fühle, was andere verbergen", scores: { sozial: 5, weisheit: 3, schatten: 3 } },
+      { id: "q10_c", text: "Klarheit – ich sehe durch den Nebel", scores: { klarheit: 5, weisheit: 4, vorsicht: 3 } },
+      { id: "q10_d", text: "Anpassung – ich fließe wie Wasser", scores: { anpassung: 5, flow: 4, freude: 3 } }
+    ]
+  },
+  {
+    id: "q11",
+    scenario: "Das Feuer brennt...",
+    text: "Was gibt dir Kraft, wenn alles dunkel scheint?",
+    options: [
+      { id: "q11_a", text: "Der Glaube an mich selbst", scores: { mut: 5, erdung: 4, instinkt: 3 } },
+      { id: "q11_b", text: "Die Verbindung zu meinem Rudel", scores: { sozial: 5, freude: 3, erdung: 4 } },
+      { id: "q11_c", text: "Das Wissen, dass alles seinen Sinn hat", scores: { weisheit: 5, schatten: 4, klarheit: 3 } },
+      { id: "q11_d", text: "Die Hoffnung auf neue Abenteuer", scores: { freiheit: 4, neugier: 5, flow: 4 } }
+    ]
+  },
+  {
+    id: "q12",
+    scenario: "Die Vision wird klar...",
+    text: "Welches Element ruft am lautesten nach dir?",
+    options: [
+      { id: "q12_a", text: "Erde – stark, beständig, verwurzelt", scores: { erdung: 5, mut: 4, sozial: 3 } },
+      { id: "q12_b", text: "Luft – frei, erhaben, klar", scores: { freiheit: 5, klarheit: 4, weisheit: 3 } },
+      { id: "q12_c", text: "Wasser – fließend, spielerisch, tief", scores: { flow: 5, freude: 4, anpassung: 4 } },
+      { id: "q12_d", text: "Schatten – mysteriös, weise, verborgen", scores: { schatten: 5, weisheit: 4, neugier: 3 } }
     ]
   }
 ];
 
 export const profiles = [
-  {
-    id: "wolf",
-    title: "Der Wolf",
-    icon: "🐺",
-    tagline: "Loyal, ausdauernd und tief verbunden.",
-    description: "Du bist ein Rudeltier, aber mit einer stolzen, unabhängigen Seele. Loyalität ist für dich kein leeres Wort, sondern Gesetz. Du beschützt die Deinen mit allem, was du hast. Gleichzeitig brauchst du die wilde Freiheit, um atmen zu können.",
-    stats: [
-      { label: "Loyalität", value: 98 },
-      { label: "Ausdauer", value: 95 },
-      { label: "Instinkt", value: 92 },
-      { label: "Kompromissbereitschaft", value: 40 }
-    ],
-    compatibility: "Bär, Rabe",
-    share_text: "🐺 Mein Krafttier: Der Wolf – Loyal und instinktiv.",
-    markers: [
-        { id: "marker.values.connection", weight: 0.5 },
-        { id: "marker.values.security", weight: 0.4 }
-    ]
-  },
-  {
-    id: "owl",
-    title: "Die Eule",
-    icon: "🦉",
-    tagline: "Weise, beobachtend und geheimnisvoll.",
-    description: "Du siehst Dinge, die anderen verborgen bleiben. Während die Welt im Chaos versinkt, bewahrst du den Überblick. Deine Weisheit kommt aus der Stille. Du handelst nicht impulsiv, sondern präzise und durchdacht.",
-    stats: [
-      { label: "Weisheit", value: 97 },
-      { label: "Wahrnehmung", value: 99 },
-      { label: "Geduld", value: 95 },
-      { label: "Lautstärke", value: 20 }
-    ],
-    compatibility: "Fuchs, Bär",
-    share_text: "🦉 Mein Krafttier: Die Eule – Weise und sehend.",
-    markers: [
-        { id: "marker.cognition.system_thinking", weight: 0.5 },
-        { id: "marker.eq.self_awareness", weight: 0.4 }
-    ]
-  },
-  {
-    id: "eagle",
-    title: "Der Adler",
-    icon: "🦅",
-    tagline: "Frei, visionär und majestätisch.",
-    description: "Der Boden ist dir zu eng, du brauchst den Himmel. Du hast den Blick für das Große Ganze und verlierst dich nicht in Details. Deine Visionen sind stark, und du hast den Mut, alleine zu fliegen, wenn es sein muss.",
-    stats: [
-      { label: "Vision", value: 98 },
-      { label: "Freiheitsdrang", value: 100 },
-      { label: "Fokus", value: 94 },
-      { label: "Bodenhaftung", value: 30 }
-    ],
-    compatibility: "Wolf, Löwe",
-    share_text: "🦅 Mein Krafttier: Der Adler – Frei und visionär.",
-    markers: [
-        { id: "marker.values.autonomy", weight: 0.6 },
-        { id: "marker.values.risk_taking", weight: 0.3 }
-    ]
-  },
-  {
-    id: "bear",
-    title: "Der Bär",
-    icon: "🐻",
-    tagline: "Stark, schützend und in sich ruhend.",
-    description: "Du bist der Fels in der Brandung. Deine Stärke ist nicht aggressiv, sondern präsent. Wer Schutz sucht, findet ihn bei dir. Du genießt das Leben und die Ruhe, aber wenn man dich reizt, zeigst du deine Kraft.",
-    stats: [
-      { label: "Stärke", value: 96 },
-      { label: "Schutzinstinkt", value: 98 },
-      { label: "Gemütlichkeit", value: 85 },
-      { label: "Hektik", value: 15 }
-    ],
-    compatibility: "Wolf, Eule",
-    share_text: "🐻 Mein Krafttier: Der Bär – Stark und schützend.",
-    markers: [
-        { id: "marker.values.security", weight: 0.5 },
-        { id: "marker.aura.authority", weight: 0.4 }
-    ]
-  },
-  {
-    id: "fox",
-    title: "Der Fuchs",
-    icon: "🦊",
-    tagline: "Schlau, anpassungsfähig und charmant.",
-    description: "Es gibt kein Problem, für das du keine Lösung findest – oft auf Wegen, die andere übersehen. Deine Intelligenz ist praktisch und schnell. Du nimmst das Leben spielerisch und nutzt jede Chance.",
-    stats: [
-      { label: "Schläue", value: 97 },
-      { label: "Anpassung", value: 95 },
-      { label: "Charme", value: 92 },
-      { label: "Ernsthaftigkeit", value: 35 }
-    ],
-    compatibility: "Eule, Delfin",
-    share_text: "🦊 Mein Krafttier: Der Fuchs – Schlau und charmant.",
-    markers: [
-        { id: "marker.skills.curiosity", weight: 0.5 },
-        { id: "marker.lifestyle.spontaneity", weight: 0.3 }
-    ]
-  },
-  {
-    id: "dolphin",
-    title: "Der Delfin",
-    icon: "🐬",
-    tagline: "Verspielt, kommunikativ und empathisch.",
-    description: "Für dich ist das Leben ein Spielplatz. Du bringst Freude, wo immer du auftauchst. Deine emotionale Intelligenz ist hoch, du spürst Schwingungen sofort. Du brauchst die Gemeinschaft wie die Luft zum Atmen.",
-    stats: [
-      { label: "Freude", value: 98 },
-      { label: "Kommunikation", value: 96 },
-      { label: "Empathie", value: 94 },
-      { label: "Alleinsein", value: 20 }
-    ],
-    compatibility: "Fuchs, Wolf",
-    share_text: "🐬 Mein Krafttier: Der Delfin – Verspielt und empathisch.",
-    markers: [
-        { id: "marker.lifestyle.spontaneity", weight: 0.5 },
-        { id: "marker.aura.warmth", weight: 0.4 }
-    ]
-  }
+    {
+      id: "wolf",
+      title: "Der Wolf",
+      icon: "🐺",
+      subtitle: "Hüter des Rudels",
+      tagline: "Loyal, instinktiv und zutiefst verbunden",
+      description: "Der Wolf erwacht in dir – loyal, instinktiv und zutiefst verbunden mit deinem Rudel. Du führst nicht durch Dominanz, sondern durch das tiefe Verständnis, dass wahre Stärke in der Gemeinschaft liegt.",
+      stats: [
+        { label: "Loyalität", value: 98 },
+        { label: "Instinkt", value: 94 },
+        { label: "Führung", value: 91 },
+        { label: "Intuition", "value": 87 }
+      ],
+      compatibility: "Adler, Bär",
+      share_text: "Mein Krafttier ist der Wolf – loyal, instinktiv und Hüter des Rudels. 🐺",
+      markers: ["marker.social.pack_loyalty", "marker.instinct.primal_sense", "marker.leadership.servant_leader"]
+    },
+    {
+      id: "owl",
+      title: "Die Eule",
+      icon: "🦉",
+      subtitle: "Wächterin der Nacht",
+      tagline: "Weise, geduldig und scharfsinnig",
+      description: "Die Eule hat dich erwählt – still, geduldig und mit Augen, die durch jeden Schleier blicken. Du verstehst, dass wahre Weisheit im Zuhören liegt, nicht im Sprechen.",
+      stats: [
+        { label: "Weisheit", value: 97 },
+        { label: "Geduld", value: 95 },
+        { label: "Durchblick", "value": 93 },
+        { label: "Intuition", "value": 89 }
+      ],
+      compatibility: "Wolf, Fuchs",
+      share_text: "Mein Krafttier ist die Eule – weise, geduldig und Wächterin der Nacht. 🦉",
+      markers: ["marker.wisdom.deep_insight", "marker.perception.night_vision", "marker.patience.eternal_watcher"]
+    },
+    {
+      id: "eagle",
+      title: "Der Adler",
+      icon: "🦅",
+      subtitle: "Herrscher der Lüfte",
+      tagline: "Frei, mutig und mit klarem Blick",
+      description: "Der Adler erhebt sich in dir – majestätisch, frei und mit einem Blick, der Horizonte überwindet. Du lebst für die Freiheit und scheust keine Höhen.",
+      stats: [
+        { label: "Freiheit", value: 98 },
+        { label: "Weitblick", value: 96 },
+        { label: "Mut", value: 94 },
+        { label: "Präzision", value: 91 }
+      ],
+      compatibility: "Wolf, Bär",
+      share_text: "Mein Krafttier ist der Adler – frei, mutig und Herrscher der Lüfte. 🦅",
+      markers: ["marker.freedom.sky_bound", "marker.vision.far_sight", "marker.courage.heights_seeker"]
+    },
+    {
+      id: "bear",
+      title: "Der Bär",
+      icon: "🐻",
+      subtitle: "Wächter der Erde",
+      tagline: "Stark, verwurzelt und besonnen",
+      description: "Der Bär erwacht in dir – geerdet, besonnen und mit einer Stärke, die aus tiefer innerer Ruhe kommt. Du brauchst keinen Lärm, um deine Präsenz zu zeigen.",
+      stats: [
+        { label: "Stärke", value: 97 },
+        { label: "Erdung", value: 96 },
+        { label: "Besonnenheit", value: 93 },
+        { label: "Schutzinstinkt", value: 91 }
+      ],
+      compatibility: "Adler, Wolf",
+      share_text: "Mein Krafttier ist der Bär – stark, verwurzelt und Wächter der Erde. 🐻",
+      markers: ["marker.strength.earth_power", "marker.stability.grounded", "marker.protection.den_keeper"]
+    },
+    {
+      id: "fox",
+      title: "Der Fuchs",
+      icon: "🦊",
+      subtitle: "Meister der Anpassung",
+      tagline: "Neugierig, clever und charmant",
+      description: "Der Fuchs tanzt durch deine Seele – neugierig, anpassungsfähig und mit einem Lächeln, das Türen öffnet. Du findest Wege, wo andere nur Mauern sehen.",
+      stats: [
+        { label: "Cleverness", value: 97 },
+        { label: "Anpassung", value: 95 },
+        { label: "Neugier", value: 94 },
+        { label: "Charme", value: 92 }
+      ],
+      compatibility: "Eule, Delfin",
+      share_text: "Mein Krafttier ist der Fuchs – clever, neugierig und Meister der Anpassung. 🦊",
+      markers: ["marker.adaptability.shape_shifter", "marker.curiosity.path_finder", "marker.charm.trickster"]
+    },
+    {
+      id: "dolphin",
+      title: "Der Delfin",
+      icon: "🐬",
+      subtitle: "Botschafter der Freude",
+      tagline: "Spielerisch, verbunden und voller Leben",
+      description: "Der Delphin spielt in deiner Seele – lebendig, spielerisch und in ständigem Flow mit dem Ozean des Lebens. Du erinnerst andere daran, dass Freude keine Schwäche ist.",
+      stats: [
+        { label: "Lebensfreude", value: 98 },
+        { label: "Spielfreude", value: 96 },
+        { label: "Verbundenheit", value: 93 },
+        { label: "Anpassung", value: 91 }
+      ],
+      compatibility: "Fuchs, Wolf",
+      share_text: "Mein Krafttier ist der Delphin – spielerisch, verbunden und Botschafter der Freude. 🐬",
+      markers: ["marker.joy.wave_rider", "marker.playfulness.eternal_youth", "marker.connection.pod_dancer"]
+    }
 ];
 
 export const profileNames = Object.fromEntries(profiles.map(p => [p.id, p.title]));
+
+export type DimensionScores = Record<string, number>;
+export type ProfileScores = Record<string, number>;
+
+// MATRIX MULTIPLICATION: Dimension Scores x Animal Weights
+export function calculateProfileScores(userDimensions: DimensionScores): ProfileScores {
+    const profileScores: ProfileScores = {};
+
+    profiles.forEach(profile => {
+        const weights = animalWeights[profile.id];
+        if (!weights) return;
+
+        let totalScore = 0;
+        Object.entries(weights).forEach(([dimId, weight]) => {
+            const userScore = userDimensions[dimId] || 0;
+            totalScore += userScore * (weight as number);
+        });
+        profileScores[profile.id] = totalScore;
+    });
+
+    return profileScores;
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { PsycheProfileV1, PsycheDelta } from '@/types/psyche';
+import { PsycheProfileV1, PsycheDelta } from '@/lib/types/psyche';
 import { MOCK_PSYCHE_PROFILE } from '@/data/mocks/psyche';
 import { getDeviceId } from '@/lib/device-id';
 import { createClient } from '@/lib/supabase/client';

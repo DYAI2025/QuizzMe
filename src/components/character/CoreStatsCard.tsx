@@ -3,7 +3,7 @@
 import React from 'react';
 import { AlchemyCard, AlchemyCardHeader, AlchemyCardTitle, AlchemyCardContent } from '@/components/ui/AlchemyCard';
 import { StatBarRow } from './StatBarRow';
-import { PsycheCoreStats } from '@/types/psyche';
+import { PsycheCoreStats } from '@/lib/types/psyche';
 import { characterSheetCopy } from '@/content/character-sheet.de';
 import { usePsycheProfile } from '@/hooks/usePsycheProfile';
 import { isTopMover } from '@/utils/deltaAnimations';

@@ -4,7 +4,7 @@
  * and identification of "top movers" (dimensions with significant changes)
  */
 
-import { PsycheCoreStats, PsycheState, PsycheDelta } from '@/types/psyche';
+import { PsycheCoreStats, PsycheState, PsycheDelta } from '@/lib/types/psyche';
 
 /**
  * Represents a dimension that has changed

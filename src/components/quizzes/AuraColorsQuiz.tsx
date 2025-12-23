@@ -17,6 +17,8 @@ import {
   type ElementInfo
 } from './aura-colors/data';
 import { contributeClient as contribute } from '@/lib/api';
+import { useClusterProgress } from '@/lib/stores/useClusterProgress';
+import { ValidationProfile } from './types';
 import { AlchemyButton, AlchemyLinkButton } from '@/components/ui/AlchemyButton';
 
 // Micro-win messages (no emojis)
@@ -57,6 +59,8 @@ export function AuraColorsQuiz() {
   const [showDescription, setShowDescription] = useState(false);
   const [microWin, setMicroWin] = useState<string | null>(null);
   const [collectedMarkers, setCollectedMarkers] = useState<CollectedMarker[]>([]);
+
+  const { completeQuiz } = useClusterProgress();
 
   const calculateResult = (finalScores: DimensionScores, allMarkers: CollectedMarker[]): QuizResult => {
     const normalized = normalizeScores(finalScores);
@@ -129,8 +133,9 @@ export function AuraColorsQuiz() {
     }
     setCollectedMarkers(newMarkers);
 
-    // Show micro-win
-    const winMessage = microWinMessages[Math.floor(Math.random() * microWinMessages.length)];
+    // Show micro-win with deterministic variety
+    const msgIndex = (currentQuestion + scores.energiefluss) % microWinMessages.length;
+    const winMessage = microWinMessages[msgIndex];
     setMicroWin(winMessage);
     setTimeout(() => setMicroWin(null), 800);
 
@@ -143,6 +148,9 @@ export function AuraColorsQuiz() {
         const finalResult = calculateResult(newScores, newMarkers);
         setResult(finalResult);
         setShowResult(true);
+
+        // Mark completion in Cluster Store
+        completeQuiz("cluster.naturkind.v1", quizMeta.id, finalResult.primary.id, finalResult.primary.title);
       }, 500);
     }
   };

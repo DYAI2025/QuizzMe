@@ -1,24 +1,30 @@
-
 "use client";
 
 import Link from "next/link";
 import { QuizSymbol, QuizSymbolVariant } from "@/components/ui/QuizSymbol";
 import { useEffect, useState } from "react";
+import { useClusterProgress } from "@/lib/stores/useClusterProgress";
+import { NATURKIND_CLUSTER } from "@/lib/clusters/registry";
+import { aggregateCluster } from "@/lib/clusters/aggregator";
+import { ClusterResultCard } from "@/components/clusters/ClusterResultCard";
+
+// Mapping from quiz ID to variant and href
+const QUIZ_MAPPING: Record<string, { variant: QuizSymbolVariant; href: string }> = {
+  "quiz.aura_colors.v1": { variant: "aura", href: "/verticals/quiz/aura-colors" },
+  "quiz.krafttier.v1": { variant: "rpg", href: "/verticals/quiz/rpg-identity" },
+  "quiz.blumenwesen.v1": { variant: "personality", href: "/verticals/quiz/blumenwesen" }, 
+  "quiz.energiestein.v1": { variant: "destiny", href: "/verticals/quiz/energiestein" }     
+};
 
 interface QuizType {
   href: string;
   title: string;
   description: string;
   variant: QuizSymbolVariant;
+  isCompleted?: boolean;
 }
 
-const quizzes: QuizType[] = [
-  {
-    href: "/verticals/quiz/aura-colors",
-    title: "Deine Aurafarben",
-    description: "Welche Farbe hat deine Aura? Entdecke das unsichtbare Licht deiner Seele.",
-    variant: "aura",
-  },
+const otherQuizzes: QuizType[] = [
   {
     href: "/verticals/quiz/social-role",
     title: "Soziale Rolle",
@@ -26,28 +32,16 @@ const quizzes: QuizType[] = [
     variant: "social-role",
   },
   {
-    href: "/verticals/quiz/rpg-identity",
-    title: "Krafttier (RPG Identity)",
-    description: "Entdecke dein inneres Krafttier und deine archetypische Klasse.",
-    variant: "rpg",
-  },
-  {
-    href: "/verticals/quiz/destiny",
-    title: "Career DNA (Destiny)",
-    description: "Entschlüssele deinen karmischen Karriere-Code.",
-    variant: "destiny",
-  },
-  {
     href: "/verticals/quiz/spotlight",
     title: "Spotlight",
     description: "Bist du bereit für die Bühne des Lebens?",
-    variant: "celebrity", // Using 'celebrity' as proxy for Spotlight theme
+    variant: "celebrity",
   },
   {
     href: "/verticals/quiz/party",
     title: "Party Bedürfnis",
     description: "Wie viel Feier steckt wirklich in dir?",
-    variant: "personality", // Using 'personality' as proxy for Party theme
+    variant: "personality",
   },
   {
     href: "/verticals/quiz/love-languages",
@@ -67,21 +61,27 @@ interface Particle {
 }
 
 export default function QuizLandingPage() {
-  const [particles, setParticles] = useState<Particle[]>([]);
-
-  useEffect(() => {
-    // Generate random particles only on the client
-    const newParticles = Array.from({ length: 12 }).map(() => ({
+  const [particles] = useState<Particle[]>(() => 
+    Array.from({ length: 12 }).map(() => ({
       width: Math.random() * 3 + 1,
       height: Math.random() * 3 + 1,
       left: Math.random() * 100,
       top: Math.random() * 100,
       duration: Math.random() * 15 + 20,
       delay: Math.random() * 8,
-    }));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setParticles(newParticles);
-  }, []);
+    }))
+  );
+  const { initCluster, getClusterProgress, isLoaded } = useClusterProgress();
+
+  useEffect(() => {
+    initCluster(NATURKIND_CLUSTER.id);
+  }, [initCluster]);
+
+  const naturkindProgress = isLoaded ? getClusterProgress(NATURKIND_CLUSTER.id) : null;
+  const isClusterComplete = naturkindProgress?.isComplete;
+  const clusterPayload = isClusterComplete && naturkindProgress 
+    ? aggregateCluster(NATURKIND_CLUSTER, naturkindProgress) 
+    : null;
 
   return (
     <div
@@ -90,7 +90,7 @@ export default function QuizLandingPage() {
         background: "linear-gradient(135deg, #F7F0E6 0%, #F2E3CF 50%, #FEFBF5 100%)",
       }}
     >
-      {/* Subtle constellation background */}
+      {/* Background Elements */}
       <div className="absolute inset-0 opacity-5 pointer-events-none overflow-hidden">
         <svg viewBox="0 0 1200 900" className="w-full h-full" preserveAspectRatio="none">
           <defs>
@@ -101,16 +101,12 @@ export default function QuizLandingPage() {
               <circle cx="60" cy="150" r="1" fill="#6CA192" opacity="0.2" />
               <circle cx="200" cy="80" r="1.2" fill="#6CA192" opacity="0.25" />
               <circle cx="240" cy="200" r="1" fill="#D2A95A" opacity="0.35" />
-              <line x1="30" y1="30" x2="90" y2="60" stroke="#D2A95A" strokeWidth="0.3" opacity="0.15" />
-              <line x1="90" y1="60" x2="150" y2="120" stroke="#D2A95A" strokeWidth="0.3" opacity="0.15" />
-              <line x1="150" y1="120" x2="200" y2="80" stroke="#6CA192" strokeWidth="0.3" opacity="0.1" />
             </pattern>
           </defs>
           <rect width="1200" height="900" fill="url(#constellation-pattern)" />
         </svg>
       </div>
 
-      {/* Floating mystical particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {particles.map((p, i) => (
           <div
@@ -130,18 +126,15 @@ export default function QuizLandingPage() {
         ))}
       </div>
 
-      {/* Gold accent line - top decorative */}
       <div
         className="absolute top-0 left-0 right-0 h-px"
         style={{ background: "linear-gradient(to right, transparent, #D2A95A, transparent)" }}
       />
 
-      {/* Main content */}
       <div className="relative z-10 min-h-screen p-6 md:p-12">
         <div className="max-w-6xl mx-auto">
-          {/* Header Section */}
-          <header className="text-center mb-20 pt-8 md:pt-12">
-            {/* Decorative ornament */}
+          {/* Header */}
+          <header className="text-center mb-16 pt-8 md:pt-12">
             <div className="flex items-center justify-center mb-8">
               <div className="w-12 h-px" style={{ background: "#D2A95A" }}></div>
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#D2A95A" strokeWidth="1" className="mx-4">
@@ -153,7 +146,6 @@ export default function QuizLandingPage() {
               <div className="w-12 h-px" style={{ background: "#D2A95A" }}></div>
             </div>
 
-            {/* Main heading */}
             <h1
               className="text-5xl md:text-7xl font-serif font-light mb-6 tracking-wide"
               style={{ color: "#053B3F", letterSpacing: "0.02em" }}
@@ -161,7 +153,6 @@ export default function QuizLandingPage() {
               Entdecke Dich Selbst
             </h1>
 
-            {/* Subheading */}
             <p
               className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-8"
               style={{ color: "#6CA192", fontWeight: 400 }}
@@ -169,7 +160,6 @@ export default function QuizLandingPage() {
               Mysterium und Klarheit vereint. Finde deine wahre Natur durch reflektierte Quizze und persönliche Erkenntnisse.
             </p>
 
-            {/* Decorative divider */}
             <div className="flex items-center justify-center gap-3">
               <div className="w-8 h-px" style={{ background: "#D2A95A" }}></div>
               <span style={{ color: "#D2A95A" }}>◆</span>
@@ -177,29 +167,71 @@ export default function QuizLandingPage() {
             </div>
           </header>
 
-          {/* Quiz Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-            {quizzes.map((quiz) => (
-              <QuizCard key={quiz.variant} {...quiz} />
-            ))}
-          </div>
-
-          {/* Trust/Info Section */}
-          <section className="mb-20">
-            <div className="text-center mb-12">
-              <h2
-                className="text-3xl md:text-4xl font-serif font-light mb-3"
-                style={{ color: "#053B3F" }}
-              >
-                Warum QuizzMe?
-              </h2>
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-6 h-px" style={{ background: "#D2A95A" }}></div>
-                <span style={{ color: "#D2A95A", fontSize: "12px" }}>✦</span>
-                <div className="w-6 h-px" style={{ background: "#D2A95A" }}></div>
+          {/* CLUSTER SECTION: NATURKIND */}
+          <section className="mb-24 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-12 text-[#D2A95A]/20 text-9xl font-serif pointer-events-none select-none">
+              NATUR
+            </div>
+            
+            <div className="text-center mb-12 relative z-10">
+              <span className="text-xs font-bold tracking-[0.2em] text-[#A77D38] uppercase mb-2 block">Cluster</span>
+              <h2 className="text-4xl md:text-5xl font-serif mb-4" style={{ color: "#2D5A4C" }}>Naturkind</h2>
+              <p className="max-w-xl mx-auto text-[#6CA192] italic">
+                {NATURKIND_CLUSTER.description}
+              </p>
+              
+              {/* Progress Bar */}
+              <div className="max-w-xs mx-auto mt-6">
+                <div className="flex justify-between text-xs font-medium text-[#2D5A4C] mb-2 uppercase tracking-wide">
+                  <span>Fortschritt</span>
+                  <span>{Math.round(naturkindProgress?.percentComplete || 0)}%</span>
+                </div>
+                <div className="h-1.5 bg-[#D2A95A]/20 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-[#2D5A4C] transition-all duration-1000 ease-out" 
+                    style={{ width: `${naturkindProgress?.percentComplete || 0}%` }}
+                  ></div>
+                </div>
               </div>
             </div>
 
+            {isClusterComplete && clusterPayload ? (
+              <div className="mb-12 animate-in fade-in zoom-in duration-700">
+                <ClusterResultCard payload={clusterPayload} />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {NATURKIND_CLUSTER.quizzes.map((quiz) => {
+                  const mapping = QUIZ_MAPPING[quiz.id];
+                  const isCompleted = naturkindProgress?.completedQuizzes.some(q => q.quizId === quiz.id);
+                  
+                  return (
+                    <QuizCard 
+                      key={quiz.id}
+                      href={mapping?.href || '#'}
+                      title={quiz.displayName}
+                      description={quiz.teaserText || ''}
+                      variant={mapping?.variant || 'aura'}
+                      isCompleted={isCompleted}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* OTHER QUIZZES */}
+          <section className="mb-20">
+            <h3 className="text-2xl font-serif text-[#053B3F] mb-8 text-center">Weitere Entdeckungen</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {otherQuizzes.map((quiz) => (
+                <QuizCard key={quiz.title} {...quiz} />
+              ))}
+            </div>
+          </section>
+
+          {/* Trust Section */}
+          <section className="mb-20">
             <div className="grid md:grid-cols-3 gap-6">
               <TrustCard
                 icon="◆"
@@ -219,7 +251,7 @@ export default function QuizLandingPage() {
             </div>
           </section>
 
-          {/* Featured Destiny Section */}
+          {/* Featured Destiny */}
           <section className="mb-20">
             <Link
               href="/verticals/horoscope"
@@ -230,33 +262,17 @@ export default function QuizLandingPage() {
               }}
             >
               <div className="p-10 md:p-16 flex flex-col md:flex-row items-center gap-12">
-                {/* Symbol */}
                 <div className="flex-shrink-0 w-40 h-40 flex items-center justify-center">
-                  <QuizSymbol
-                    variant="destiny"
-                    size="large"
-                    state="default"
-                  />
+                  <QuizSymbol variant="destiny" size="large" state="default" />
                 </div>
-
-                {/* Content */}
                 <div className="flex-1 text-center md:text-left">
-                  <h3
-                    className="text-3xl md:text-4xl font-serif font-light mb-4"
-                    style={{ color: "#053B3F" }}
-                  >
+                  <h3 className="text-3xl md:text-4xl font-serif font-light mb-4" style={{ color: "#053B3F" }}>
                     Dein Schicksal im Kosmos
                   </h3>
-                  <p
-                    className="text-base md:text-lg leading-relaxed mb-6"
-                    style={{ color: "#6CA192" }}
-                  >
-                    Tritt in unsere Astrologie-Sphäre ein und entdecke die kosmischen Muster, die dein Leben gestalten. Erkunde Sternzeichen, tägliche Vorhersagen und himmlische Führung.
+                  <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "#6CA192" }}>
+                    Tritt in unsere Astrologie-Sphäre ein und entdecke die kosmischen Muster.
                   </p>
-                  <div
-                    className="inline-flex items-center font-medium group-hover:translate-x-1 transition-transform"
-                    style={{ color: "#A77D38" }}
-                  >
+                  <div className="inline-flex items-center font-medium group-hover:translate-x-1 transition-transform" style={{ color: "#A77D38" }}>
                     Zu den Sternen <span className="ml-2">→</span>
                   </div>
                 </div>
@@ -265,18 +281,13 @@ export default function QuizLandingPage() {
           </section>
 
           {/* Footer */}
-          <footer
-            className="text-center py-12 border-t border-opacity-20"
-            style={{ borderColor: "#D2A95A", color: "#6CA192" }}
-          >
+          <footer className="text-center py-12 border-t border-opacity-20" style={{ borderColor: "#D2A95A", color: "#6CA192" }}>
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-8 h-px" style={{ background: "#D2A95A" }}></div>
               <span style={{ color: "#D2A95A", fontSize: "12px" }}>◇</span>
               <div className="w-8 h-px" style={{ background: "#D2A95A" }}></div>
             </div>
-            <p className="text-sm">
-              © 2025 QuizzMe. Mystik trifft Substanz.
-            </p>
+            <p className="text-sm">© 2025 QuizzMe. Mystik trifft Substanz.</p>
           </footer>
         </div>
       </div>
@@ -286,18 +297,24 @@ export default function QuizLandingPage() {
 
 type QuizCardProps = QuizType;
 
-function QuizCard({ href, title, description, variant }: QuizCardProps) {
+function QuizCard({ href, title, description, variant, isCompleted }: QuizCardProps) {
   return (
     <Link
       href={href}
-      className="group block h-full rounded-lg transition-all duration-500 hover:shadow-lg"
+      className={`group block h-full rounded-lg transition-all duration-500 hover:shadow-lg relative overflow-hidden ${isCompleted ? 'ring-2 ring-[#2D5A4C] ring-offset-2 ring-offset-[#F7F0E6]' : ''}`}
       style={{
-        background: "#F7F0E6",
+        background: isCompleted ? "rgba(45, 90, 76, 0.05)" : "#F7F0E6",
         border: "1px solid #D2A95A",
       }}
     >
+      {isCompleted && (
+        <div className="absolute top-3 right-3 bg-[#2D5A4C] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider z-10 flex items-center gap-1">
+          <span>✓</span> Erledigt
+        </div>
+      )}
+
       <div className="p-8 flex flex-col h-full">
-        {/* Symbol Container */}
+        {/* Symbol with updated state logic could be passed here if QuizSymbol supports 'completed' state */}
         <div className="mb-6 flex justify-center h-28 group-hover:scale-105 transition-transform duration-500">
           <QuizSymbol
             variant={variant}
@@ -306,7 +323,6 @@ function QuizCard({ href, title, description, variant }: QuizCardProps) {
           />
         </div>
 
-        {/* Content */}
         <div className="flex-1 flex flex-col">
           <h3
             className="text-lg md:text-xl font-serif font-light mb-3 text-center leading-tight"
@@ -323,12 +339,11 @@ function QuizCard({ href, title, description, variant }: QuizCardProps) {
           </p>
         </div>
 
-        {/* CTA */}
         <div
           className="mt-6 pt-6 text-center text-sm font-medium group-hover:translate-y-(-1) transition-all duration-300"
           style={{ color: "#A77D38", borderTop: "1px solid #D2A95A" }}
         >
-          Quiz starten
+          {isCompleted ? "Ergebnis ansehen" : "Quiz starten"}
         </div>
       </div>
     </Link>
@@ -350,22 +365,13 @@ function TrustCard({ icon, title, description }: TrustCardProps) {
         border: "1px solid #D2A95A",
       }}
     >
-      <div
-        className="text-4xl mb-4 group-hover:scale-110 transition-transform"
-        style={{ color: "#D2A95A" }}
-      >
+      <div className="text-4xl mb-4 group-hover:scale-110 transition-transform" style={{ color: "#D2A95A" }}>
         {icon}
       </div>
-      <h4
-        className="text-lg font-serif font-light mb-2"
-        style={{ color: "#053B3F" }}
-      >
+      <h4 className="text-lg font-serif font-light mb-2" style={{ color: "#053B3F" }}>
         {title}
       </h4>
-      <p
-        className="text-sm leading-relaxed"
-        style={{ color: "#6CA192" }}
-      >
+      <p className="text-sm leading-relaxed" style={{ color: "#6CA192" }}>
         {description}
       </p>
     </div>
