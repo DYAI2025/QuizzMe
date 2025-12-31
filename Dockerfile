@@ -1,29 +1,33 @@
-# Build stage
-FROM node:20-alpine AS builder
-
+FROM node:20-slim AS builder
 WORKDIR /app
-
-# Copy package files
-COPY package.json package-lock.json ./
-
-# Install dependencies
+COPY package*.json ./
+# Use npm ci for reliable builds
 RUN npm ci
-
-# Copy source code
 COPY . .
-
-# Build static export
+# Run build (server mode)
 RUN npm run build
 
-# Production stage with nginx
-FROM nginx:alpine
+FROM node:20-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
 
-# Copy static files from build
-COPY --from=builder /app/out /usr/share/nginx/html
+# Install Python and dependencies for CosmicEngine
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Install pyswisseph (required by CosmicEngine)
+# using --break-system-packages because we are in a container/venv isolation isn't strictly needed for this single pkg
+RUN pip3 install pyswisseph --break-system-packages
 
-EXPOSE 80
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-CMD ["nginx", "-g", "daemon off;"]
+# Create directory for Ephemeris files (to be mounted via volume)
+RUN mkdir -p /app/ephe
+ENV SE_EPHE_PATH=/app/ephe
+
+EXPOSE 3000
+CMD ["node", "server.js"]

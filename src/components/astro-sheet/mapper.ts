@@ -1,0 +1,68 @@
+import { AstroSheetViewModel, AstroProfileRow } from './model';
+
+export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetViewModel {
+  if (!row) {
+    return getEmptyViewModel();
+  }
+
+  const isPremium = row.account_tier === 'premium';
+  
+  // Basic validation check based on DB status and JSON presence
+  const hasJson = row.astro_json && Object.keys(row.astro_json).length > 0;
+  const validationStatus = row.astro_validation_status;
+  
+  // Improve readiness check: strict mode might return a json with "validation": { "status": "error" }
+  const jsonStatus = row.astro_json?.validation?.status;
+  const isOk = (validationStatus === 'ok' || jsonStatus === 'ok') && hasJson;
+  
+  const needsCompute = !isOk;
+  const hasAmbiguousTime = validationStatus === 'AMBIGUOUS_LOCAL_TIME' || jsonStatus === 'AMBIGUOUS_LOCAL_TIME';
+
+  // Extract signs from row (cached) or json
+  const sun = row.sun_sign || row.astro_json?.western?.sun?.sign || "Unknown";
+  const moon = row.moon_sign || row.astro_json?.western?.moon?.sign || "Unknown";
+  const asc = row.asc_sign || row.astro_json?.western?.ascendant?.sign || "Unknown";
+
+  return {
+    identity: {
+      displayName: row.username || "Traveler",
+      solarSign: sun,
+      lunarSign: moon,
+      ascendantSign: asc,
+      level: 1, // Placeholder: implement leveling logic later
+      status: "INITIATE", // Placeholder
+    },
+    stats: [
+      // Example placeholder stats - in future map from astro_json elements/modes
+      { label: "Fire", value: 45 },
+      { label: "Water", value: 60 },
+      { label: "Air", value: 30 },
+      { label: "Earth", value: 75 },
+    ],
+    quizzes: [
+       // Placeholder quizzes until slot integration
+       { id: "q1", title: "Unlock your Moon", href: "#", status: "locked", progress: 0 }
+    ], 
+    agents: [], // Placeholder
+    monetization: {
+      isPremium,
+      showAds: !isPremium,
+    },
+    validation: {
+      needsCompute,
+      hasAmbiguousTime,
+      errorMessage: !isOk && !hasAmbiguousTime ? (validationStatus || "Compute required") : undefined,
+    }
+  };
+}
+
+function getEmptyViewModel(): AstroSheetViewModel {
+  return {
+    identity: { displayName: "", solarSign: "", lunarSign: "", ascendantSign: "", level: 0, status: "" },
+    stats: [],
+    quizzes: [],
+    agents: [],
+    monetization: { isPremium: false, showAds: false },
+    validation: { needsCompute: true, hasAmbiguousTime: false }
+  };
+}
