@@ -1,10 +1,9 @@
 /**
  * GET /api/profile/snapshot
  *
- * Returns the current ProfileSnapshot for a user.
+ * Returns the current ProfileSnapshot for the authenticated user.
  *
- * Query params:
- *   userId?: string  // defaults to "demo"
+ * Query params: (none, inferred from session)
  *
  * Response:
  * {
@@ -17,15 +16,25 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import { NextRequest, NextResponse } from "next/server";
-import { getDefaultProfileStore } from "@/lib/storage/json-store";
 import { getSnapshot } from "@/lib/api/contribute-service";
+import { createClient } from "@/lib/supabase/server";
+import { SupabaseProfileStore } from "@/lib/storage/supabase-store";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId") ?? "demo";
+    // 1. Authenticate User
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    const result = await getSnapshot(getDefaultProfileStore(), userId);
+    if (authError || !user) {
+        return NextResponse.json(
+            { error: "Unauthorized" },
+            { status: 401 }
+        );
+    }
+  
+    // 2. Get Snapshot for Authenticated User
+    const result = await getSnapshot(new SupabaseProfileStore(supabase), user.id);
 
     return NextResponse.json(result);
   } catch (err) {

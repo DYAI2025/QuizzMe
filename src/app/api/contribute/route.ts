@@ -5,7 +5,6 @@
  *
  * Request body:
  * {
- *   userId?: string,  // defaults to "demo"
  *   event: ContributionEvent
  * }
  *
@@ -18,21 +17,28 @@
  */
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getDefaultProfileStore,
-  getDefaultEventStore,
-} from "@/lib/storage/json-store";
 import { contribute } from "@/lib/api/contribute-service";
+import { createClient } from "@/lib/supabase/server";
+import { SupabaseProfileStore } from "@/lib/storage/supabase-store";
+import { getDefaultEventStore } from "@/lib/storage/json-store";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    // 1. Authenticate User
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    // Extract userId (default to "demo" for testing)
-    const userId = (body.userId as string) ?? "demo";
+    if (authError || !user) {
+        return NextResponse.json(
+            { error: "Unauthorized", accepted: false },
+            { status: 401 }
+        );
+    }
+    
+    // 2. Parse Body
+    const body = await req.json();
     const event = body.event;
 
     if (!event) {
@@ -42,13 +48,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Process contribution
+    // 3. Process contribution using authenticated User ID
     const result = await contribute(
       {
-        profiles: getDefaultProfileStore(),
+        profiles: new SupabaseProfileStore(supabase),
+        // We stick with JSONL for event audit log for now (cheap append-only)
+        // ideally this moves to Supabase too, but it's less critical for consistency.
         events: getDefaultEventStore(),
       },
-      { userId, event }
+      { userId: user.id, event }
     );
 
     // Return appropriate status based on acceptance
@@ -74,6 +82,6 @@ export async function GET() {
     status: "ok",
     endpoint: "/api/contribute",
     method: "POST",
-    description: "Submit a ContributionEvent for processing",
+    description: "Submit a ContributionEvent for processing. Requires Auth.",
   });
 }
