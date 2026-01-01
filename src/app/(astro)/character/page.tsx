@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import AstroSheet from "@/components/astro-sheet/AstroSheet";
@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 
 export default function CharacterPage() {
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
