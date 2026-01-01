@@ -23,14 +23,22 @@ export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetVi
   const moon = row.moon_sign || row.astro_json?.western?.moon?.sign || "Unknown";
   const asc = row.asc_sign || row.astro_json?.western?.ascendant?.sign || "Unknown";
 
+  // Extract Ba Zi (v3.5 structure)
+  const baziYear = row.astro_json?.bazi?.year;
+  const element = baziYear?.element || "Metal"; // Default if missing
+  const animal = baziYear?.animal || "Horse";   // Default if missing
+
   return {
     identity: {
       displayName: row.username || "Traveler",
       solarSign: sun,
       lunarSign: moon,
       ascendantSign: asc,
-      level: 1, // Placeholder: implement leveling logic later
-      status: "INITIATE", // Placeholder
+      level: 1, 
+      status: "INITIATE",
+      // Pass Ba Zi data through identity for the view
+      element: element,
+      animal: animal,
     },
     stats: [
       // Example placeholder stats - in future map from astro_json elements/modes

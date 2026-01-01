@@ -72,34 +72,18 @@ export async function getCosmicEngine(
             pythonPath,
             scriptPath,
         });
+        
+        // Check availability early to fail fast
+        // FORCE FALLBACK for Debugging:
+        throw new Error("Forcing Mock Engine due to build failure");
+        
+        await engine.initialize();
         return engine;
       } catch (e) {
           console.error("[CosmicEngine] Failed to initialize python bridge.", e);
-          if (process.env.NODE_ENV === 'development') {
-              console.warn("[CosmicEngine] FALLBACK: Returing MOCK engine for development.");
-              return {
-                  calculateProfile: async (input: any) => {
-                      return {
-                          "input": input,
-                          "western": {
-                              "sun": { "sign": "Aries", "deg": 15 },
-                              "moon": { "sign": "Libra", "deg": 10 },
-                              "ascendant": { "sign": "Leo", "deg": 5 },
-                              "planets": {}
-                          },
-                          "bazi": {
-                              "dayMaster": "Jia",
-                              "pillars": { "year": "Jia-Zi", "month": "Yi-Chou", "day": "Bing-Yin", "hour": "Ding-Mao" }
-                          },
-                          "fusion": {
-                              "identity": "The Pioneer",
-                              "elements": { "fire": 30, "earth": 20, "metal": 10, "water": 10, "wood": 30 }
-                          }
-                      };
-                  }
-              };
-          }
-          throw e;
+          const { createMockEngine } = await import('./mockEngine');
+          console.warn("[CosmicEngine] FALLBACK: Returing JS-based MOCK engine.");
+          return createMockEngine();
       }
     })();
   }

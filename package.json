@@ -17,6 +17,7 @@
     "@google/genai": "^1.34.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
+    "astronomy-engine": "^2.1.19",
     "better-sqlite3": "^12.5.0",
     "cosmic-architecture-engine": "file:./vendor/cosmic-engine-v3_5",
     "framer-motion": "^12.23.26",

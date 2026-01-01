@@ -18,6 +18,9 @@ export function proxy(request: NextRequest) {
         !url.pathname.startsWith('/_next') &&
         !url.pathname.startsWith('/api') &&
         !url.pathname.startsWith('/character') && // exclude character sheet
+        !url.pathname.startsWith('/login') && // exclude auth
+        !url.pathname.startsWith('/auth') && // exclude auth callback
+        !url.pathname.startsWith('/onboarding') && // exclude onboarding
         !url.pathname.includes('.') // exclude files
     ) {
         const newUrl = url.clone()

@@ -12,6 +12,7 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 // Production Mode Detection
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -104,7 +105,17 @@ class PrecisionBridge {
       fs.unlinkSync(tempInput);
 
       // Output parsen
-      const result = JSON.parse(output);
+      let result;
+      try {
+          result = JSON.parse(output);
+      } catch (parseError) {
+          console.error("PY_STDOUT:", output); 
+          // Check if stdout contained error messages instead of JSON
+          throw new PrecisionError(
+            `Failed to parse Python output: ${parseError.message}. Content: ${output.substring(0, 200)}...`,
+             { code: 'JSON_PARSE_ERROR', output }
+          );
+      }
 
       // FAIL-CLOSED: Validation Gate
       this._enforceValidation(result);
@@ -475,7 +486,7 @@ class PrecisionBridge {
    * Erstellt temporäre Datei
    */
   async _createTempFile(content) {
-    const tempDir = path.join(__dirname, '..', 'temp');
+    const tempDir = path.join(os.tmpdir(), 'cosmic-engine-temp');
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }

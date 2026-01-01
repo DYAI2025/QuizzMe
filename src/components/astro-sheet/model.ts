@@ -6,6 +6,8 @@ export interface AstroSheetViewModel {
     ascendantSign: string;
     level: number;
     status: string; // e.g. "Mission Seeker"
+    element?: string; // Ba Zi Element
+    animal?: string; // Ba Zi Animal
   };
   stats: Array<{
     label: string;

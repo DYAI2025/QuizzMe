@@ -25,6 +25,7 @@ export interface MasterIdentity {
   tagestier: string;
   stundenMeister: string;
   element: string;
+  animal?: string; // Add optional animal field for dynamic overrides
   konstellation: {
     sun: string;
     moon: string;

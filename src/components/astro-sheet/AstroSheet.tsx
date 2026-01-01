@@ -8,22 +8,14 @@ import StatsCard from './StatsCard';
 import LootSection from './LootSection';
 import QuizzesCard from './QuizzesCard';
 import AgentsSection from './AgentsSection';
-import HoroscopeInput from './HoroscopeInput';
 import { Search, Activity } from 'lucide-react';
 import { useAstroProfile } from '@/hooks/useAstroProfile';
-import { useAstroCompute } from '@/hooks/useAstroCompute';
 import { mapProfileToViewModel } from './mapper';
 import { UserProfile, MasterIdentity, Stat, QuizItem, Agent } from './types';
 import { CORE_STATS, IDENTITY_DATA, QUIZZES, AGENTS } from './constants';
-import { createClient } from '@/lib/supabase/client';
-import tzlookup from 'tz-lookup';
 
-import { AstroInputData } from './model';
-
-type InputData = AstroInputData;
 export default function AstroSheet() {
-  const { profile, loading: loadingProfile, refetch } = useAstroProfile();
-  const { compute, computing } = useAstroCompute();
+  const { profile, loading: loadingProfile } = useAstroProfile();
 
   const [timestamp, setTimestamp] = React.useState<number>(0);
 
@@ -40,14 +32,17 @@ export default function AstroSheet() {
     status: viewModel.identity.status || 'UNPLUGGED',
   };
 
-  // 2. Identity Adapter (Hybrid: Real Western + Mock BaZi)
+  // 2. Identity Adapter (Hybrid: Real Western + Real Ba Zi)
   const masterIdentity: MasterIdentity = {
-    ...IDENTITY_DATA, // Retain BaZi mocks for visual completeness
+    ...IDENTITY_DATA, 
     konstellation: {
       sun: viewModel.identity.solarSign,
       moon: viewModel.identity.lunarSign,
       rising: viewModel.identity.ascendantSign,
     },
+    // Override Ba Zi mocks if available
+    element: viewModel.identity.element || IDENTITY_DATA.element,
+    animal: viewModel.identity.animal || IDENTITY_DATA.animal,
   };
 
   // 3. Stats Adapter
@@ -56,95 +51,6 @@ export default function AstroSheet() {
   // 4. Quizzes & Agents (Placeholder/Mock for now as per plan)
   const quizzes: QuizItem[] = QUIZZES;
   const agents: Agent[] = AGENTS;
-
-
-
-// ... inside component ...
-
-  const handleCalculate = async (data: InputData) => {
-    if (computing) return;
-    console.log("Updating profile with:", data);
-    
-    // Geocoding & Timezone
-    let lat = 0;
-    let lng = 0;
-    let tz = 'UTC';
-    let placeName = data.location;
-
-    if (data.location) {
-        try {
-            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(data.location)}&format=json&limit=1`, {
-                headers: { 'User-Agent': 'QuizzMe-Astro/1.0' }
-            });
-            const geoJson = await geoRes.json();
-            if (Array.isArray(geoJson) && geoJson.length > 0) {
-                lat = parseFloat(geoJson[0].lat);
-                lng = parseFloat(geoJson[0].lon);
-                placeName = geoJson[0].display_name || data.location;
-                try {
-                    tz = tzlookup(lat, lng);
-                } catch (e) {
-                    console.warn("Timezone lookup failed", e);
-                }
-            }
-        } catch (e) {
-            console.error("Geocoding failed", e);
-        }
-    }
-
-    const supabase = createClient();
-    
-
-    let userId = null;
-    let userName = data.name || 'User';
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-        // AUTH CHECK
-        if (!user) {
-            alert("Please log in to calculate your horoscope.");
-            return;
-        }
-        
-        userId = user.id;
-        userName = user.email?.split('@')[0] || userName;
-
-    // Map input data to DB columns
-    const payload = {
-        user_id: userId,
-        username: userName,
-        birth_date: data.date, 
-        birth_time: data.time || '12:00', // Default if unknown
-        birth_lat: lat,
-        birth_lng: lng,
-        birth_place_name: placeName,
-        iana_time_zone: tz, 
-    };
-
-    console.log("Saving Astro Profile payload:", payload);
-    const { error: upsertError } = await supabase.from('astro_profiles').upsert(payload);
-    
-    if (upsertError) {
-        console.error("Failed to save profile:", upsertError);
-        alert(`Error saving profile: ${upsertError.message}`);
-        return;
-    }
-
-    // Trigger compute
-    try {
-        console.log("Triggering compute...");
-        await compute(true);
-        console.log("Compute finished, refetching...");
-        await refetch();
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e: unknown) {
-        const error = e as Error;
-        console.error("Compute failed:", error);
-        alert(`Compute Error: ${error.message}`);
-    }
-  };
-
 
   if (loadingProfile) {
       return (
@@ -183,6 +89,12 @@ export default function AstroSheet() {
             <button className="px-12 py-4 bg-[#0E1B33] text-white text-[11px] font-extrabold uppercase tracking-[0.4em] rounded-full hover:bg-[#8F7AD1] transition-all shadow-xl shadow-[#0E1B33]/10">
               UPGRADE
             </button>
+            <a 
+              href={user.name === 'TRAVELER' && user.status === 'UNPLUGGED' ? "/login" : "#"} 
+              className={`px-8 py-4 ${user.name === 'TRAVELER' ? 'bg-[#C9A46A] hover:bg-[#b08d55]' : 'bg-transparent border border-[#E6E0D8] hover:bg-[#F6F3EE]'} text-white text-[11px] font-extrabold uppercase tracking-[0.4em] rounded-full transition-all`}
+            >
+              {user.name === 'TRAVELER' ? 'LOGIN' : 'PROFILE'}
+            </a>
           </div>
         </header>
 
@@ -247,16 +159,14 @@ export default function AstroSheet() {
              </div>
           </section>
 
-          {/* Data Input Section - Re-Calibration */}
+          {/* Calibration Action */}
           <section className="animate-reveal" style={{ animationDelay: '0.5s' }}>
-            <div className="text-center mb-24 relative">
-               <div className="cluster-title absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">INPUT</div>
-               <div className="relative z-10">
-                 <div className="text-[11px] uppercase tracking-[0.8em] font-extrabold text-[#8F7AD1] mb-5">Calibration</div>
-                 <h2 className="serif text-7xl font-light text-[#0E1B33] tracking-tighter">Matrix Rekonfiguration</h2>
-               </div>
-            </div>
-            <HoroscopeInput onCalculate={handleCalculate} />
+             <div className="flex justify-center mb-24">
+                <a href="/onboarding/astro" className="px-8 py-4 border border-[#E6E0D8] bg-white text-[10px] mono font-bold uppercase tracking-[0.4em] text-[#A1A1AA] hover:text-[#0E1B33] hover:border-[#0E1B33] rounded-full transition-all flex items-center gap-3">
+                   <Activity size={14} className="text-[#C9A46A]" />
+                   Recalibrate Origin Data
+                </a>
+             </div>
           </section>
 
           {/* Event Log Pill */}
