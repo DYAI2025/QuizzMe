@@ -1,15 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { MAJOR_CITIES, PlaceOption } from '@/lib/places';
 import { upsertProfile } from '@/lib/astroProfiles';
+import { createClient } from '@/lib/supabase/client';
 
 export default function OnboardingPage() {
     const router = useRouter();
+    const supabase = useMemo(() => createClient(), []);
     // const [step, setStep] = useState(1); // Unused for now
     const [loading, setLoading] = useState(false);
+    const [authChecked, setAuthChecked] = useState(false);
     
     // Form State
     const [date, setDate] = useState('');
@@ -18,6 +21,24 @@ export default function OnboardingPage() {
     const [name, setName] = useState('');
 
     const canSubmit = date && time && selectedPlace && name;
+
+    useEffect(() => {
+        const ensureSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    router.replace('/login');
+                    return;
+                }
+                setAuthChecked(true);
+            } catch (err) {
+                console.error('Session check failed', err);
+                router.replace('/login');
+            }
+        };
+
+        ensureSession();
+    }, [router, supabase]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -72,6 +93,14 @@ export default function OnboardingPage() {
             setLoading(false);
         }
     };
+
+    if (!authChecked) {
+        return (
+            <div className="min-h-screen w-full flex items-center justify-center bg-[#F6F3EE] text-[#0E1B33]">
+                <Loader2 className="animate-spin text-[#C9A46A]" size={32} />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#F6F3EE] text-[#0E1B33]">
