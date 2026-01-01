@@ -184,9 +184,8 @@ async function contributeApi(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(userId ? { "x-user-id": userId } : {}),
       },
-      body: JSON.stringify({ event }),
+      body: JSON.stringify({ event, userId }),
     });
 
     const data = await response.json();
@@ -213,9 +212,11 @@ async function contributeApi(
  */
 async function getSnapshotApi(userId?: string): Promise<GetSnapshotResult> {
   try {
-    const response = await fetch("/api/profile/snapshot", {
-      headers: userId ? { "x-user-id": userId } : {},
-    });
+    const url = userId 
+      ? `/api/profile/snapshot?userId=${encodeURIComponent(userId)}`
+      : "/api/profile/snapshot";
+      
+    const response = await fetch(url);
 
     const data = await response.json();
 

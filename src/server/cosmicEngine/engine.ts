@@ -79,9 +79,12 @@ export async function getCosmicEngine(
                       body: JSON.stringify(input)
                   });
                   if (!response.ok) {
-                      throw new Error(`Cloud engine error: ${response.statusText}`);
+                      const errorBody = await response.text();
+                      console.error("[CosmicEngine] Cloud Error Body:", errorBody);
+                      throw new Error(`Cloud engine error: ${response.status} ${response.statusText}`);
                   }
-                  return await response.json();
+                  const data = await response.json();
+                  return data;
               }
           };
       }
@@ -95,8 +98,10 @@ export async function getCosmicEngine(
         });
         
         // Check availability early to fail fast
-        // FORCE FALLBACK for Debugging (User can remove this once comfortable)
-        // throw new Error("Forcing Mock Engine due to build failure");
+        // Optional: Manual Mocking via Env Var (e.g. for specific debug scenarios)
+        if (process.env.COSMIC_FORCE_MOCK === "true") {
+           throw new Error("Forcing Mock Engine via COSMIC_FORCE_MOCK env var");
+        }
         
         if (engine.initialize) {
             await engine.initialize();
@@ -105,7 +110,7 @@ export async function getCosmicEngine(
       } catch (e) {
           console.error("[CosmicEngine] Failed to initialize local python bridge.", e);
           const { createMockEngine } = await import('./cosmic-fallback');
-          console.warn("[CosmicEngine] FALLBACK: Returing JS-based MOCK engine.");
+          console.warn("[CosmicEngine] FALLBACK: Returning JS-based MOCK engine.");
           return createMockEngine();
       }
     })();

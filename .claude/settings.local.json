@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip3:*)",
+      "Bash(pip --version:*)",
+      "Bash(/usr/bin/which:*)",
+      "Bash(/opt/homebrew/bin/python3:*)",
+      "Bash(/usr/local/bin/python3:*)",
+      "Bash(/usr/bin/python3:*)",
+      "Bash(brew list:*)",
+      "Bash(echo:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "claude-flow",
+    "ruv-swarm"
+  ]
+}

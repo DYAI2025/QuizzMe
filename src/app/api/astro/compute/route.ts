@@ -182,9 +182,12 @@ export async function POST(req: Request) {
       ...(row.fold === 0 || row.fold === 1 ? { fold: row.fold } : {}),
     };
 
+    console.log("[POST /api/astro/compute] Input for engine:", engineInput);
+
     let result: any;
     try {
       result = await engine.calculateProfile(engineInput);
+      console.log("[POST /api/astro/compute] Engine Result Keys:", Object.keys(result || {}));
     } catch (err) {
       // Preserve CosmicEngine/Precision error codes for UI resolution (DST fold etc.)
       if (isPrecisionLikeError(err)) {

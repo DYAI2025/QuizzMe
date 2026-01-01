@@ -66,8 +66,7 @@ ALTER TABLE psyche_profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read own profile" ON psyche_profiles
   FOR SELECT
   USING (
-    auth.uid() = user_id 
-    OR device_id IS NOT NULL
+    auth.uid() = user_id
   );
 
 -- Policy: Users can insert their own profiles
@@ -75,15 +74,13 @@ CREATE POLICY "Users can insert own profile" ON psyche_profiles
   FOR INSERT
   WITH CHECK (
     auth.uid() = user_id 
-    OR (user_id IS NULL AND device_id IS NOT NULL)
   );
 
 -- Policy: Users can update their own profiles
 CREATE POLICY "Users can update own profile" ON psyche_profiles
   FOR UPDATE
   USING (
-    auth.uid() = user_id 
-    OR device_id IS NOT NULL
+    auth.uid() = user_id
   );
 
 -- Grant access to anon and authenticated roles
