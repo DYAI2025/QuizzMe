@@ -100,6 +100,8 @@ export async function getCosmicEngine(
 
       // 1. Cloud Engine Logic with Fallback
       const cloudUrl = process.env.COSMIC_CLOUD_URL;
+      console.log("[CosmicEngine] DEBUG: Resolved cloudUrl =", cloudUrl);
+
       
       // We keep a reference to a local fallback singleton if we ever need it.
       let fallbackEngine: CosmicEngineInstance | null = null;
