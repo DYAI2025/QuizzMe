@@ -5,6 +5,7 @@ import { createRequire } from "module";
 
 type CosmicEngineInstance = {
   calculateProfile: (input: any) => Promise<any>;
+  initialize?: () => Promise<void>;
 };
 
 type GetEngineOptions = {
@@ -66,6 +67,26 @@ export async function getCosmicEngine(
       //
       // process.env.ASTRO_PRECISION_ALLOW_MOSHIER = process.env.ASTRO_PRECISION_ALLOW_MOSHIER ?? "1";
 
+      // 1. Try Cloud Engine if configured
+      const cloudUrl = process.env.COSMIC_CLOUD_URL;
+      if (cloudUrl) {
+          console.log("[CosmicEngine] Using Cloud Engine at:", cloudUrl);
+          return {
+              calculateProfile: async (input: any) => {
+                  const response = await fetch(`${cloudUrl}/compute`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(input)
+                  });
+                  if (!response.ok) {
+                      throw new Error(`Cloud engine error: ${response.statusText}`);
+                  }
+                  return await response.json();
+              }
+          };
+      }
+
+      // 2. Try Local Python Bridge
       try {
         const engine = await cosmic.createEngine({
             strictMode,
@@ -74,14 +95,16 @@ export async function getCosmicEngine(
         });
         
         // Check availability early to fail fast
-        // FORCE FALLBACK for Debugging:
-        throw new Error("Forcing Mock Engine due to build failure");
+        // FORCE FALLBACK for Debugging (User can remove this once comfortable)
+        // throw new Error("Forcing Mock Engine due to build failure");
         
-        await engine.initialize();
+        if (engine.initialize) {
+            await engine.initialize();
+        }
         return engine;
       } catch (e) {
-          console.error("[CosmicEngine] Failed to initialize python bridge.", e);
-          const { createMockEngine } = await import('./mockEngine');
+          console.error("[CosmicEngine] Failed to initialize local python bridge.", e);
+          const { createMockEngine } = await import('./cosmic-fallback');
           console.warn("[CosmicEngine] FALLBACK: Returing JS-based MOCK engine.");
           return createMockEngine();
       }

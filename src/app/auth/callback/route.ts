@@ -2,19 +2,21 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const requestUrl = new URL(request.url)
+  const { searchParams, origin } = requestUrl
   const code = searchParams.get('code')
-  // if "next" is in param, use it as the redirect URL
   const next = searchParams.get('next') ?? '/character'
+
+  console.log("[Auth Callback] Request URL:", request.url);
+  console.log("[Auth Callback] Code found:", !!code);
 
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
-      // Check if user has an astro profile
       const { data: { user } } = await supabase.auth.getUser();
-      console.log("[Auth Callback] User:", user?.id);
+      console.log("[Auth Callback] Success. User:", user?.id);
       
       if (user) {
          const { data: profile, error: profileError } = await supabase
@@ -35,14 +37,14 @@ export async function GET(request: Request) {
              return NextResponse.redirect(`${origin}/onboarding/astro`);
          }
       }
-      
-      // Fallback if no user found (shouldn't happen on success)
-      return NextResponse.redirect(`${origin}${next}`)
     } else {
-        console.error("[Auth Callback] Code Exchange Error:", error);
+        console.error("[Auth Callback] Code Exchange Error:", error.message, error.status);
     }
+  } else {
+      console.warn("[Auth Callback] No code provided in URL");
   }
 
   // return the user to an error page with instructions
+  console.log("[Auth Callback] Redirecting to error page");
   return NextResponse.redirect(`${origin}/auth/auth-code-error`)
 }

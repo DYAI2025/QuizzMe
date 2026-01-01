@@ -37,6 +37,7 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${inter.variable} antialiased`}
         style={{ background: "var(--alchemy-bg-midnight)" }}
+        suppressHydrationWarning
       >
         {children}
       </body>
