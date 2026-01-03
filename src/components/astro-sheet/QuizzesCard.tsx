@@ -2,6 +2,7 @@
 import React from 'react';
 import { CheckCircle, Play, ChevronRight, GraduationCap } from 'lucide-react';
 import { QuizItem } from './types';
+import { trackQuizEvent } from "@/lib/analytics/supabase";
 
 interface QuizzesCardProps { quizzes: QuizItem[]; }
 
@@ -38,7 +39,10 @@ const QuizzesCard: React.FC<QuizzesCardProps> = ({ quizzes }) => {
                 <p className="text-[12px] text-[#5A6477] italic leading-relaxed mb-6 font-light">
                   Analysten-Tipp: Schärfe deine <span className="text-[#0E1B33] font-bold underline decoration-[#C9A46A]/30">{quiz.recommendation}</span> für präzisere Ergebnisse.
                 </p>
-                <button className="flex items-center justify-center gap-4 w-full py-4 bg-[#F6F3EE] hover:bg-[#0E1B33] hover:text-white rounded-2xl text-[10px] font-extrabold uppercase tracking-[0.3em] transition-all group/btn shadow-sm">
+                <button
+                  className="flex items-center justify-center gap-4 w-full py-4 bg-[#F6F3EE] hover:bg-[#0E1B33] hover:text-white rounded-2xl text-[10px] font-extrabold uppercase tracking-[0.3em] transition-all group/btn shadow-sm"
+                  onClick={() => trackQuizEvent({ event: "quiz_cta_click", quizId: quiz.id, metadata: { title: quiz.title } })}
+                >
                   Quiz fortsetzen
                   <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                 </button>

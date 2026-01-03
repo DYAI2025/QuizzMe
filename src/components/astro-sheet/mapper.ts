@@ -1,4 +1,8 @@
-import { AstroSheetViewModel, AstroProfileRow } from './model';
+import { AstroSheetViewModel, AstroProfileRow, HousePlacement, NatalAspect, NatalBody } from './model';
+
+type RawPlanet = { name?: string; body?: string; sign?: string; degree?: number; house?: number };
+type RawHouse = { number?: number; sign?: string; degree?: number };
+type RawAspect = { from?: string; to?: string; p1?: string; p2?: string; type?: string; aspect?: string; orb?: number };
 
 export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetViewModel {
   if (!row) {
@@ -32,6 +36,26 @@ export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetVi
   const element = baziYear?.element || "Metal"; // Default if missing
   const animal = baziYear?.animal || "Horse";   // Default if missing
 
+  const planets: NatalBody[] = (row.astro_json?.western?.planets as RawPlanet[] | undefined || []).map((p) => ({
+    name: p.name || p.body || "Planet",
+    sign: p.sign || "" ,
+    degree: Number(p.degree || 0),
+    house: p.house,
+  }));
+
+  const houses: HousePlacement[] = (row.astro_json?.western?.houses as RawHouse[] | undefined || []).map((h, idx: number) => ({
+    number: h.number || idx + 1,
+    sign: h.sign || "",
+    degree: Number(h.degree || 0),
+  }));
+
+  const aspects: NatalAspect[] = (row.astro_json?.western?.aspects as RawAspect[] | undefined || []).map((a) => ({
+    from: a.from || a.p1 || "",
+    to: a.to || a.p2 || "",
+    type: a.type || a.aspect || "",
+    orb: a.orb ? Number(a.orb) : undefined,
+  }));
+
   return {
     identity: {
       displayName: row.username || "Traveler",
@@ -60,6 +84,11 @@ export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetVi
       isPremium,
       showAds: !isPremium,
     },
+    natal: {
+      planets,
+      houses,
+      aspects,
+    },
     validation: {
       needsCompute,
       hasAmbiguousTime,
@@ -77,6 +106,7 @@ function getEmptyViewModel(): AstroSheetViewModel {
     quizzes: [],
     agents: [],
     monetization: { isPremium: false, showAds: false },
+    natal: { planets: [], houses: [], aspects: [] },
     validation: { needsCompute: true, hasAmbiguousTime: false }
   };
 }

@@ -1,8 +1,10 @@
-'use client';
+"use client";
 
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2, Mail, ArrowRight, CheckCircle } from 'lucide-react';
+import { useTranslations } from "@/components/i18n/TranslationProvider";
+import { OAuthButtons } from "./OAuthButtons";
 
 export default function AuthForm() {
     const [email, setEmail] = useState('');
@@ -10,6 +12,7 @@ export default function AuthForm() {
     const [sent, setSent] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const supabase = createClient();
+    const t = useTranslations();
 
     const handleMagicLink = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,8 +28,9 @@ export default function AuthForm() {
             });
             if (error) throw error;
             setSent(true);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -40,16 +44,15 @@ export default function AuthForm() {
                         <CheckCircle className="text-[#7AA7A1]" size={32} />
                     </div>
                 </div>
-                <h1 className="serif text-3xl text-[#0E1B33] mb-4">Check your Email</h1>
+                <h1 className="serif text-3xl text-[#0E1B33] mb-4">{t("login.sentTitle")}</h1>
                 <p className="text-sm text-[#5A6477] mb-8 leading-relaxed">
-                    We sent a magic link to <span className="font-bold text-[#0E1B33]">{email}</span>.<br/>
-                    Click the link to enter your cosmic dashboard.
+                    {t("login.sentBody").replace('{email}', email)}
                 </p>
-                <button 
+                <button
                     onClick={() => setSent(false)}
                     className="text-[10px] uppercase tracking-widest text-[#A1A1AA] hover:text-[#0E1B33] transition-colors"
                 >
-                    Use a different email
+                    {t("login.useDifferent")}
                 </button>
             </div>
         );
@@ -59,16 +62,16 @@ export default function AuthForm() {
         <div className="w-full max-w-md p-8 rounded-3xl bg-white/80 backdrop-blur-xl border border-[#E6E0D8] shadow-2xl">
             <div className="text-center mb-8">
                 <h1 className="serif text-4xl text-[#0E1B33] mb-2">
-                    Enter the Matrix
+                    {t("login.title")}
                 </h1>
                 <p className="mono text-[10px] text-[#5A6477] uppercase tracking-[0.2em]">
-                    Authentication Required
+                    {t("login.description")}
                 </p>
             </div>
 
             <form onSubmit={handleMagicLink} className="space-y-4">
                 <div className="space-y-2">
-                    <label className="mono text-[10px] uppercase tracking-widest text-[#5A6477] font-bold">Email</label>
+                    <label className="mono text-[10px] uppercase tracking-widest text-[#5A6477] font-bold">{t("login.email")}</label>
                     <div className="relative group">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] group-focus-within:text-[#C9A46A] transition-colors" size={16} />
                         <input
@@ -98,7 +101,7 @@ export default function AuthForm() {
                             <Loader2 className="animate-spin" size={16} />
                         ) : (
                             <>
-                                Send Magic Link
+                                {t("login.magic")}
                                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                             </>
                         )}
@@ -111,6 +114,9 @@ export default function AuthForm() {
                     </p>
                 </div>
             </form>
+            <div className="mt-8 pt-6 border-t border-[#E6E0D8]">
+              <OAuthButtons />
+            </div>
         </div>
     );
 }

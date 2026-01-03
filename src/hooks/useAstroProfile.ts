@@ -9,6 +9,7 @@ export function useAstroProfile() {
   const [profile, setProfile] = useState<AstroProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -24,6 +25,8 @@ export function useAstroProfile() {
         return;
       }
 
+      setUserId(user.id);
+
       const { data, error } = await supabase
         .from("astro_profiles")
         .select("*")
@@ -35,9 +38,10 @@ export function useAstroProfile() {
       }
       
       setProfile(data as AstroProfileRow | null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching astro profile:", err);
-      setError(err.message);
+      const message = err instanceof Error ? err.message : "Unknown error";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -46,6 +50,27 @@ export function useAstroProfile() {
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel("astro-profiles-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "astro_profiles", filter: `user_id=eq.${userId}` },
+        (payload) => {
+          if (payload.new) {
+            setProfile(payload.new as AstroProfileRow);
+          }
+        }
+      );
+
+    channel.subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, userId]);
 
   return { profile, loading, error, refetch: fetchProfile };
 }

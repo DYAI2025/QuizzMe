@@ -31,6 +31,11 @@ export interface AstroSheetViewModel {
     isPremium: boolean;
     showAds: boolean;
   };
+  natal: {
+    planets: NatalBody[];
+    houses: HousePlacement[];
+    aspects: NatalAspect[];
+  };
   validation: {
     needsCompute: boolean;
     hasAmbiguousTime: boolean; // if true, UI should show fold selector
@@ -38,6 +43,26 @@ export interface AstroSheetViewModel {
     status?: string;
     computedAt?: string | null;
   };
+}
+
+export interface NatalBody {
+  name: string;
+  sign: string;
+  degree: number;
+  house?: number;
+}
+
+export interface HousePlacement {
+  number: number;
+  sign: string;
+  degree: number;
+}
+
+export interface NatalAspect {
+  from: string;
+  to: string;
+  type: string;
+  orb?: number;
 }
 
 export type AstroProfileRow = {
