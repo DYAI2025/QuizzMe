@@ -16,11 +16,3 @@ ALTER TABLE astro_profiles
 UPDATE astro_profiles
 SET birth_time_local = birth_time
 WHERE birth_time_local IS NULL AND birth_time IS NOT NULL;
-
--- Enforce NOT NULL when data exists
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM astro_profiles) THEN
-    ALTER TABLE astro_profiles ALTER COLUMN birth_time_local SET NOT NULL;
-  END IF;
-END $$;
