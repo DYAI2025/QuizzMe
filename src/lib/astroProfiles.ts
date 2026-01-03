@@ -19,7 +19,8 @@ export async function upsertProfile(data: ProfileInput) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("User not authenticated");
 
-    const normalizedTime = data.birth_time.includes(":") && data.birth_time.length === 5
+    const timeHHMMRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+    const normalizedTime = timeHHMMRegex.test(data.birth_time)
         ? `${data.birth_time}:00`
         : data.birth_time;
 
