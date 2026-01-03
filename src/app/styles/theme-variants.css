@@ -1,0 +1,14 @@
+:root[data-theme='light'] {
+  color-scheme: light;
+  --app-surface: #F6F3EE;
+  --app-text: #0E1B33;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --alchemy-bg-midnight: #0a1626;
+  --alchemy-text-light: #f0f4ff;
+  --alchemy-card-bg: #0f2236;
+  --app-surface: #0b1523;
+  --app-text: #f5f7fb;
+}

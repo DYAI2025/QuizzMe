@@ -13,6 +13,8 @@ import { useAstroProfile } from '@/hooks/useAstroProfile';
 import { mapProfileToViewModel } from './mapper';
 import { UserProfile, MasterIdentity, Stat, QuizItem, Agent } from './types';
 import { CORE_STATS, IDENTITY_DATA, QUIZZES, AGENTS } from './constants';
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { NatalChartCard } from "./NatalChartCard";
 
 export default function AstroSheet() {
   const { profile, loading: loadingProfile } = useAstroProfile();
@@ -80,17 +82,18 @@ export default function AstroSheet() {
           <div className="flex items-center gap-12">
             <div className="relative group hidden lg:block">
                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#A1A1AA]" size={16} />
-               <input 
-                 type="text" 
+               <input
+                 type="text"
                  placeholder="Matrix durchsuchen..."
                  className="pl-14 pr-8 py-3.5 bg-[#F6F3EE] border border-[#E6E0D8] rounded-full text-xs font-medium focus:outline-none focus:border-[#C9A46A] w-72 transition-all"
-               />
+              />
             </div>
+            <ThemeToggle />
             <button className="px-12 py-4 bg-[#0E1B33] text-white text-[11px] font-extrabold uppercase tracking-[0.4em] rounded-full hover:bg-[#8F7AD1] transition-all shadow-xl shadow-[#0E1B33]/10">
               UPGRADE
             </button>
-            <a 
-              href={user.name === 'TRAVELER' && user.status === 'UNPLUGGED' ? "/login" : "#"} 
+            <a
+              href={user.name === 'TRAVELER' && user.status === 'UNPLUGGED' ? "/login" : "#"}
               className={`px-8 py-4 ${user.name === 'TRAVELER' ? 'bg-[#C9A46A] hover:bg-[#b08d55]' : 'bg-transparent border border-[#E6E0D8] hover:bg-[#F6F3EE]'} text-white text-[11px] font-extrabold uppercase tracking-[0.4em] rounded-full transition-all`}
             >
               {user.name === 'TRAVELER' ? 'LOGIN' : 'PROFILE'}
@@ -104,6 +107,10 @@ export default function AstroSheet() {
           {/* Identity Section - Consolidated Badge */}
           <section className="animate-reveal" style={{ animationDelay: '0.1s' }}>
             <IdentityBadges data={masterIdentity} />
+          </section>
+
+          <section className="animate-reveal" style={{ animationDelay: '0.15s' }}>
+            <NatalChartCard natal={viewModel.natal} />
           </section>
 
           {/* Daily Horoscope - Oracle Section */}
