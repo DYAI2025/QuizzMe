@@ -10,7 +10,7 @@ export function useAstroCompute() {
     setComputing(true);
     setError(null);
     try {
-      const res = await fetch("/api/astro/compute", {
+      const res = await fetch("/api/astro-compute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ force }),

@@ -40,6 +40,8 @@ export interface AstroSheetViewModel {
     needsCompute: boolean;
     hasAmbiguousTime: boolean; // if true, UI should show fold selector
     errorMessage?: string;
+    status?: string;
+    computedAt?: string | null;
   };
 }
 
@@ -68,15 +70,25 @@ export type AstroProfileRow = {
   username: string;
   birth_date: string;
   birth_time: string;
+  birth_time_local?: string;
   iana_time_zone: string;
   fold: number | null;
   // ... other fields
+  birth_place_name?: string;
+  birth_place_country?: string | null;
+  birth_lat?: number;
+  birth_lng?: number;
   sun_sign: string | null;
   moon_sign: string | null;
   asc_sign: string | null;
-  astro_json: Record<string, unknown>;
+  astro_json: Record<string, any>;
+  astro_meta_json?: Record<string, any> | null;
+  astro_validation_json?: Record<string, any> | null;
+  astro_compute_hash?: string | null;
+  astro_computed_at?: string | null;
   account_tier: 'free' | 'premium';
   astro_validation_status: string | null; // e.g. "ok", "error", "ambiguous"
+  input_status?: 'ready' | 'computing' | 'computed' | 'error';
 };
 
 export interface AstroInputData {

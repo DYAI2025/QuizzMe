@@ -17,7 +17,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { NatalChartCard } from "./NatalChartCard";
 
 export default function AstroSheet() {
-  const { profile, loading: loadingProfile } = useAstroProfile();
+  const { profile, loading: loadingProfile, error, refetch } = useAstroProfile();
 
   const [timestamp, setTimestamp] = React.useState<number>(0);
 
@@ -26,6 +26,14 @@ export default function AstroSheet() {
   }, []);
 
   const viewModel = mapProfileToViewModel(profile);
+  const statusColor = viewModel.validation.status === 'computed'
+    ? 'border-green-200 bg-green-50 text-green-700'
+    : viewModel.validation.status === 'computing'
+      ? 'border-amber-200 bg-amber-50 text-amber-700'
+      : 'border-[#E6E0D8] bg-white text-[#0E1B33]';
+  const computedAt = viewModel.validation.computedAt
+    ? new Date(viewModel.validation.computedAt).toLocaleString()
+    : null;
 
   // 1. User Adapter
   const user: UserProfile = {
@@ -65,11 +73,71 @@ export default function AstroSheet() {
       );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F6F3EE] text-[#0E1B33]">
+        <div className="bg-white border border-[#E6E0D8] shadow-xl rounded-2xl p-8 max-w-md w-full space-y-4 text-center">
+          <h2 className="serif text-3xl">Fehler beim Laden</h2>
+          <p className="mono text-[12px] text-[#5A6477] leading-relaxed">
+            {error} — bitte melde dich erneut an oder versuche es noch einmal.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <a
+              href="/login"
+              className="px-4 py-3 bg-[#0E1B33] text-white rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:bg-[#1a2c4e]"
+            >
+              Login öffnen
+            </a>
+            <button
+              type="button"
+              onClick={refetch}
+              className="px-4 py-3 border border-[#E6E0D8] rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:border-[#0E1B33]"
+            >
+              Erneut laden
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <Sidebar user={user} />
-      
+
       <main className="pl-[260px] min-h-screen relative z-10">
+        {(viewModel.validation.status || viewModel.validation.errorMessage || viewModel.validation.needsCompute) && (
+          <div className="px-16 pt-10">
+            <div className={`border rounded-2xl p-6 shadow-sm ${statusColor}`}>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="mono text-[10px] uppercase tracking-[0.3em] font-bold">Compute Status</p>
+                  <p className="text-lg font-semibold">{(viewModel.validation.status || 'ready').toUpperCase()}</p>
+                  {computedAt && (
+                    <p className="text-sm opacity-80">Letzte Berechnung: {computedAt}</p>
+                  )}
+                  {viewModel.validation.errorMessage && (
+                    <p className="text-sm text-red-700">{viewModel.validation.errorMessage}</p>
+                  )}
+                  {viewModel.validation.hasAmbiguousTime && (
+                    <p className="text-sm text-amber-700">Doppelte Sommerzeit erkannt – wähle die korrekte Uhrzeit im Onboarding.</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {viewModel.validation.needsCompute && (
+                    <a
+                      href="/onboarding/astro"
+                      className="px-4 py-2 rounded-lg border border-[#E6E0D8] bg-white text-[10px] mono font-bold uppercase tracking-[0.2em] hover:border-[#0E1B33] hover:text-[#0E1B33]"
+                    >
+                      Neu berechnen
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Topbar / Editorial Header */}
         <header className="h-28 px-16 flex items-center justify-between border-b border-[#E6E0D8] bg-white/60 backdrop-blur-xl sticky top-0 z-50">
           <div>

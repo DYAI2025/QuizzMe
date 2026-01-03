@@ -13,6 +13,7 @@ export default function OnboardingPage() {
     // const [step, setStep] = useState(1); // Unused for now
     const [loading, setLoading] = useState(false);
     const [authChecked, setAuthChecked] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     
     // Form State
     const [date, setDate] = useState('');
@@ -40,19 +41,19 @@ export default function OnboardingPage() {
         ensureSession();
     }, [router, supabase]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const runFlow = async () => {
         if (!canSubmit) return;
-
+        setErrorMessage(null);
         setLoading(true);
+
         try {
-            // 1. Persist Profile
             if (selectedPlace) {
                 await upsertProfile({
                     username: name,
                     birth_date: date,
                     birth_time: time,
                     birth_place_name: selectedPlace.name,
+                    birth_place_country: selectedPlace.country,
                     birth_lat: selectedPlace.lat,
                     birth_lng: selectedPlace.lng,
                     iana_time_zone: selectedPlace.tz,
@@ -60,7 +61,7 @@ export default function OnboardingPage() {
             }
 
             // 2. Trigger Compute
-            const res = await fetch('/api/astro/compute', {
+            const res = await fetch('/api/astro-compute', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ force: true })
@@ -68,30 +69,38 @@ export default function OnboardingPage() {
 
             const data = await res.json();
 
+            if (res.status === 401) {
+                router.replace('/login');
+                setLoading(false);
+                return;
+            }
+
             if (!res.ok) {
-                // Handle Errors
                 if (data.code === 'AMBIGUOUS_LOCAL_TIME') {
-                   alert("DST Ambiguity detected (Implementation pending for Phase 3.2)");
-                   // TODO: Open Fold Choice Dialog
+                    setErrorMessage('DST Ambiguity detected (Implementation pending for Phase 3.2)');
                 } else if (data.code === 'NONEXISTENT_LOCAL_TIME') {
-                   alert("Invalid Time detected (DST gap) (Implementation pending for Phase 3.3)");
-                   // TODO: Show Error on time field
+                    setErrorMessage('Invalid Time detected (DST gap) (Implementation pending for Phase 3.3)');
                 } else {
-                   throw new Error(data.error || 'Computation failed');
+                    setErrorMessage(data.error || 'Computation failed');
                 }
                 setLoading(false);
                 return;
             }
 
             // 3. Success -> Redirect
-            router.push('/character');
+            router.push('/astrosheet');
             
         } catch (err: unknown) {
             console.error("Onboarding failed:", err);
             const msg = err instanceof Error ? err.message : 'Unknown error';
-            alert(`Error: ${msg}`);
+            setErrorMessage(msg);
             setLoading(false);
         }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await runFlow();
     };
 
     if (!authChecked) {
@@ -182,6 +191,31 @@ export default function OnboardingPage() {
                  >
                     {loading ? <Loader2 className="animate-spin" /> : <>Initialize <ArrowRight size={16}/></>}
                  </button>
+                 {errorMessage && (
+                    <div className="p-4 border border-red-200 bg-red-50 text-red-800 rounded-xl flex flex-col gap-3">
+                        <p className="mono text-[12px]">{errorMessage}</p>
+                        <div className="flex gap-3 flex-wrap">
+                            <button
+                                type="button"
+                                disabled={!canSubmit || loading}
+                                onClick={() => {
+                                    if (canSubmit && !loading) {
+                                        runFlow();
+                                    }
+                                }}
+                                className="px-4 py-3 bg-[#0E1B33] text-white rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:bg-[#1a2c4e] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Erneut versuchen
+                            </button>
+                            <a
+                                href="/login"
+                                className="px-4 py-3 border border-[#E6E0D8] rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:border-[#0E1B33]"
+                            >
+                                Zur Login-Seite
+                            </a>
+                        </div>
+                    </div>
+                 )}
               </form>
            </div>
         </div>
