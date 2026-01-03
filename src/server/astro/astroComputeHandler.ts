@@ -257,7 +257,7 @@ export async function handleAstroCompute(req: Request, label = "astro-compute") 
     if (upErr) {
       console.error(`[POST /api/${label}] DB update error:`, upErr);
       await markStatus(user.id, "error", {
-        astro_validation_status: upErr.message,
+        astro_validation_status: (upErr as any).code ?? "DB_UPDATE_ERROR",
       });
       return NextResponse.json(
         { ok: false, error: "Failed to persist computed profile" },
