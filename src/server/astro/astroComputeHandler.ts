@@ -162,7 +162,7 @@ export async function handleAstroCompute(req: Request, label = "astro-compute") 
         astro_compute_hash: row.astro_compute_hash,
         astro_computed_at: row.astro_computed_at,
         astro_validation_status: row.astro_validation_status,
-        input_status: row.input_status,
+        input_status: "computed",
       });
     }
 
