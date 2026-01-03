@@ -6,6 +6,7 @@
 
 export * from "./compute";
 export * from "./astronomy";
+export * from "./time-helpers";
 export {
   computeBaseScores,
   isAnchorableTrait,
