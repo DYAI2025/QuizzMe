@@ -5,7 +5,6 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const { searchParams, origin } = requestUrl
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/astrosheet'
 
   console.log("[Auth Callback] Request URL:", request.url);
   console.log("[Auth Callback] Code found:", !!code);
