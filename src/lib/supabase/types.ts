@@ -1,7 +1,7 @@
 /**
  * Supabase Database Types
  * 
- * These types match the psyche_profiles table schema
+ * These types match the public schema tables used by the app
  */
 
 export interface Database {
@@ -12,11 +12,45 @@ export interface Database {
         Insert: PsycheProfileInsert;
         Update: PsycheProfileUpdate;
       };
+      profiles: {
+        Row: ProfileRow;
+        Insert: ProfileInsert;
+        Update: ProfileUpdate;
+      };
+      astro_profiles: {
+        Row: AstroProfileRow;
+        Insert: AstroProfileInsert;
+        Update: AstroProfileUpdate;
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: Record<string, never>;
   };
+}
+
+export interface ProfileRow {
+  id: string;
+  email: string | null;
+  onboarding_status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProfileInsert {
+  id: string;
+  email?: string | null;
+  onboarding_status?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProfileUpdate {
+  id?: string;
+  email?: string | null;
+  onboarding_status?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PsycheProfileRow {
@@ -122,4 +156,84 @@ interface DeltaJson {
     delta: number;
     magnitude: number;
   }>;
+}
+
+export interface AstroProfileRow {
+  user_id: string;
+  username: string;
+  birth_date: string;
+  birth_time: string;
+  birth_time_local: string;
+  iana_time_zone: string;
+  fold: number | null;
+  birth_place_name: string;
+  birth_place_country: string | null;
+  birth_lat: number;
+  birth_lng: number;
+  sun_sign: string | null;
+  moon_sign: string | null;
+  asc_sign: string | null;
+  astro_json: Record<string, any>;
+  astro_meta_json: Record<string, any> | null;
+  astro_validation_json: Record<string, any> | null;
+  astro_compute_hash: string | null;
+  astro_computed_at: string | null;
+  astro_validation_status: string | null;
+  input_status: 'ready' | 'computing' | 'computed' | 'error';
+  account_tier: 'free' | 'premium';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AstroProfileInsert {
+  user_id: string;
+  username: string;
+  birth_date: string;
+  birth_time: string;
+  birth_time_local?: string;
+  iana_time_zone: string;
+  fold?: number | null;
+  birth_place_name: string;
+  birth_place_country?: string | null;
+  birth_lat: number;
+  birth_lng: number;
+  sun_sign?: string | null;
+  moon_sign?: string | null;
+  asc_sign?: string | null;
+  astro_json?: Record<string, any>;
+  astro_meta_json?: Record<string, any> | null;
+  astro_validation_json?: Record<string, any> | null;
+  astro_compute_hash?: string | null;
+  astro_computed_at?: string | null;
+  astro_validation_status?: string | null;
+  input_status?: 'ready' | 'computing' | 'computed' | 'error';
+  account_tier?: 'free' | 'premium';
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AstroProfileUpdate {
+  username?: string;
+  birth_date?: string;
+  birth_time?: string;
+  birth_time_local?: string;
+  iana_time_zone?: string;
+  fold?: number | null;
+  birth_place_name?: string;
+  birth_place_country?: string | null;
+  birth_lat?: number;
+  birth_lng?: number;
+  sun_sign?: string | null;
+  moon_sign?: string | null;
+  asc_sign?: string | null;
+  astro_json?: Record<string, any>;
+  astro_meta_json?: Record<string, any> | null;
+  astro_validation_json?: Record<string, any> | null;
+  astro_compute_hash?: string | null;
+  astro_computed_at?: string | null;
+  astro_validation_status?: string | null;
+  input_status?: 'ready' | 'computing' | 'computed' | 'error';
+  account_tier?: 'free' | 'premium';
+  created_at?: string;
+  updated_at?: string;
 }
