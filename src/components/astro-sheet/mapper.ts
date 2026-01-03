@@ -6,17 +6,21 @@ export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetVi
   }
 
   const isPremium = row.account_tier === 'premium';
-  
+  const status = row.input_status ?? 'ready';
+
   // Basic validation check based on DB status and JSON presence
   const hasJson = row.astro_json && Object.keys(row.astro_json).length > 0;
   const validationStatus = row.astro_validation_status;
-  
+
   // Improve readiness check: strict mode might return a json with "validation": { "status": "error" }
   const jsonStatus = row.astro_json?.validation?.status;
   const isOk = (validationStatus === 'ok' || jsonStatus === 'ok') && hasJson;
-  
+
   const needsCompute = !isOk;
   const hasAmbiguousTime = validationStatus === 'AMBIGUOUS_LOCAL_TIME' || jsonStatus === 'AMBIGUOUS_LOCAL_TIME';
+  const errorMessage = status === 'error' || !isOk
+    ? (validationStatus || row.astro_validation_json?.message || 'Compute required')
+    : undefined;
 
   // Extract signs from row (cached) or json
   const sun = row.sun_sign || row.astro_json?.western?.sun?.sign || "Unknown";
@@ -50,16 +54,18 @@ export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetVi
     quizzes: [
        // Placeholder quizzes until slot integration
        { id: "q1", title: "Unlock your Moon", href: "#", status: "locked", progress: 0 }
-    ], 
+    ],
     agents: [], // Placeholder
     monetization: {
       isPremium,
       showAds: !isPremium,
     },
     validation: {
-      needsCompute,
+      needsCompute: needsCompute || status !== 'computed',
       hasAmbiguousTime,
-      errorMessage: !isOk && !hasAmbiguousTime ? (validationStatus || "Compute required") : undefined,
+      errorMessage: hasAmbiguousTime ? undefined : errorMessage,
+      status,
+      computedAt: row.astro_computed_at ?? null,
     }
   };
 }
