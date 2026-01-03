@@ -18,7 +18,7 @@ export function useAstroProfile() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setError("Session abgelaufen. Bitte erneut anmelden.");
+        setError("Session expired. Please log in again.");
         router.replace('/login');
         setLoading(false);
         return;
