@@ -47,13 +47,6 @@ export default function OnboardingPage() {
         setLoading(true);
 
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                router.replace('/login');
-                setLoading(false);
-                return;
-            }
-
             if (selectedPlace) {
                 await upsertProfile({
                     username: name,
