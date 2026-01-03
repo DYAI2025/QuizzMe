@@ -35,6 +35,7 @@ export function usePsycheProfile(): UsePsycheProfileResult {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
     const [showBanner, setShowBanner] = useState(false);
+    const supabase = useMemo(() => createClient(), []);
 
     // Compute movers from delta
     const movers = useMemo<Mover[]>(() => {
@@ -79,8 +80,6 @@ export function usePsycheProfile(): UsePsycheProfileResult {
                 return;
             }
 
-            const supabase = createClient();
-            
             const { data, error: fetchError } = await supabase
                 .from('psyche_profiles')
                 .select('*')
@@ -108,7 +107,7 @@ export function usePsycheProfile(): UsePsycheProfileResult {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [supabase]);
 
     const saveProfile = useCallback(async (profileData: Partial<PsycheProfileV1>): Promise<boolean> => {
         try {
@@ -136,8 +135,6 @@ export function usePsycheProfile(): UsePsycheProfileResult {
                 mind_heart: profileData.state?.mind_heart ?? profile?.state?.mind_heart ?? 0.5,
             };
 
-            const supabase = createClient();
-            
             // Check if profile exists
             const { data: existing } = await supabase
                 .from('psyche_profiles')
@@ -200,7 +197,7 @@ export function usePsycheProfile(): UsePsycheProfileResult {
             console.error('Error saving psyche profile:', err);
             return false;
         }
-    }, [profile]);
+    }, [profile, supabase]);
 
     // Auto-dismiss banner after timeout
     useEffect(() => {

@@ -15,7 +15,7 @@ import { UserProfile, MasterIdentity, Stat, QuizItem, Agent } from './types';
 import { CORE_STATS, IDENTITY_DATA, QUIZZES, AGENTS } from './constants';
 
 export default function AstroSheet() {
-  const { profile, loading: loadingProfile } = useAstroProfile();
+  const { profile, loading: loadingProfile, error, refetch } = useAstroProfile();
 
   const [timestamp, setTimestamp] = React.useState<number>(0);
 
@@ -69,6 +69,34 @@ export default function AstroSheet() {
            </div>
         </div>
       );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F6F3EE] text-[#0E1B33]">
+        <div className="bg-white border border-[#E6E0D8] shadow-xl rounded-2xl p-8 max-w-md w-full space-y-4 text-center">
+          <h2 className="serif text-3xl">Fehler beim Laden</h2>
+          <p className="mono text-[12px] text-[#5A6477] leading-relaxed">
+            {error} — bitte melde dich erneut an oder versuche es noch einmal.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <a
+              href="/login"
+              className="px-4 py-3 bg-[#0E1B33] text-white rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:bg-[#1a2c4e]"
+            >
+              Login öffnen
+            </a>
+            <button
+              type="button"
+              onClick={refetch}
+              className="px-4 py-3 border border-[#E6E0D8] rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:border-[#0E1B33]"
+            >
+              Erneut laden
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
