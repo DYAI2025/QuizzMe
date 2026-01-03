@@ -61,7 +61,7 @@ export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetVi
       showAds: !isPremium,
     },
     validation: {
-      needsCompute: needsCompute || status !== 'computed',
+      needsCompute,
       hasAmbiguousTime,
       errorMessage: hasAmbiguousTime ? undefined : errorMessage,
       status,
