@@ -5,7 +5,6 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const { searchParams, origin } = requestUrl
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/character'
 
   console.log("[Auth Callback] Request URL:", request.url);
   console.log("[Auth Callback] Code found:", !!code);
@@ -30,8 +29,8 @@ export async function GET(request: Request) {
          }
 
          if (profile) {
-             console.log("[Auth Callback] Profile found, redirecting to /character");
-             return NextResponse.redirect(`${origin}/character`);
+             console.log("[Auth Callback] Profile found, redirecting to /astrosheet");
+             return NextResponse.redirect(`${origin}/astrosheet`);
          } else {
              console.log("[Auth Callback] No profile, redirecting to /onboarding/astro");
              return NextResponse.redirect(`${origin}/onboarding/astro`);

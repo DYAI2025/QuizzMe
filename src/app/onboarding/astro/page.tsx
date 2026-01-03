@@ -53,6 +53,7 @@ export default function OnboardingPage() {
                     birth_date: date,
                     birth_time: time,
                     birth_place_name: selectedPlace.name,
+                    birth_place_country: selectedPlace.country,
                     birth_lat: selectedPlace.lat,
                     birth_lng: selectedPlace.lng,
                     iana_time_zone: selectedPlace.tz,
@@ -60,7 +61,7 @@ export default function OnboardingPage() {
             }
 
             // 2. Trigger Compute
-            const res = await fetch('/api/astro/compute', {
+            const res = await fetch('/api/astro-compute', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ force: true })
@@ -84,7 +85,7 @@ export default function OnboardingPage() {
             }
 
             // 3. Success -> Redirect
-            router.push('/character');
+            router.push('/astrosheet');
             
         } catch (err: unknown) {
             console.error("Onboarding failed:", err);

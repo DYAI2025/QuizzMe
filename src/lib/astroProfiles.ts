@@ -5,9 +5,11 @@ export type ProfileInput = {
     birth_date: string;
     birth_time: string;
     birth_place_name: string;
+    birth_place_country?: string;
     birth_lat: number;
     birth_lng: number;
     iana_time_zone: string;
+    fold?: number | null;
 };
 
 export async function upsertProfile(data: ProfileInput) {
@@ -17,9 +19,27 @@ export async function upsertProfile(data: ProfileInput) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("User not authenticated");
 
+    const timeHHMMRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+    const normalizedTime = timeHHMMRegex.test(data.birth_time)
+        ? `${data.birth_time}:00`
+        : data.birth_time;
+
     const payload = {
         user_id: user.id,
-        ...data,
+        username: data.username,
+        birth_date: data.birth_date,
+        birth_time: normalizedTime,
+        birth_time_local: normalizedTime,
+        birth_place_name: data.birth_place_name,
+        birth_place_country: data.birth_place_country ?? null,
+        birth_lat: data.birth_lat,
+        birth_lng: data.birth_lng,
+        iana_time_zone: data.iana_time_zone,
+        fold: data.fold ?? null,
+        input_status: 'ready',
+        astro_validation_status: null,
+        astro_compute_hash: null,
+        astro_computed_at: null,
         updated_at: new Date().toISOString()
     };
 
