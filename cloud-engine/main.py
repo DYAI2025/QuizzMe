@@ -35,7 +35,7 @@ async def compute(input_data: ComputeInput):
         )
         
         # Run precision calculation
-        result = compute_horoscope(data, options)
+        result = compute_horoscope(data, options=options)
         
         return result
     except Exception as e:

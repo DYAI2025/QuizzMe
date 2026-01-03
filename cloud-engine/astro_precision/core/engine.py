@@ -296,7 +296,7 @@ def compute_horoscope(payload: Dict[str, Any], *, options: ComputeOptions) -> Di
 
     # --- Houses / Asc
     try:
-        cusps, ascmc = swe.houses_ex(jd_ut, lat, lon, hsys.encode('ascii'), 0)
+        cusps, ascmc = swe.houses_ex(jd_ut, lat, lon, hsys.encode('ascii'), flags)
         asc = float(ascmc[0]) % 360.0
         mc = float(ascmc[1]) % 360.0
     except Exception as e:

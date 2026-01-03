@@ -7,6 +7,8 @@ app = 'osmic-cloud-engine'
 primary_region = 'fra'
 
 [build]
+[env]
+  ASTRO_PRECISION_ALLOW_MOSHIER = "1"
 
 [http_service]
   internal_port = 8080

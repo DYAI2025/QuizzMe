@@ -8,7 +8,8 @@
       "Bash(/usr/local/bin/python3:*)",
       "Bash(/usr/bin/python3:*)",
       "Bash(brew list:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(git commit:*)"
     ]
   },
   "enabledMcpjsonServers": [
