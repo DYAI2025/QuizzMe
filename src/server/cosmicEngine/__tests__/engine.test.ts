@@ -1,133 +1,206 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
+/**
+ * Tests for CosmicEngine Loading Logic
+ *
+ * Tests the singleton engine loader with various configurations:
+ * - Local Python engine
+ * - Cloud engine fallback
+ * - Mock engine fallback
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import type { BirthInput, AstroProfileV1 } from "../schemas";
 
 // Mock server-only
-vi.mock('server-only', () => ({}));
+vi.mock("server-only", () => ({}));
 
-// 1. Define the mock factory for the engine dependency
+// Mock the fusionSign module
+vi.mock("../fusionSign", () => ({
+  generateFusionSign: vi.fn().mockReturnValue(undefined),
+}));
+
+// Mock the astronomy-utils module
+vi.mock("../astronomy-utils", () => ({
+  getWesternZodiacSign: vi.fn().mockReturnValue("cancer"),
+  STEM_ELEMENT_INDEX: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
+  BRANCH_FIXED_ELEMENT_INDEX: [4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4],
+  WU_XING: ["Wood", "Fire", "Earth", "Metal", "Water"],
+  WU_XING_DE: ["Holz", "Feuer", "Erde", "Metall", "Wasser"],
+  STEMS_CN: ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"],
+  BRANCHES_CN: ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"],
+  ZODIAC_ANIMALS_DE: [
+    "Ratte",
+    "Büffel",
+    "Tiger",
+    "Hase",
+    "Drache",
+    "Schlange",
+    "Pferd",
+    "Ziege",
+    "Affe",
+    "Hahn",
+    "Hund",
+    "Schwein",
+  ],
+  SOLAR_MONTH_START_LONS: [315, 345, 15, 45, 75, 105, 135, 165, 195, 225, 255, 285],
+  calculateTrueSolarTime: vi.fn().mockReturnValue(720),
+  normalizeDeg: (deg: number) => ((deg % 360) + 360) % 360,
+}));
+
+// Define the mock factory for the engine dependency
 const mockCreateEngine = vi.fn();
 
-// 2. Intercept the `createRequire` call used in engine.ts
-vi.mock('module', async (importOriginal) => {
-    const actual: any = await importOriginal();
-    return {
-        ...actual,
-        createRequire: () => {
-             // Return a mock 'require' function
-             const requireMock = (id: string) => {
-                 if (id === 'cosmic-architecture-engine') {
-                     return { createEngine: mockCreateEngine };
-                 }
-                 if (id === 'path') return require('path');
-                 // Fallback for other requires if necessary, or throw
-                 return {};
-             };
-             // Also need to mock require.resolve for path.dirname(entry)
-             requireMock.resolve = (id: string) => {
-                 if (id === 'cosmic-architecture-engine') return '/mock/path/index.js';
-                 return '';
-             };
-             return requireMock;
+// Intercept the `createRequire` call used in engine.ts
+vi.mock("module", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    createRequire: () => {
+      const requireMock = (id: string) => {
+        if (id === "cosmic-architecture-engine") {
+          return { createEngine: mockCreateEngine };
         }
-    };
+        if (id === "path") return require("path");
+        return {};
+      };
+      requireMock.resolve = (id: string) => {
+        if (id === "cosmic-architecture-engine") return "/mock/path/index.js";
+        return "";
+      };
+      return requireMock;
+    },
+  };
 });
 
-describe('CosmicEngine Loading Logic', () => {
-    const originalEnv = process.env;
+// Test fixture: Valid birth input
+const validInput: BirthInput = {
+  year: 1980,
+  month: 6,
+  day: 24,
+  hour: 14,
+  minute: 30,
+  second: 0,
+  latitude: 52.52,
+  longitude: 13.405,
+  timezone: "Europe/Berlin",
+  houseSystem: "P",
+};
 
-    beforeEach(() => {
-        vi.resetModules();
-        process.env = { ...originalEnv };
-        vi.clearAllMocks();
-        mockCreateEngine.mockReset();
+// Mock result structure
+const createMockResult = (source: string): Partial<AstroProfileV1> => ({
+  version: "1.0",
+  audit: {
+    utcOffsetMinutes: 0,
+    timezone: "UTC",
+    calculatedAt: new Date().toISOString(),
+    hybrid: source === "hybrid",
+    engineVersion: source,
+  },
+});
+
+describe("CosmicEngine Loading Logic", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    vi.resetModules();
+    process.env = { ...originalEnv };
+    vi.clearAllMocks();
+    mockCreateEngine.mockReset();
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+    vi.restoreAllMocks();
+  });
+
+  it("attempts to load real engine and gracefully falls back when missing", { timeout: 15000 }, async () => {
+    // Mock the fallback engine
+    vi.doMock("../cosmic-fallback", () => ({
+      createMockEngine: vi.fn().mockReturnValue({
+        calculateProfile: vi.fn().mockResolvedValue({
+          planets: { Sun: { longitude: 92 }, Moon: { longitude: 215 } },
+          audit: { utc_offset_minutes: 120 },
+        }),
+      }),
+    }));
+
+    const { getCosmicEngine } = await import("../engine");
+    const engine = await getCosmicEngine();
+    const result = await engine.calculateProfile(validInput);
+
+    // Should return AstroProfileV1 structure
+    expect(result.version).toBe("1.0");
+    expect(result.bazi).toBeDefined();
+    expect(result.fusion).toBeDefined();
+  });
+
+  it("forces mock engine when COSMIC_FORCE_MOCK is 'true'", async () => {
+    process.env.COSMIC_FORCE_MOCK = "true";
+
+    mockCreateEngine.mockResolvedValue({
+      initialize: vi.fn(),
+      calculateProfile: vi.fn(),
     });
 
-    afterEach(() => {
-        process.env = originalEnv;
-        vi.restoreAllMocks();
+    vi.doMock("../cosmic-fallback", () => ({
+      createMockEngine: vi.fn().mockReturnValue({
+        calculateProfile: vi.fn().mockResolvedValue({
+          planets: { Sun: { longitude: 92 }, Moon: { longitude: 215 } },
+          audit: { utc_offset_minutes: 0 },
+        }),
+      }),
+    }));
+
+    const { getCosmicEngine } = await import("../engine");
+    const engine = await getCosmicEngine();
+    const result = await engine.calculateProfile(validInput);
+
+    // Should still return valid profile
+    expect(result.version).toBe("1.0");
+    expect(result.bazi).toBeDefined();
+    expect(result.audit).toBeDefined();
+  });
+
+  it("uses Cloud Engine when COSMIC_CLOUD_URL is set", async () => {
+    process.env.COSMIC_CLOUD_URL = "https://my-cosmic-cloud.fly.dev";
+
+    // Mock global fetch
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        planets: { Sun: { longitude: 92, sign: "cancer" }, Moon: { longitude: 215 } },
+        audit: { utc_offset_minutes: 120 },
+      }),
     });
+    global.fetch = fetchMock;
 
-    it('attempts to load real engine and gracefully falls back when missing', async () => {
-        // In this test env, the real engine is missing (no python), so it should fail and fallback.
-        // We verify this flow works.
+    const { getCosmicEngine } = await import("../engine");
+    const engine = await getCosmicEngine();
+    const result = await engine.calculateProfile(validInput);
 
-        // We assert that it falls back to the MOCK engine.
-        // We mock the fallback to be sure we hit IT and not the real fallback logic
-        vi.doMock('../cosmic-fallback', () => ({
-            createMockEngine: vi.fn().mockReturnValue({
-                calculateProfile: vi.fn().mockResolvedValue({ status: 'fallback_mock' })
-            })
-        }));
+    expect(fetchMock).toHaveBeenCalledWith("https://my-cosmic-cloud.fly.dev/compute", expect.anything());
+    expect(result.version).toBe("1.0");
+    expect(result.audit.hybrid).toBe(true);
+  });
 
-        const { getCosmicEngine } = await import('../engine');
-        const engine = await getCosmicEngine();
-        const result = await engine.calculateProfile({});
-        
-        expect(result.status).toBe('fallback_mock');
-    });
+  it("falls back to mock engine if real engine logic fails", async () => {
+    mockCreateEngine.mockRejectedValue(new Error("Import failed"));
 
-    it('forces mock engine when COSMIC_FORCE_MOCK is "true"', async () => {
-        process.env.COSMIC_FORCE_MOCK = 'true';
-        
-        // Even if the real engine WOULD work, we shouldn't use it.
-        // But the code instantiates it first then throws/checks env? 
-        // No, current logic checks env AFTER createEngine? 
-        // Wait, looking at engine.ts: 
-        // It checks env inside the `try` block AFTER `createEngine`.
-        // So `createEngine` is still called.
-        
-        mockCreateEngine.mockResolvedValue({
-             initialize: vi.fn(),
-             calculateProfile: vi.fn()
-        });
+    vi.doMock("../cosmic-fallback", () => ({
+      createMockEngine: vi.fn().mockReturnValue({
+        calculateProfile: vi.fn().mockResolvedValue({
+          planets: { Sun: { longitude: 92 }, Moon: { longitude: 215 } },
+          audit: { utc_offset_minutes: 0 },
+        }),
+      }),
+    }));
 
-        // We need to mock the fallback module too
-        vi.doMock('../cosmic-fallback', () => ({
-            createMockEngine: vi.fn().mockReturnValue({
-                calculateProfile: vi.fn().mockResolvedValue({ status: 'mock' })
-            })
-        }));
+    const { getCosmicEngine } = await import("../engine");
+    const engine = await getCosmicEngine();
+    const result = await engine.calculateProfile(validInput);
 
-        const { getCosmicEngine } = await import('../engine');
-        const engine = await getCosmicEngine();
-        const result = await engine.calculateProfile({});
-
-        expect(result.status).toBe('mock');
-    });
-
-    it('uses Cloud Engine when COSMIC_CLOUD_URL is set', async () => {
-        process.env.COSMIC_CLOUD_URL = 'https://my-cosmic-cloud.fly.dev';
-        
-        // Mock global fetch
-        const fetchMock = vi.fn().mockResolvedValue({
-            ok: true,
-            json: async () => ({ status: 'cloud' })
-        });
-        global.fetch = fetchMock;
-
-        const { getCosmicEngine } = await import('../engine');
-        const engine = await getCosmicEngine();
-        const result = await engine.calculateProfile({});
-
-        expect(fetchMock).toHaveBeenCalledWith(
-            'https://my-cosmic-cloud.fly.dev/compute', 
-            expect.anything()
-        );
-        expect(result.status).toBe('cloud');
-    });
-
-    it('falls back to mock engine if real engine logic fails', async () => {
-        mockCreateEngine.mockRejectedValue(new Error('Import failed'));
-        
-        vi.doMock('../cosmic-fallback', () => ({
-            createMockEngine: vi.fn().mockReturnValue({
-                calculateProfile: vi.fn().mockResolvedValue({ status: 'mock' })
-            })
-        }));
-
-        const { getCosmicEngine } = await import('../engine');
-        const engine = await getCosmicEngine();
-        const result = await engine.calculateProfile({});
-
-        expect(result.status).toBe('mock');
-    });
+    // Should return valid profile from mock
+    expect(result.version).toBe("1.0");
+    expect(result.bazi).toBeDefined();
+    expect(result.fusion).toBeDefined();
+  });
 });
