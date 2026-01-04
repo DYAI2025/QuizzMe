@@ -201,7 +201,7 @@ const RadarChart: React.FC<{ vector: [number, number, number, number, number] }>
 const FusionCard: React.FC<FusionCardProps> = ({ fusion }) => {
   if (!fusion) {
     return (
-      <div className="bg-white rounded-[2rem] border border-[#E6E0D8] p-12 text-center">
+      <div className="bg-white rounded-[2rem] border border-[#E6E0D8] p-12 text-center" data-testid="fusion-card-empty">
         <Sparkles className="mx-auto mb-4 text-[#E6E0D8]" size={32} />
         <p className="mono text-[11px] text-[#A1A1AA] uppercase tracking-[0.3em]">
           Fusion-Analyse nicht verfügbar
@@ -213,7 +213,7 @@ const FusionCard: React.FC<FusionCardProps> = ({ fusion }) => {
   const { elementVector, harmonyIndex, harmonyInterpretation, resonances } = fusion;
 
   return (
-    <div className="bg-white rounded-[2rem] border border-[#E6E0D8] overflow-hidden shadow-xl">
+    <div className="bg-white rounded-[2rem] border border-[#E6E0D8] overflow-hidden shadow-xl" data-testid="fusion-card">
       {/* Header */}
       <div className="p-8 border-b border-[#E6E0D8] bg-gradient-to-r from-[#F6F3EE] to-white">
         <div className="flex items-center justify-between">
@@ -234,7 +234,7 @@ const FusionCard: React.FC<FusionCardProps> = ({ fusion }) => {
             <div className="mono text-[10px] text-[#5A6477] uppercase tracking-widest mb-1">
               Harmonie-Index
             </div>
-            <div className="text-3xl font-bold text-[#0E1B33]">
+            <div className="text-3xl font-bold text-[#0E1B33]" data-testid="harmony-index">
               {Math.round(harmonyIndex * 100)}%
             </div>
             <div className="mono text-[9px] text-[#7AA7A1] font-bold uppercase tracking-wider">
@@ -280,7 +280,7 @@ const FusionCard: React.FC<FusionCardProps> = ({ fusion }) => {
 
       {/* Resonances */}
       {resonances.length > 0 && (
-        <div className="p-8 border-t border-[#E6E0D8] bg-[#F6F3EE]">
+        <div className="p-8 border-t border-[#E6E0D8] bg-[#F6F3EE]" data-testid="resonances-section">
           <div className="mono text-[10px] text-[#5A6477] uppercase tracking-widest mb-4">
             Aktive Resonanzen
           </div>

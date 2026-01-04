@@ -16,6 +16,8 @@ import { CORE_STATS, IDENTITY_DATA, QUIZZES, AGENTS } from './constants';
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { NatalChartCard } from "./NatalChartCard";
 import FusionCard from "./FusionCard";
+import EntfaltungsMatrix from "./EntfaltungsMatrix";
+import CrossSystemCard from "./CrossSystemCard";
 
 export default function AstroSheet() {
   const { profile, loading: loadingProfile, error, refetch } = useAstroProfile();
@@ -176,17 +178,28 @@ export default function AstroSheet() {
         <div className="max-w-7xl mx-auto px-16 py-24 space-y-40">
           
           {/* Identity Section - Consolidated Badge */}
-          <section className="animate-reveal" style={{ animationDelay: '0.1s' }}>
+          <section className="animate-reveal" style={{ animationDelay: '0.1s' }} data-testid="identity-section">
             <IdentityBadges data={masterIdentity} />
           </section>
 
-          <section className="animate-reveal" style={{ animationDelay: '0.15s' }}>
+          <section className="animate-reveal" style={{ animationDelay: '0.15s' }} data-testid="natal-chart-section">
             <NatalChartCard natal={viewModel.natal} />
           </section>
 
           {/* Element Fusion - East-West Synthesis */}
-          <section className="animate-reveal" style={{ animationDelay: '0.18s' }}>
+          <section className="animate-reveal" style={{ animationDelay: '0.18s' }} data-testid="fusion-section">
             <FusionCard fusion={viewModel.fusion} />
+          </section>
+
+          {/* Cross-System Alignment */}
+          <section className="animate-reveal" style={{ animationDelay: '0.22s' }} data-testid="cross-system-section">
+            <CrossSystemCard
+              fusion={viewModel.fusion}
+              dayMasterElement={viewModel.bazi?.dayMaster?.element as any}
+              sunSign={viewModel.identity.solarSign?.toLowerCase()}
+              moonSign={viewModel.identity.lunarSign?.toLowerCase()}
+              ascSign={viewModel.identity.ascendantSign?.toLowerCase()}
+            />
           </section>
 
           {/* Daily Horoscope - Oracle Section */}
@@ -212,7 +225,7 @@ export default function AstroSheet() {
           </section>
 
           {/* Progress & Stats - High Contrast Block */}
-          <section className="space-y-24 animate-reveal" style={{ animationDelay: '0.3s' }}>
+          <section className="space-y-24 animate-reveal" style={{ animationDelay: '0.3s' }} data-testid="stats-section">
             <div className="text-center relative">
                <div className="cluster-title absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">STATS</div>
                <div className="relative z-10">
@@ -220,11 +233,20 @@ export default function AstroSheet() {
                  <h2 className="serif text-7xl font-light text-[#0E1B33] tracking-tighter">Entfaltungs-Matrix</h2>
                </div>
             </div>
+            {/* Entfaltungs-Matrix Radar */}
+            <EntfaltungsMatrix
+              stats={stats.map(s => ({
+                label: s.label,
+                value: s.value,
+                potential: Math.min(100, s.value + 15 + Math.floor(Math.random() * 10)), // Simulated potential
+              }))}
+            />
+            {/* Biometric Stats */}
             <StatsCard stats={stats} />
           </section>
 
           {/* Loot & Quizzes - High Alignment Block */}
-          <section className="space-y-24">
+          <section className="space-y-24" data-testid="loot-section">
              <div className="text-center relative">
                 <div className="cluster-title absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">LOOT</div>
                 <div className="relative z-10">
