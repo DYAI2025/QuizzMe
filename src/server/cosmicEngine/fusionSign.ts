@@ -5,7 +5,7 @@ import type { SymbolSpecV1 } from "./schemas";
 // ═══════════════════════════════════════════════════════════════════════════
 
 const symbolCache = new Map<string, SymbolSpecV1>();
-const CACHE_MAX_SIZE = 100; // Limit cache size
+const CACHE_MAX_SIZE = 100; // Limit cache size (FIFO eviction: oldest inserted entries removed first)
 
 function getCacheKey(baziElement: string, westernSign: string): string {
     return `${baziElement}::${westernSign}`;
