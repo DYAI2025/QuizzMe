@@ -286,7 +286,7 @@ export function generateFusionSign(
         generatedAt: new Date().toISOString(),
     };
 
-    // 8. Store in cache (LRU eviction if full)
+    // 8. Store in cache (FIFO eviction: remove oldest entry when full)
     if (symbolCache.size >= CACHE_MAX_SIZE) {
         const firstKey = symbolCache.keys().next().value;
         if (firstKey) {
