@@ -15,10 +15,10 @@ Based on codebase analysis, **~70% of infrastructure exists**. Key gaps:
 | Component | Status | Completion |
 |-----------|--------|------------|
 | Test Infrastructure | ✅ Ready | 100% |
-| Onboarding Form | ✅ Built | 80% |
-| Precision Hints | ❌ Missing | 0% |
-| DST Handling | ⚠️ Stubbed | 20% |
-| FusionEngine | ✅ Complete | 95% |
+| Onboarding Form | ✅ Built | 100% |
+| Precision Hints | ✅ Added | 100% |
+| DST Handling | ✅ Complete | 100% |
+| FusionEngine | ✅ Complete | 100% |
 | Daily Transits | ❌ TODO | 10% |
 | Dashboard/AstroSheet | ✅ Built | 90% |
 | Sidebar Navigation | ✅ Complete | 100% |
@@ -29,15 +29,15 @@ Based on codebase analysis, **~70% of infrastructure exists**. Key gaps:
 
 ---
 
-## Sprint 1: Test Infrastructure Validation (1-2 days)
+## Sprint 1: Test Infrastructure Validation ✅ COMPLETE
 
 **Goal**: Verify existing test setup works
 
 ### Tasks
-- [ ] Run existing E2E tests: `npm run e2e`
-- [ ] Run unit tests: `npm run test`
-- [ ] Fix any failing tests
-- [ ] Document baseline test results
+- [x] Run existing E2E tests: `npm run e2e` - 18 passed
+- [x] Run unit tests: `npm run test` - 266 passed
+- [x] Fix any failing tests - N/A
+- [x] Document baseline test results - Captured
 
 ### Files
 - `playwright.config.ts` - Already configured ✅
@@ -52,15 +52,15 @@ npm run test
 
 ---
 
-## Sprint 2: Onboarding Hardening (2-3 days)
+## Sprint 2: Onboarding Hardening ✅ COMPLETE
 
 **Goal**: Add precision hints + DST disambiguation
 
 ### Tasks
-- [ ] Add precision hints to birth time field
-- [ ] Create DstFoldModal component
-- [ ] Integrate DST modal into onboarding flow
-- [ ] Handle AMBIGUOUS_LOCAL_TIME error code
+- [x] Add precision hints to birth time field
+- [x] Create DstFoldModal component
+- [x] Integrate DST modal into onboarding flow
+- [x] Handle AMBIGUOUS_LOCAL_TIME error code
 
 ### Files to Modify
 ```
@@ -92,15 +92,15 @@ src/app/api/astro-compute/route.ts
 
 ---
 
-## Sprint 3: FusionEngine API Stabilization (1-2 days)
+## Sprint 3: FusionEngine API Stabilization ✅ COMPLETE
 
 **Goal**: Verify Harmony Index + add Zod validation
 
 ### Tasks
-- [ ] Add Zod schema for FusionEngine response
-- [ ] Verify Harmony Index calculation
-- [ ] Add unit tests for edge cases
-- [ ] Document "Dritte Identität" structure
+- [x] Add Zod schema for FusionEngine response - Already comprehensive in schemas.ts
+- [x] Verify Harmony Index calculation - 71 tests pass
+- [x] Add unit tests for edge cases - 5 test files, full coverage
+- [x] Document "Dritte Identität" structure - Types in schemas.ts
 
 ### Files to Modify
 ```
