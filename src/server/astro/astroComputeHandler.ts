@@ -186,6 +186,7 @@ export async function handleAstroCompute(req: Request, label = "astro-compute") 
       latitude: row.birth_lat,
       longitude: row.birth_lng,
       timezone: row.iana_time_zone,
+      houseSystem: "P" as const, // Placidus (default)
       ...(row.fold === 0 || row.fold === 1 ? { fold: row.fold } : {}),
     };
 

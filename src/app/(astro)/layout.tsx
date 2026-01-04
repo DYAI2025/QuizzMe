@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./astro-sheet.css";
+import { getDictionary } from "@/i18n/dictionaries";
+import { TranslationProvider } from "@/components/i18n/TranslationProvider";
+import { defaultLocale } from "@/i18n/config";
+import Providers from "../providers";
 
 // Font configurations
 const cormorant = Cormorant_Garamond({
@@ -28,20 +32,25 @@ export const metadata: Metadata = {
   description: 'Your cosmic identity revealed.',
 };
 
-export default function AstroLayout({
+export default async function AstroLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { strings, locale } = await getDictionary(defaultLocale);
+
   return (
     <div
       className={`astro-scope ${cormorant.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
       {/* Background pattern is handled by .astro-scope .bg-pattern in css */}
       <div className="bg-pattern" />
-      
-      
-      {children}
+
+      <TranslationProvider locale={locale} strings={strings}>
+        <Providers>
+          {children}
+        </Providers>
+      </TranslationProvider>
     </div>
   );
 }
