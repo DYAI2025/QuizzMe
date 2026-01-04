@@ -295,40 +295,41 @@ export type FusionResult = z.infer<typeof FusionResultSchema>;
 // SYMBOL SCHEMAS (Sprint 2)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Symbol Shape */
-export const SymbolShapeSchema = z.object({
-  /** Shape type */
-  type: z.enum(["circle", "triangle", "square", "hexagon", "star", "wave", "spiral"]),
-  /** SVG path data */
-  path: z.string(),
-  /** Fill color (hex) */
-  fill: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-  /** Stroke color (hex) */
-  stroke: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
-  /** Opacity (0-1) */
-  opacity: z.number().min(0).max(1).optional(),
-  /** Transform */
-  transform: z.string().optional(),
+/** Symbol Elements (Ba Zi + Western source) */
+export const SymbolElementsSchema = z.object({
+  /** Ba Zi Day Master element */
+  bazi: z.enum(["Wood", "Fire", "Earth", "Metal", "Water"]),
+  /** Western zodiac element */
+  western: z.enum(["Fire", "Earth", "Air", "Water"]),
 });
-export type SymbolShape = z.infer<typeof SymbolShapeSchema>;
+export type SymbolElements = z.infer<typeof SymbolElementsSchema>;
 
-/** Symbol Specification */
+/** Symbol Colors */
+export const SymbolColorsSchema = z.object({
+  /** Foreground/primary color (Ba Zi) */
+  primary: z.string(),
+  /** Background/secondary color (Western) */
+  secondary: z.string(),
+  /** Canvas background */
+  bg: z.string(),
+});
+export type SymbolColors = z.infer<typeof SymbolColorsSchema>;
+
+/** Symbol Specification V1 - "Systemic Minimalism" */
 export const SymbolSpecV1Schema = z.object({
-  /** Version */
+  /** Schema version */
   version: z.literal("1.0"),
-  /** Unique symbol ID */
-  id: z.string().uuid(),
-  /** SVG viewBox */
-  viewBox: z.string().default("0 0 100 100"),
-  /** Background color */
-  background: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-  /** Shape layers */
-  shapes: z.array(SymbolShapeSchema),
   /** Complete SVG string */
   svg: z.string(),
-  /** AI prompt for image generation */
+  /** Human-readable description */
+  description: z.string(),
+  /** Source elements */
+  elements: SymbolElementsSchema,
+  /** Color palette used */
+  colors: SymbolColorsSchema,
+  /** AI prompt for Midjourney/NanoBanana generation */
   prompt: z.string().optional(),
-  /** Timestamp */
+  /** Generation timestamp */
   generatedAt: z.string().datetime(),
 });
 export type SymbolSpecV1 = z.infer<typeof SymbolSpecV1Schema>;

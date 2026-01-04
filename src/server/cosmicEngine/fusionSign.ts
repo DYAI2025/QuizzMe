@@ -1,21 +1,8 @@
-// import { 
-//     WU_XING_DE, 
-//     WU_XING 
-// } from './astronomy-utils';
+import type { SymbolSpecV1 } from "./schemas";
 
-export type FusionSignArtifacts = {
-    svg: string;
-    description: string;
-    elements: {
-        bazi: string;
-        western: string;
-    };
-    colors: {
-        primary: string;
-        secondary: string;
-        bg: string;
-    }
-};
+// Wu Xing elements
+type WuXingElement = "Wood" | "Fire" | "Earth" | "Metal" | "Water";
+type WesternElement = "Fire" | "Earth" | "Air" | "Water";
 
 // --- Mappings ---
 
@@ -97,10 +84,46 @@ function getShape(system: 'BaZi' | 'Western', element: string, polarity: 'Yang' 
     return 'Diamond'; // Fallback Yang
 }
 
+/**
+ * Generate AI prompt for Midjourney/NanoBanana
+ */
+function generatePrompt(
+    baziElement: WuXingElement,
+    westernElement: WesternElement,
+    bPolarity: 'Yang' | 'Yin',
+    wPolarity: 'Yang' | 'Yin',
+    fgShape: string,
+    bgShape: string
+): string {
+    const polarityDesc = bPolarity === wPolarity
+        ? `unified ${bPolarity} energy`
+        : `${bPolarity}-${wPolarity} duality`;
+
+    return `Minimalist geometric symbol, ${fgShape} inside ${bgShape}, ` +
+        `representing ${baziElement} (${bPolarity}) core within ${westernElement} (${wPolarity}) context, ` +
+        `${polarityDesc}, systemic minimalism style, clean lines, ` +
+        `soft gradients, light blue and beige palette, white background, ` +
+        `sacred geometry, vector art, no text --ar 1:1 --stylize 50`;
+}
+
+/**
+ * Generate Fusion Sign - "Systemic Minimalism" Symbol
+ *
+ * Creates a visual identity symbol by fusing Ba Zi Day Master element
+ * with Western Sun Sign element using geometric shapes and polarities.
+ *
+ * @param baziDayMasterElement - Ba Zi Day Master element (Wood, Fire, Earth, Metal, Water)
+ * @param westernSunSign - Western zodiac sign (Aries, Taurus, etc.)
+ * @returns SymbolSpecV1 compliant object
+ */
 export function generateFusionSign(
-    baziDayMasterElement: string, // e.g. "Wood", "Fire"
-    westernSunSign: string        // e.g. "Virgo", "Leo"
-): FusionSignArtifacts {
+    baziDayMasterElement: string,
+    westernSunSign: string
+): SymbolSpecV1 | undefined {
+    // Validate inputs
+    if (!baziDayMasterElement || !westernSunSign) {
+        return undefined;
+    }
     
     // 1. Normalize Inputs
     // Ba Zi should be standard English "Wood", "Fire" etc.
@@ -216,18 +239,32 @@ export function generateFusionSign(
 
     // 5. Description / Label
     const description = `The **${bElement}** (${bPolarity}) core structures the **${wElement}** (${wPolarity}) context.`;
-    
+
+    // 6. Generate AI Prompt
+    const prompt = generatePrompt(
+        bElement as WuXingElement,
+        wElement as WesternElement,
+        bPolarity,
+        wPolarity,
+        fgShapeType.toLowerCase(),
+        bgShapeType.toLowerCase()
+    );
+
+    // 7. Return SymbolSpecV1 compliant object
     return {
+        version: "1.0" as const,
         svg,
         description,
         elements: {
-            bazi: bElement,
-            western: wElement
+            bazi: bElement as WuXingElement,
+            western: wElement as WesternElement,
         },
         colors: {
             primary: renderFgColor,
             secondary: renderBgColor,
-            bg: '#FFFFFF'
-        }
+            bg: '#FFFFFF',
+        },
+        prompt,
+        generatedAt: new Date().toISOString(),
     };
 }
