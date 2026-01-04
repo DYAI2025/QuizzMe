@@ -107,3 +107,17 @@ export function getJulianDayNumber(date: Date): number {
     const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
     return Math.floor(jd);
 }
+
+/**
+ * Helper: Get Western Zodiac Sign from Sun Longitude.
+ */
+export function getWesternZodiacSign(lon: number): string {
+    const signs = [
+        'Aries', 'Taurus', 'Gemini', 'Cancer', 
+        'Leo', 'Virgo', 'Libra', 'Scorpio', 
+        'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+    ];
+    // 0 = Aries start (Vernal Equinox).
+    const idx = Math.floor(((lon % 360) + 360) % 360 / 30);
+    return signs[idx];
+}

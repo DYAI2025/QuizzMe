@@ -53,6 +53,7 @@ export default function AstroSheet() {
     // Override Ba Zi mocks if available
     element: viewModel.identity.element || IDENTITY_DATA.element,
     animal: viewModel.identity.animal || IDENTITY_DATA.animal,
+    symbol: viewModel.identity.symbol,
   };
 
   // 3. Stats Adapter

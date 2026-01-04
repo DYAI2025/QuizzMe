@@ -1,7 +1,25 @@
 
 import React from 'react';
 
-const SigilPortrait: React.FC = () => {
+interface SigilPortraitProps {
+  svg?: string;
+  description?: string;
+}
+
+const SigilPortrait: React.FC<SigilPortraitProps> = ({ svg, description }) => {
+  if (svg) {
+    return (
+      <div className="relative w-64 h-64 flex flex-col items-center justify-center animate-reveal">
+         <div className="absolute inset-0 bg-gradient-to-tr from-[#22D3EE]/5 to-[#C5A059]/5 blur-3xl rounded-full" />
+         <div className="w-full h-full relative z-10" dangerouslySetInnerHTML={{ __html: svg }} />
+         {description && (
+           <div className="absolute top-full mt-4 text-[10px] mono text-[#5A6477] text-center max-w-[200px] opacity-70">
+              {description}
+           </div>
+         )}
+      </div>
+    );
+  }
   return (
     <div className="relative w-64 h-64 flex items-center justify-center">
       <div className="absolute inset-0 bg-gradient-to-tr from-[#22D3EE]/5 to-[#C5A059]/5 blur-3xl rounded-full" />

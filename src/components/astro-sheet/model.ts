@@ -8,6 +8,10 @@ export interface AstroSheetViewModel {
     status: string; // e.g. "Mission Seeker"
     element?: string; // Ba Zi Element
     animal?: string; // Ba Zi Animal
+    symbol?: {
+      svg: string;
+      description: string;
+    };
   };
   stats: Array<{
     label: string;

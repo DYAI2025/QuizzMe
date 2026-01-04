@@ -67,6 +67,10 @@ export function mapProfileToViewModel(row: AstroProfileRow | null): AstroSheetVi
       // Pass Ba Zi data through identity for the view
       element: element,
       animal: animal,
+      symbol: row.astro_json?.symbol ? {
+        svg: row.astro_json.symbol.svg,
+        description: row.astro_json.symbol.description
+      } : undefined,
     },
     stats: [
       // Example placeholder stats - in future map from astro_json elements/modes

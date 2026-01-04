@@ -32,6 +32,10 @@ export interface MasterIdentity {
     rising: string;
   };
   bedeutung: string;
+  symbol?: {
+    svg: string;
+    description: string;
+  };
 }
 
 export interface QuizItem {

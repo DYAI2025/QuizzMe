@@ -331,7 +331,10 @@ const IdentityBadges: React.FC<IdentityBadgesProps> = ({ data }) => {
             </div>
             
             <div className="relative mb-12">
-              <SigilPortrait />
+              <SigilPortrait 
+                svg={data.symbol?.svg}
+                description={data.symbol?.description}
+              />
             </div>
 
             <div className="text-center">
