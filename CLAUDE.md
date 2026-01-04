@@ -21,10 +21,20 @@ npx vitest run src/lib/traits/__tests__/trait-engine.test.ts
 
 ## Architecture
 
-### Multi-Domain Routing
-Middleware rewrites based on hostname:
-- Hostname contains "horoskop"/"horoscope" → `/verticals/horoscope/*`
-- Default → `/verticals/quiz/*`
+### Routing (Next.js 16 Proxy)
+
+`src/proxy.ts` handles all routing (replaces middleware.ts in Next.js 16):
+- Root `/` and `/de` redirect to `/astrosheet`
+- Hostname contains "horoskop"/"horoscope" → rewrite to `/verticals/horoscope/*`
+- Default hostname → rewrite to `/verticals/quiz/*`
+- Paths like `/login`, `/auth`, `/onboarding`, `/verticals`, `/astrosheet`, `/character` skip locale redirect
+
+### Main Pages
+
+- `/astrosheet` - Main dashboard (requires auth, uses TranslationProvider)
+- `/verticals/quiz` - Quiz landing with cluster progress
+- `/login` - Auth page
+- `/onboarding/astro` - Birth data collection
 
 ### Core Data Flow
 
@@ -77,7 +87,32 @@ Add new IDs to `src/lib/registry/` files. Run `npm run registry:lint` to validat
 - `astronomy.ts` - Julian dates, planetary positions, ephemeris calculations
 - `interpretations.ts` - Transit text generation
 
-Uses vendored `cosmic-architecture-engine` for precision calculations.
+### Cosmic Engine (Hybrid Architecture)
+
+`src/server/cosmicEngine/` - Server-only hybrid astrology engine:
+
+```
+Cloud API (COSMIC_CLOUD_URL) → Local Python Bridge → Mock Engine (fallback)
+```
+
+**Key files:**
+- `engine.ts` - Singleton loader with automatic fallback
+- `schemas.ts` - Zod-validated types (AstroProfileV1, BaZiChart, etc.)
+- `bazi.ts` - Ba Zi (Four Pillars) calculation
+- `fusion.ts` - East-West element fusion
+- `fusionSign.ts` - Identity symbol SVG generation (cached, max 100 entries)
+
+**Environment variables:**
+- `COSMIC_CLOUD_URL` - Cloud engine URL (enables hybrid mode)
+- `COSMIC_PYTHON_PATH` - Python executable (default: python3)
+- `COSMIC_FORCE_MOCK` - Force mock engine for testing
+
+### Quiz Clusters
+
+Quizzes are grouped into thematic clusters (e.g., "Naturkind", "Mentalist"):
+- `src/lib/clusters/registry.ts` - Cluster definitions
+- `src/lib/clusters/aggregator.ts` - Cluster completion logic
+- Completed clusters show badge on AstroSheet
 
 ## Quiz Development
 
@@ -114,6 +149,38 @@ export const questions = [
 Required in `.env.local`:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `GOOGLE_AI_API_KEY` - For AI insights (server-side only)
+
+Optional:
+- `COSMIC_CLOUD_URL` - Cloud astrology engine
+- `COSMIC_PYTHON_PATH` - Python path for local engine
+- `COSMIC_FORCE_MOCK` - Force mock engine
+
+## Server Actions
+
+Use server actions for secure API calls (API keys stay server-side):
+- `src/app/actions/generateInsight.ts` - AI-powered astro insights
+
+Pattern:
+```typescript
+// In server action file
+"use server";
+export async function myAction(input: Input) {
+  const apiKey = process.env.SECRET_KEY; // Server-only
+  // ...
+}
+
+// In client component
+import { myAction } from '@/app/actions/myAction';
+const result = await myAction(data);
+```
+
+## i18n & TranslationProvider
+
+Components using `useTranslations()` must be wrapped in `TranslationProvider`:
+- `src/app/[locale]/layout.tsx` - Provides translations for locale routes
+- `src/app/(astro)/layout.tsx` - Provides translations for astro routes
+- Always use `getDictionary(locale)` to get strings
 
 ## API Routes
 
