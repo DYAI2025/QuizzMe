@@ -1,21 +1,87 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// BA ZI (FOUR PILLARS) TYPES
+// ═══════════════════════════════════════════════════════════════════════════
+
+export type WuXing = 'Wood' | 'Fire' | 'Earth' | 'Metal' | 'Water';
+export type WuXingDE = 'Holz' | 'Feuer' | 'Erde' | 'Metall' | 'Wasser';
+export type Polarity = 'Yang' | 'Yin';
+
+export interface BaZiPillar {
+  stem: string;
+  stemCN: string;
+  branch: string;
+  branchCN: string;
+  element: WuXing;
+  polarity: Polarity;
+  animal: string;
+  animalDE: string;
+}
+
+export interface BaZiData {
+  year: BaZiPillar;
+  month: BaZiPillar;
+  day: BaZiPillar;
+  hour: BaZiPillar;
+  dayMaster: {
+    stem: string;
+    stemCN: string;
+    element: WuXing;
+    polarity: Polarity;
+  };
+  fullNotation: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FUSION TYPES
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface FusionData {
+  elementVector: {
+    combined: [number, number, number, number, number]; // Wood, Fire, Earth, Metal, Water
+    eastern: [number, number, number, number, number];
+    western: [number, number, number, number, number];
+    dominantElement: WuXing;
+    dominantElementDE: WuXingDE;
+    deficientElement: WuXing;
+    deficientElementDE: WuXingDE;
+  };
+  harmonyIndex: number; // 0-1
+  harmonyInterpretation: string;
+  resonances: Array<{
+    type: string;
+    eastern: string;
+    western: string;
+    strength: number;
+    quality: 'harmony' | 'tension' | 'neutral';
+    description?: string;
+  }>;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN VIEW MODEL
+// ═══════════════════════════════════════════════════════════════════════════
+
 export interface AstroSheetViewModel {
   identity: {
     displayName: string;
-    solarSign: string; // e.g. "Scorpio"
+    solarSign: string;
     lunarSign: string;
     ascendantSign: string;
     level: number;
-    status: string; // e.g. "Mission Seeker"
-    element?: string; // Ba Zi Element
-    animal?: string; // Ba Zi Animal
+    status: string;
+    element?: string;
+    animal?: string;
     symbol?: {
       svg: string;
       description: string;
+      prompt?: string;
     };
   };
+  bazi: BaZiData | null;
+  fusion: FusionData | null;
   stats: Array<{
     label: string;
-    value: number; // 0-100
+    value: number;
     suffix?: string;
   }>;
   quizzes: Array<{
@@ -23,7 +89,7 @@ export interface AstroSheetViewModel {
     title: string;
     href: string;
     status: 'completed' | 'in_progress' | 'locked';
-    progress: number; // 0-100
+    progress: number;
   }>;
   agents: Array<{
     id: string;
@@ -42,7 +108,7 @@ export interface AstroSheetViewModel {
   };
   validation: {
     needsCompute: boolean;
-    hasAmbiguousTime: boolean; // if true, UI should show fold selector
+    hasAmbiguousTime: boolean;
     errorMessage?: string;
     status?: string;
     computedAt?: string | null;

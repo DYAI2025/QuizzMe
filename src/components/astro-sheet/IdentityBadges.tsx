@@ -291,27 +291,38 @@ const IdentityBadges: React.FC<IdentityBadgesProps> = ({ data }) => {
   const tierkreisClean = data.tierkreis.replace(/\s/g, '');
   const combinedHeader = `${tierkreisClean} Sonne: ${data.konstellation.sun} AC ${data.konstellation.rising}`;
 
-  const pillars = [
-    { 
-      label: 'JAHR', title: 'Ahnenerbe', stem: 'Metall (Geng)', branch: 'Pferd (Wu)', element: 'Yang Metall', aspect: 'Äußeres Image',
-      hiddenStems: ['Feuer (Ding)', 'Erde (Ji)'], strength: 78,
-      meaning: 'Dein soziales Erbe und der erste Eindruck, den du in der Welt hinterlässt. Geprägt von Disziplin und Schnelligkeit.'
-    },
-    { 
-      label: 'MONAT', title: 'Eltern/Karriere', stem: 'Erde (Ji)', branch: 'Ziege (Wei)', element: 'Yin Erde', aspect: 'Berufung',
-      hiddenStems: ['Erde (Ji)', 'Feuer (Ding)', 'Holz (Yi)'], strength: 64,
-      meaning: 'Der Ursprung deines Ehrgeizes und das Fundament deiner beruflichen Identität. Stabil und nährend.'
-    },
-    { 
-      label: 'TAG', title: 'Selbstkern', stem: 'Wasser (Gui)', branch: 'Hahn (You)', element: 'Yin Wasser', aspect: 'Inneres Wesen',
-      hiddenStems: ['Metall (Xin)'], strength: 92,
-      meaning: 'Dein wahres Ich und dein engstes Umfeld. Eine tiefe Quelle der Intuition und analytischen Klarheit.'
-    },
-    { 
-      label: 'STUNDE', title: 'Zukunft/Ideale', stem: 'Metall (Xin)', branch: 'Schwein (Hai)', element: 'Yin Metall', aspect: 'Bestimmung',
-      hiddenStems: ['Wasser (Ren)', 'Holz (Jia)'], strength: 55,
-      meaning: 'Deine Wünsche, Träume und das Vermächtnis, das du hinterlassen willst. Scharfsinnig und fließend.'
-    },
+  // Transform real BaZi data into pillar display format
+  const PILLAR_META = {
+    year: { label: 'JAHR', title: 'Ahnenerbe', aspect: 'Äußeres Image', meaningBase: 'Dein soziales Erbe und der erste Eindruck, den du in der Welt hinterlässt.' },
+    month: { label: 'MONAT', title: 'Eltern/Karriere', aspect: 'Berufung', meaningBase: 'Der Ursprung deines Ehrgeizes und das Fundament deiner beruflichen Identität.' },
+    day: { label: 'TAG', title: 'Selbstkern', aspect: 'Inneres Wesen', meaningBase: 'Dein wahres Ich und dein engstes Umfeld. Eine tiefe Quelle der Intuition.' },
+    hour: { label: 'STUNDE', title: 'Zukunft/Ideale', aspect: 'Bestimmung', meaningBase: 'Deine Wünsche, Träume und das Vermächtnis, das du hinterlassen willst.' },
+  };
+
+  const ELEMENT_DE: Record<string, string> = {
+    Wood: 'Holz', Fire: 'Feuer', Earth: 'Erde', Metal: 'Metall', Water: 'Wasser',
+  };
+
+  const pillars = data.bazi ? (['year', 'month', 'day', 'hour'] as const).map((key) => {
+    const pillar = data.bazi![key];
+    const meta = PILLAR_META[key];
+    return {
+      label: meta.label,
+      title: meta.title,
+      stem: `${ELEMENT_DE[pillar.element] || pillar.element} (${pillar.stem})`,
+      branch: `${pillar.animalDE || pillar.animal} (${pillar.branch})`,
+      element: `${pillar.polarity} ${ELEMENT_DE[pillar.element] || pillar.element}`,
+      aspect: meta.aspect,
+      hiddenStems: [] as string[], // Hidden stems need additional computation
+      strength: 70, // Placeholder - could be derived from element balance
+      meaning: meta.meaningBase,
+    };
+  }) : [
+    // Fallback mock data when bazi is not available
+    { label: 'JAHR', title: 'Ahnenerbe', stem: 'Metall (Geng)', branch: 'Pferd (Wu)', element: 'Yang Metall', aspect: 'Äußeres Image', hiddenStems: ['Feuer (Ding)', 'Erde (Ji)'], strength: 78, meaning: 'Dein soziales Erbe und der erste Eindruck, den du in der Welt hinterlässt.' },
+    { label: 'MONAT', title: 'Eltern/Karriere', stem: 'Erde (Ji)', branch: 'Ziege (Wei)', element: 'Yin Erde', aspect: 'Berufung', hiddenStems: ['Erde (Ji)', 'Feuer (Ding)', 'Holz (Yi)'], strength: 64, meaning: 'Der Ursprung deines Ehrgeizes und das Fundament deiner beruflichen Identität.' },
+    { label: 'TAG', title: 'Selbstkern', stem: 'Wasser (Gui)', branch: 'Hahn (You)', element: 'Yin Wasser', aspect: 'Inneres Wesen', hiddenStems: ['Metall (Xin)'], strength: 92, meaning: 'Dein wahres Ich und dein engstes Umfeld. Eine tiefe Quelle der Intuition.' },
+    { label: 'STUNDE', title: 'Zukunft/Ideale', stem: 'Metall (Xin)', branch: 'Schwein (Hai)', element: 'Yin Metall', aspect: 'Bestimmung', hiddenStems: ['Wasser (Ren)', 'Holz (Jia)'], strength: 55, meaning: 'Deine Wünsche, Träume und das Vermächtnis, das du hinterlassen willst.' },
   ];
 
   return (

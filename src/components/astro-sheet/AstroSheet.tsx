@@ -15,6 +15,7 @@ import { UserProfile, MasterIdentity, Stat, QuizItem, Agent } from './types';
 import { CORE_STATS, IDENTITY_DATA, QUIZZES, AGENTS } from './constants';
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { NatalChartCard } from "./NatalChartCard";
+import FusionCard from "./FusionCard";
 
 export default function AstroSheet() {
   const { profile, loading: loadingProfile, error, refetch } = useAstroProfile();
@@ -44,7 +45,7 @@ export default function AstroSheet() {
 
   // 2. Identity Adapter (Hybrid: Real Western + Real Ba Zi)
   const masterIdentity: MasterIdentity = {
-    ...IDENTITY_DATA, 
+    ...IDENTITY_DATA,
     konstellation: {
       sun: viewModel.identity.solarSign,
       moon: viewModel.identity.lunarSign,
@@ -54,6 +55,7 @@ export default function AstroSheet() {
     element: viewModel.identity.element || IDENTITY_DATA.element,
     animal: viewModel.identity.animal || IDENTITY_DATA.animal,
     symbol: viewModel.identity.symbol,
+    bazi: viewModel.bazi,
   };
 
   // 3. Stats Adapter
@@ -180,6 +182,11 @@ export default function AstroSheet() {
 
           <section className="animate-reveal" style={{ animationDelay: '0.15s' }}>
             <NatalChartCard natal={viewModel.natal} />
+          </section>
+
+          {/* Element Fusion - East-West Synthesis */}
+          <section className="animate-reveal" style={{ animationDelay: '0.18s' }}>
+            <FusionCard fusion={viewModel.fusion} />
           </section>
 
           {/* Daily Horoscope - Oracle Section */}

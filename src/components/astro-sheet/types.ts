@@ -1,3 +1,4 @@
+import type { BaZiData } from './model';
 
 export interface Stat {
   label: string;
@@ -25,7 +26,7 @@ export interface MasterIdentity {
   tagestier: string;
   stundenMeister: string;
   element: string;
-  animal?: string; // Add optional animal field for dynamic overrides
+  animal?: string;
   konstellation: {
     sun: string;
     moon: string;
@@ -36,6 +37,7 @@ export interface MasterIdentity {
     svg: string;
     description: string;
   };
+  bazi?: BaZiData | null;
 }
 
 export interface QuizItem {
