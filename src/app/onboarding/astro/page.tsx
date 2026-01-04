@@ -2,24 +2,32 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight, Info, AlertCircle } from 'lucide-react';
 import { MAJOR_CITIES, PlaceOption } from '@/lib/places';
 import { upsertProfile } from '@/lib/astroProfiles';
 import { createClient } from '@/lib/supabase/client';
+import DstFoldModal from '@/components/onboarding/DstFoldModal';
 
 export default function OnboardingPage() {
     const router = useRouter();
     const supabase = useMemo(() => createClient(), []);
-    // const [step, setStep] = useState(1); // Unused for now
     const [loading, setLoading] = useState(false);
     const [authChecked, setAuthChecked] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    
+    const [errorCode, setErrorCode] = useState<string | null>(null);
+
+    // DST Modal State
+    const [showDstModal, setShowDstModal] = useState(false);
+    const [selectedFold, setSelectedFold] = useState<number | null>(null);
+
     // Form State
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [selectedPlace, setSelectedPlace] = useState<PlaceOption | null>(null);
     const [name, setName] = useState('');
+
+    // Validation hints
+    const [timeBlurred, setTimeBlurred] = useState(false);
 
     const canSubmit = date && time && selectedPlace && name;
 
@@ -41,9 +49,10 @@ export default function OnboardingPage() {
         ensureSession();
     }, [router, supabase]);
 
-    const runFlow = async () => {
+    const runFlow = async (foldOverride?: number | null) => {
         if (!canSubmit) return;
         setErrorMessage(null);
+        setErrorCode(null);
         setLoading(true);
 
         try {
@@ -57,6 +66,7 @@ export default function OnboardingPage() {
                     birth_lat: selectedPlace.lat,
                     birth_lng: selectedPlace.lng,
                     iana_time_zone: selectedPlace.tz,
+                    fold: foldOverride ?? selectedFold,
                 });
             }
 
@@ -76,12 +86,17 @@ export default function OnboardingPage() {
             }
 
             if (!res.ok) {
+                setErrorCode(data.code || null);
+
                 if (data.code === 'AMBIGUOUS_LOCAL_TIME') {
-                    setErrorMessage('DST Ambiguity detected (Implementation pending for Phase 3.2)');
+                    // Show DST disambiguation modal
+                    setShowDstModal(true);
+                    setLoading(false);
+                    return;
                 } else if (data.code === 'NONEXISTENT_LOCAL_TIME') {
-                    setErrorMessage('Invalid Time detected (DST gap) (Implementation pending for Phase 3.3)');
+                    setErrorMessage('Diese Uhrzeit existiert nicht (DST-Lücke). Bitte wähle eine andere Zeit.');
                 } else {
-                    setErrorMessage(data.error || 'Computation failed');
+                    setErrorMessage(data.error || 'Berechnung fehlgeschlagen');
                 }
                 setLoading(false);
                 return;
@@ -89,18 +104,32 @@ export default function OnboardingPage() {
 
             // 3. Success -> Redirect
             router.push('/astrosheet');
-            
+
         } catch (err: unknown) {
             console.error("Onboarding failed:", err);
-            const msg = err instanceof Error ? err.message : 'Unknown error';
+            const msg = err instanceof Error ? err.message : 'Unbekannter Fehler';
             setErrorMessage(msg);
             setLoading(false);
         }
     };
 
+    const handleDstSelect = async (fold: 0 | 1) => {
+        setSelectedFold(fold);
+        setShowDstModal(false);
+        // Retry with the selected fold
+        await runFlow(fold);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await runFlow();
+    };
+
+    // Format date for display
+    const formatDisplayDate = (dateStr: string) => {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}.${m}.${y}`;
     };
 
     if (!authChecked) {
@@ -125,9 +154,9 @@ export default function OnboardingPage() {
                  {/* Name */}
                  <div className="space-y-3">
                     <label htmlFor="name-input" className="mono text-[10px] uppercase tracking-widest font-bold">Callsign</label>
-                    <input 
+                    <input
                        id="name-input"
-                       type="text" 
+                       type="text"
                        value={name}
                        onChange={(e) => setName(e.target.value)}
                        placeholder="Enter your name"
@@ -135,11 +164,11 @@ export default function OnboardingPage() {
                     />
                  </div>
 
-                 {/* Date */}
+                 {/* Date & Time */}
                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
                         <label htmlFor="date-input" className="mono text-[10px] uppercase tracking-widest font-bold">Date</label>
-                        <input 
+                        <input
                            id="date-input"
                            title="Birth Date"
                            type="date"
@@ -149,22 +178,40 @@ export default function OnboardingPage() {
                         />
                     </div>
                     <div className="space-y-3">
-                        <label htmlFor="time-input" className="mono text-[10px] uppercase tracking-widest font-bold">Time</label>
-                        <input 
+                        <label htmlFor="time-input" className="mono text-[10px] uppercase tracking-widest font-bold flex items-center gap-2">
+                            Time
+                            <span className="text-[#C9A46A]">*</span>
+                        </label>
+                        <input
                            id="time-input"
                            title="Birth Time"
                            type="time"
                            value={time}
                            onChange={(e) => setTime(e.target.value)}
+                           onBlur={() => setTimeBlurred(true)}
                            className="w-full p-4 bg-[#F6F3EE] rounded-xl border-none focus:ring-1 focus:ring-[#C9A46A] transition-all"
                         />
+                    </div>
+                 </div>
+
+                 {/* Precision Hint - Always visible */}
+                 <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl" data-testid="precision-hint">
+                    <Info className="text-amber-600 mt-0.5 flex-shrink-0" size={16} />
+                    <div className="text-[12px] text-amber-800 leading-relaxed">
+                        <strong>Präzision ist entscheidend:</strong> Ohne exakte Geburtszeit sinkt die Genauigkeit
+                        deines Horoskops um 10-15%. Ascendent und Häuser können nur mit genauer Uhrzeit berechnet werden.
+                        {!time && timeBlurred && (
+                            <span className="block mt-2 text-amber-700 font-medium">
+                                → Bitte gib deine Geburtszeit ein (Format: HH:MM)
+                            </span>
+                        )}
                     </div>
                  </div>
 
                  {/* Place */}
                  <div className="space-y-3">
                     <label htmlFor="place-select" className="mono text-[10px] uppercase tracking-widest font-bold">Location</label>
-                    <select 
+                    <select
                        id="place-select"
                        title="Birth Place"
                        value={selectedPlace?.name || ''}
@@ -184,6 +231,18 @@ export default function OnboardingPage() {
                     </p>
                  </div>
 
+                 {/* Längengrad-Korrektur Info */}
+                 {selectedPlace && (
+                    <div className="flex items-start gap-3 p-4 bg-[#F6F3EE] border border-[#E6E0D8] rounded-xl">
+                        <AlertCircle className="text-[#7AA7A1] mt-0.5 flex-shrink-0" size={16} />
+                        <div className="text-[11px] text-[#5A6477] leading-relaxed">
+                            <strong>Längengrad-Korrektur aktiv:</strong> Die Berechnung berücksichtigt die
+                            exakte Position von {selectedPlace.name} ({selectedPlace.lat.toFixed(2)}°N, {selectedPlace.lng.toFixed(2)}°E)
+                            für maximale Präzision bei Aszendent und Häusern.
+                        </div>
+                    </div>
+                 )}
+
                  <button
                     type="submit"
                     disabled={!canSubmit || loading}
@@ -191,9 +250,16 @@ export default function OnboardingPage() {
                  >
                     {loading ? <Loader2 className="animate-spin" /> : <>Initialize <ArrowRight size={16}/></>}
                  </button>
+
                  {errorMessage && (
                     <div className="p-4 border border-red-200 bg-red-50 text-red-800 rounded-xl flex flex-col gap-3">
                         <p className="mono text-[12px]">{errorMessage}</p>
+                        {errorCode === 'NONEXISTENT_LOCAL_TIME' && (
+                            <p className="text-[11px] text-red-600">
+                                Tipp: Während der Zeitumstellung im Frühjahr existieren bestimmte Uhrzeiten nicht.
+                                Wähle eine Zeit vor oder nach der Umstellung.
+                            </p>
+                        )}
                         <div className="flex gap-3 flex-wrap">
                             <button
                                 type="button"
@@ -218,6 +284,15 @@ export default function OnboardingPage() {
                  )}
               </form>
            </div>
+
+           {/* DST Fold Modal */}
+           <DstFoldModal
+               isOpen={showDstModal}
+               onClose={() => setShowDstModal(false)}
+               onSelect={handleDstSelect}
+               time={time}
+               date={formatDisplayDate(date)}
+           />
         </div>
     );
 }
