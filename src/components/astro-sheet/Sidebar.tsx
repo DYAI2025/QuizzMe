@@ -15,9 +15,9 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     { icon: LayoutDashboard, label: 'Dashboard', href: '/astrosheet' },
     { icon: User, label: 'Profil', href: '/character' },
     { icon: PieChart, label: 'Quizzes', href: '/verticals/quiz' },
-    { icon: Bot, label: 'Agenten', href: '#' },
-    { icon: Sparkles, label: 'Premium', href: '#', premium: true },
-    { icon: Settings, label: 'Einstellungen', href: '#' },
+    { icon: Bot, label: 'Agenten', href: '/agents' },
+    { icon: Sparkles, label: 'Premium', href: '/premium', premium: true },
+    { icon: Settings, label: 'Einstellungen', href: '/settings' },
   ];
 
   const handleNavClick = (href: string) => {
