@@ -59,7 +59,8 @@ export function proxy(request: NextRequest) {
         const localeMatch = locales.find(l => pathname.startsWith(`/${l}/`) || pathname === `/${l}`)
 
         if (localeMatch) {
-            const pathWithoutLocale = pathname.replace(`/${localeMatch}`, '') || '/'
+            const pathWithoutLocaleRaw = pathname.replace(`/${localeMatch}`, '') || '/'
+            const pathWithoutLocale = pathWithoutLocaleRaw === '/' ? '' : pathWithoutLocaleRaw
             const newUrl = url.clone()
             newUrl.pathname = `/${localeMatch}/verticals/${vertical}${pathWithoutLocale}`
             return NextResponse.rewrite(newUrl)
