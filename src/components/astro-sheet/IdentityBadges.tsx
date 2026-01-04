@@ -41,7 +41,7 @@ const ElementBadge: React.FC<{ name: string }> = ({ name }) => {
   const icon = getElementIcon(name);
   return (
     <span className="inline-flex items-center gap-2">
-      {icon ? React.createElement(icon, { size: 12, className: "text-[#C9A46A]" } as any) : null}
+      {icon ? React.createElement(icon, { size: 12, className: "text-[#C9A46A]" }) : null}
       <span>{name}</span>
     </span>
   );
@@ -184,7 +184,7 @@ const PlanetaryVisualization: React.FC<{ konstellation: { sun: string; moon: str
       <div className="absolute inset-0 flex items-center justify-center">
         <svg viewBox="0 0 400 200" className="w-full h-full p-10 overflow-visible">
           <circle cx="200" cy="100" r="85" fill="none" stroke="white" strokeWidth="0.1" strokeDasharray="1 5" className="animate-spin-slow" />
-          <circle cx="200" cy="100" r="65" fill="none" stroke="white" strokeWidth="0.2" strokeDasharray="10 20" style={{ animation: 'rotate 120s linear infinite reverse' }} className="opacity-20" />
+          <circle cx="200" cy="100" r="65" fill="none" stroke="white" strokeWidth="0.2" strokeDasharray="10 20" className="opacity-20 animate-[spin_120s_linear_infinite_reverse]" />
           <circle cx="200" cy="100" r="2" fill="#7AA7A1" className="animate-pulse" />
           <circle cx="200" cy="100" r="4" fill="none" stroke="#7AA7A1" strokeWidth="0.5" className="animate-ping opacity-30" />
           
@@ -194,21 +194,21 @@ const PlanetaryVisualization: React.FC<{ konstellation: { sun: string; moon: str
             <path d="M 100 40 Q 120 100 160 150" fill="none" stroke="#7AA7A1" strokeWidth="0.3" strokeDasharray="2 2" />
           </g>
 
-          <g className="animate-reveal group/sun" style={{ animationDelay: '0.2s' }}>
+          <g className="animate-reveal group/sun [animation-delay:0.2s]">
              <line x1="200" y1="100" x2="100" y2="40" stroke="#C9A46A" strokeWidth="0.5" strokeDasharray="1 3" />
              <circle cx="100" cy="40" r="7" fill="#0E1B33" stroke="#C9A46A" strokeWidth="1" className="group-hover/sun:scale-125 transition-transform" />
              <text x="100" y="42" textAnchor="middle" className="text-[6px] fill-[#C9A46A] select-none font-bold">☉</text>
              <text x="85" y="30" className="mono text-[4px] fill-[#C9A46A] uppercase font-bold tracking-widest opacity-0 group-hover/sun:opacity-100 transition-opacity">SUN_{konstellation.sun.toUpperCase()}</text>
           </g>
 
-          <g className="animate-reveal group/moon" style={{ animationDelay: '0.4s' }}>
+          <g className="animate-reveal group/moon [animation-delay:0.4s]">
              <line x1="200" y1="100" x2="280" y2="60" stroke="#8F7AD1" strokeWidth="0.5" strokeDasharray="1 3" />
              <circle cx="280" cy="60" r="7" fill="#0E1B33" stroke="#8F7AD1" strokeWidth="1" className="group-hover/moon:scale-125 transition-transform" />
              <text x="280" y="62" textAnchor="middle" className="text-[6px] fill-[#8F7AD1] select-none font-bold">☽</text>
              <text x="285" y="52" className="mono text-[4px] fill-[#8F7AD1] uppercase font-bold tracking-widest opacity-0 group-hover/moon:opacity-100 transition-opacity">MOON_{konstellation.moon.toUpperCase()}</text>
           </g>
 
-          <g className="animate-reveal group/asc" style={{ animationDelay: '0.6s' }}>
+          <g className="animate-reveal group/asc [animation-delay:0.6s]">
              <line x1="200" y1="100" x2="160" y2="150" stroke="#7AA7A1" strokeWidth="0.5" strokeDasharray="1 3" />
              <circle cx="160" cy="150" r="7" fill="#0E1B33" stroke="#7AA7A1" strokeWidth="1" className="group-hover/asc:scale-125 transition-transform" />
              <text x="160" y="152" textAnchor="middle" className="text-[5px] fill-[#7AA7A1] select-none font-bold uppercase">AC</text>
@@ -408,9 +408,9 @@ const IdentityBadges: React.FC<IdentityBadgesProps> = ({ data }) => {
                           : 'bg-white border-[#E6E0D8] text-[#5A6477] hover:border-[#C9A46A] hover:bg-[#F6F3EE] hover:scale-[1.02]'
                       }`}
                     >
-                      <div className={`absolute top-0 left-0 right-0 h-[3px] transition-all duration-500 ${
+                      <div className={`absolute top-0 left-0 right-0 h-[3px] transition-all duration-500 bg-gradient-to-r from-[#8F7AD1] via-[#7AA7A1] to-[#C9A46A] ${
                         activePillar === idx ? 'opacity-100 scale-x-100' : 'opacity-40 scale-x-75 group-hover/tab:opacity-100 group-hover/tab:scale-x-100'
-                      }`} style={{ background: 'linear-gradient(90deg, #8F7AD1, #7AA7A1, #C9A46A)' }} />
+                      }`} />
                       
                       <span className="mono text-[9px] font-bold tracking-widest mb-1">{p.label}</span>
                       <span className="text-[10px] opacity-60 uppercase font-medium">{p.title}</span>

@@ -36,7 +36,7 @@ export function ZodiacShield({ sign, size = 120, className = "" }: ZodiacShieldP
   return (
     <div 
       className={`relative flex items-center justify-center ${className}`}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size }} // Dynamic size required
     >
       {/* 
         Container for the shield.
@@ -54,7 +54,6 @@ export function ZodiacShield({ sign, size = 120, className = "" }: ZodiacShieldP
           className="object-contain drop-shadow-2xl"
           priority
         />
-        
         {/* Optional: Add a lock icon overlay if strictly locked, 
             but user asked specifically for "grayed out" same shape. 
             So simpler is better. 

@@ -22,13 +22,20 @@ export function proxy(request: NextRequest) {
         return NextResponse.next()
     }
 
-    // 2. i18n: Check if path already has a locale prefix
+    // 2. Root path → redirect to /astrosheet
+    if (pathname === '/' || locales.some(l => pathname === `/${l}`)) {
+        const redirectUrl = url.clone()
+        redirectUrl.pathname = '/astrosheet'
+        return NextResponse.redirect(redirectUrl)
+    }
+
+    // 3. i18n: Check if path already has a locale prefix
     const hasLocale = locales.some(
         (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
     )
 
-    // If no locale, redirect to default locale
-    if (!hasLocale && !pathname.startsWith('/verticals')) {
+    // If no locale, redirect to default locale (for non-root paths)
+    if (!hasLocale && !pathname.startsWith('/verticals') && !pathname.startsWith('/astrosheet')) {
         const redirectUrl = url.clone()
         redirectUrl.pathname = `/${defaultLocale}${pathname}`
         return NextResponse.redirect(redirectUrl)
@@ -59,10 +66,14 @@ export function proxy(request: NextRequest) {
         const localeMatch = locales.find(l => pathname.startsWith(`/${l}/`) || pathname === `/${l}`)
 
         if (localeMatch) {
-            const pathWithoutLocaleRaw = pathname.replace(`/${localeMatch}`, '') || '/'
-            const pathWithoutLocale = pathWithoutLocaleRaw === '/' ? '' : pathWithoutLocaleRaw
+            const pathWithoutLocale = pathname.replace(`/${localeMatch}`, '')
+            // Verticals don't use locale prefix - rewrite directly
             const newUrl = url.clone()
-            newUrl.pathname = `/${localeMatch}/verticals/${vertical}${pathWithoutLocale}`
+            // Ensure clean path without double slashes
+            const targetPath = pathWithoutLocale && pathWithoutLocale !== '/'
+                ? `/verticals/${vertical}${pathWithoutLocale}`
+                : `/verticals/${vertical}`
+            newUrl.pathname = targetPath
             return NextResponse.rewrite(newUrl)
         }
     }

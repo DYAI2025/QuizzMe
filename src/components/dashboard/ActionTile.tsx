@@ -1,6 +1,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export type ActionTileVariant = 'gold' | 'mystic' | 'danger' | 'neutral';
 
@@ -52,9 +53,12 @@ export function ActionTile({
       {/* Background Image (Optional) */}
       {backgroundImageSrc && (
         <>
-            <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 opacity-40 group-hover:opacity-60 grayscale group-hover:grayscale-0"
-                style={{ backgroundImage: `url(${backgroundImageSrc})` }}
+            {/* Replaced inline background image with absolute img for better lint compliance */}
+            <Image 
+                src={backgroundImageSrc}
+                alt=""
+                fill
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-40 group-hover:opacity-60 grayscale group-hover:grayscale-0"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
         </>
