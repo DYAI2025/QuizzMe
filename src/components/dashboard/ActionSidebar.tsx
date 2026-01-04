@@ -49,12 +49,12 @@ export function ActionSidebar({ snapshot }: ActionSidebarProps) {
         />
       </div>
 
-      {/* 3. Community / Share */}
+      {/* 3. Community / Share - Opens share modal */}
       <div className="space-y-2 pt-4 border-t border-white/5">
-         <ActionTile 
+         <ActionTile
           title="Profil Teilen"
           subtitle="Zeige anderen deine wahre Natur."
-          href="#"
+          href="/astrosheet?share=true"
           variant="neutral"
           icon={<span className="text-xl">🔗</span>}
           className="opacity-70 hover:opacity-100"

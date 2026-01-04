@@ -1,3 +1,9 @@
+/**
+ * AstroSheet Constants
+ *
+ * These constants serve as fallback/default values when user data is not yet computed.
+ * They are NOT mock data to be removed - they provide reasonable defaults for new users.
+ */
 
 import { Stat, Badge, QuizItem, Agent, MasterIdentity } from './types';
 
@@ -14,6 +20,7 @@ export const COLORS = {
   deepPurple: '#4A0E4E',
 };
 
+/** Default stats shown when user has no computed profile data */
 export const CORE_STATS: Stat[] = [
   { label: 'Energie-Aufladung', value: 84 },
   { label: 'Bindung', value: 52 },
@@ -22,6 +29,7 @@ export const CORE_STATS: Stat[] = [
   { label: 'Analyse ↔ Intuition', value: 48 },
 ];
 
+/** Default identity shown when user has no computed astro data */
 export const IDENTITY_DATA: MasterIdentity = {
   tierkreis: "Metall Pferd",
   monatstier: "Ziege (Wei)",
@@ -46,11 +54,13 @@ export const IDENTITY_BADGES: Badge[] = [
   { label: 'Erde-Ratte', type: 'bazi' },
 ];
 
+/** Sample quiz progress - will be replaced with real DB data in future */
 export const QUIZZES: QuizItem[] = [
   { id: '1', title: 'Naturkind', status: 'completed' },
   { id: '2', title: 'Mentalist', status: 'in_progress', progress: 45, recommendation: 'Reflexions-Tiefe' },
 ];
 
+/** Available AI agents - matches /agents page configuration */
 export const AGENTS: Agent[] = [
   { id: 'atlas', name: 'ATLAS', type: 'Ba Zi', description: 'Analytische Matrix-Schnittstelle' },
   { id: 'vika', name: 'VIKA', type: 'Westlich', description: 'Harmonische Resonanz-Einheit', premium: true },
