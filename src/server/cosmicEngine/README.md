@@ -121,7 +121,7 @@ All types are Zod-validated for runtime safety.
 
 The engine automatically falls back through three tiers:
 
-1. **Cloud API** (if `COSMIC_CLOUD_URL` set): Precision calculations
+1. **Cloud API** (if `COSMIC_CLOUD_URL` is set): Precision calculations
 2. **Local Python Bridge**: Swiss Ephemeris via cosmic-architecture-engine
 3. **Mock Engine**: JavaScript-only using astronomy-engine
 
