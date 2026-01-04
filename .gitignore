@@ -57,3 +57,12 @@ astro-character-dashboard*
 astro-precision-horoscope/
 cosmicEnginge_v3/
 
+# Playwright test artifacts
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Misc temp files
+*.zip
+astro-fusion-engine*
+
