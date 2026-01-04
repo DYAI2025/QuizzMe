@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import SigilPortrait from './SigilPortrait';
 import { ZODIAC_DATA } from './constants';
-import { GoogleGenAI } from "@google/genai";
+import { generateAstroInsight } from '@/app/actions/generateInsight';
 
 interface IdentityBadgesProps {
   data: MasterIdentity;
@@ -265,22 +265,15 @@ const IdentityBadges: React.FC<IdentityBadgesProps> = ({ data }) => {
   const generateDeepInsight = async () => {
     setIsGenerating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-      const prompt = `Du bist ein Experte für Astrologie (westlich) und BaZi (chinesisch). Analysiere diese Konfiguration: 
-      Westlich: Sonne ${data.konstellation.sun}, Mond ${data.konstellation.moon}, AC ${data.konstellation.rising}.
-      BaZi: Tierkreis ${data.tierkreis}, Monatstier ${data.monatstier}, Element ${data.element}.
-      Erstelle eine tiefgründige, poetische und präzise 'Quanten-Synergie-Analyse' (ca. 60 Wörter) in Deutsch.
-      Konzentriere dich auf die Schnittmenge der beiden Systeme. Was bedeutet diese Kombination für das innere Potenzial?
-      Verwende einen modernen, retro-futuristischen Ton.`;
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
+      const insight = await generateAstroInsight({
+        sunSign: data.konstellation.sun,
+        moonSign: data.konstellation.moon,
+        ascSign: data.konstellation.rising,
+        tierkreis: data.tierkreis,
+        monatstier: data.monatstier,
+        element: data.element,
       });
-
-      if (response.text) {
-        setAiInsight(response.text.trim());
-      }
+      setAiInsight(insight);
     } catch (error) {
       console.error("AI Insight Generation failed:", error);
     } finally {

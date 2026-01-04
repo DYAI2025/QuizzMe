@@ -1,5 +1,16 @@
 import type { SymbolSpecV1 } from "./schemas";
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SYMBOL CACHE (Deterministic memoization)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const symbolCache = new Map<string, SymbolSpecV1>();
+const CACHE_MAX_SIZE = 100; // Limit cache size
+
+function getCacheKey(baziElement: string, westernSign: string): string {
+    return `${baziElement}::${westernSign}`;
+}
+
 // Wu Xing elements
 type WuXingElement = "Wood" | "Fire" | "Earth" | "Metal" | "Water";
 type WesternElement = "Fire" | "Earth" | "Air" | "Water";
@@ -124,7 +135,14 @@ export function generateFusionSign(
     if (!baziDayMasterElement || !westernSunSign) {
         return undefined;
     }
-    
+
+    // Check cache first (deterministic function)
+    const cacheKey = getCacheKey(baziDayMasterElement, westernSunSign);
+    const cached = symbolCache.get(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
     // 1. Normalize Inputs
     // Ba Zi should be standard English "Wood", "Fire" etc.
     // Western Sign -> Element
@@ -250,8 +268,8 @@ export function generateFusionSign(
         bgShapeType.toLowerCase()
     );
 
-    // 7. Return SymbolSpecV1 compliant object
-    return {
+    // 7. Build SymbolSpecV1 compliant object
+    const result: SymbolSpecV1 = {
         version: "1.0" as const,
         svg,
         description,
@@ -267,4 +285,15 @@ export function generateFusionSign(
         prompt,
         generatedAt: new Date().toISOString(),
     };
+
+    // 8. Store in cache (LRU eviction if full)
+    if (symbolCache.size >= CACHE_MAX_SIZE) {
+        const firstKey = symbolCache.keys().next().value;
+        if (firstKey) {
+            symbolCache.delete(firstKey);
+        }
+    }
+    symbolCache.set(cacheKey, result);
+
+    return result;
 }
