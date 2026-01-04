@@ -1,19 +1,30 @@
+'use client';
 
 import React from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { User, HelpCircle, Bot, Sparkles, Settings, AlertCircle, LayoutDashboard, Compass, PieChart, FileText } from 'lucide-react';
 import { UserProfile } from './types';
 
 interface SidebarProps { user: UserProfile; }
 
 const Sidebar: React.FC<SidebarProps> = ({ user }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+
   const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', active: true },
-    { icon: User, label: 'Profil' },
-    { icon: PieChart, label: 'Quizzes' },
-    { icon: Bot, label: 'Agenten' },
-    { icon: Sparkles, label: 'Premium', premium: true },
-    { icon: Settings, label: 'Einstellungen' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/astrosheet' },
+    { icon: User, label: 'Profil', href: '/character' },
+    { icon: PieChart, label: 'Quizzes', href: '/verticals/quiz' },
+    { icon: Bot, label: 'Agenten', href: '#' },
+    { icon: Sparkles, label: 'Premium', href: '#', premium: true },
+    { icon: Settings, label: 'Einstellungen', href: '#' },
   ];
+
+  const handleNavClick = (href: string) => {
+    if (href !== '#') {
+      router.push(href);
+    }
+  };
 
   return (
     <aside className="w-[260px] h-screen fixed left-0 top-0 border-r border-[#E6E0D8] bg-white flex flex-col p-10 z-50">
@@ -35,19 +46,23 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       </div>
 
       <nav className="flex-1 space-y-4">
-        {navItems.map((item) => (
-          <button
-            key={item.label}
-            className={`w-full flex items-center gap-5 px-6 py-4 rounded-2xl transition-all duration-300 relative overflow-hidden group ${
-              item.active 
-                ? 'bg-[#0E1B33] text-white shadow-xl shadow-[#0E1B33]/20' 
-                : 'text-[#5A6477] hover:text-[#0E1B33] hover:bg-[#F6F3EE]'
-            }`}
-          >
-            <item.icon size={18} className={`relative z-10 transition-colors ${item.active ? 'text-[#7AA7A1]' : ''} ${item.premium ? 'text-[#C9A46A]' : ''}`} />
-            <span className="text-[11px] font-extrabold uppercase tracking-[0.3em] relative z-10">{item.label}</span>
-          </button>
-        ))}
+        {navItems.map((item) => {
+          const isActive = pathname === item.href || (item.href !== '#' && pathname?.startsWith(item.href));
+          return (
+            <button
+              key={item.label}
+              onClick={() => handleNavClick(item.href)}
+              className={`w-full flex items-center gap-5 px-6 py-4 rounded-2xl transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+                isActive
+                  ? 'bg-[#0E1B33] text-white shadow-xl shadow-[#0E1B33]/20'
+                  : 'text-[#5A6477] hover:text-[#0E1B33] hover:bg-[#F6F3EE]'
+              }`}
+            >
+              <item.icon size={18} className={`relative z-10 transition-colors ${isActive ? 'text-[#7AA7A1]' : ''} ${item.premium ? 'text-[#C9A46A]' : ''}`} />
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.3em] relative z-10">{item.label}</span>
+            </button>
+          );
+        })}
       </nav>
 
       <div className="mt-auto pt-10">

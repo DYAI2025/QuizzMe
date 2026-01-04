@@ -34,8 +34,18 @@ export function proxy(request: NextRequest) {
         (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
     )
 
-    // If no locale, redirect to default locale (for non-root paths)
-    if (!hasLocale && !pathname.startsWith('/verticals') && !pathname.startsWith('/astrosheet')) {
+    // Skip locale redirect for specific paths that don't need it
+    const noLocaleNeeded = [
+        '/verticals',
+        '/astrosheet',
+        '/character',
+        '/login',
+        '/auth',
+        '/onboarding',
+    ]
+
+    // If no locale and path needs locale, redirect
+    if (!hasLocale && !noLocaleNeeded.some(p => pathname.startsWith(p))) {
         const redirectUrl = url.clone()
         redirectUrl.pathname = `/${defaultLocale}${pathname}`
         return NextResponse.redirect(redirectUrl)

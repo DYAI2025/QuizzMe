@@ -18,7 +18,6 @@ import {
 } from './aura-colors/data';
 import { contributeClient as contribute } from '@/lib/api';
 import { useClusterProgress } from '@/lib/stores/useClusterProgress';
-import { ValidationProfile } from './types';
 import { AlchemyButton, AlchemyLinkButton } from '@/components/ui/AlchemyButton';
 
 // Micro-win messages (no emojis)
@@ -173,17 +172,11 @@ export function AuraColorsQuiz() {
   if (!started) {
     return (
       <div 
-        className="min-h-[600px] flex items-center justify-center rounded-3xl p-6 relative overflow-hidden"
-        style={{
-          background: 'linear-gradient(165deg, #053B3F 0%, #041726 50%, #031119 100%)'
-        }}
+        className="min-h-[600px] flex items-center justify-center rounded-3xl p-6 relative overflow-hidden bg-[linear-gradient(165deg,#053B3F_0%,#041726_50%,#031119_100%)]"
       >
         {/* Background glow effects */}
         <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at 20% 30%, rgba(210, 169, 90, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(108, 161, 146, 0.06) 0%, transparent 50%)'
-          }}
+          className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_20%_30%,rgba(210,169,90,0.08)_0%,transparent_50%),radial-gradient(ellipse_at_80%_70%,rgba(108,161,146,0.06)_0%,transparent_50%)]"
         />
         
         <div className="relative z-10 max-w-lg w-full text-center">
@@ -210,22 +203,19 @@ export function AuraColorsQuiz() {
           </div>
           
           <h1 
-            className="text-4xl md:text-5xl font-serif font-medium mb-4" 
-            style={{ color: '#D2A95A' }}
+            className="text-4xl md:text-5xl font-serif font-medium mb-4 text-[#D2A95A]" 
           >
             {quizMeta.title}
           </h1>
           
           <p 
-            className="text-lg mb-8 leading-relaxed max-w-md mx-auto"
-            style={{ color: '#A8B5A0' }}
+            className="text-lg mb-8 leading-relaxed max-w-md mx-auto text-[#A8B5A0]"
           >
             {quizMeta.subtitle} — und die Farbe, in der deine Seele spricht.
           </p>
           
           <div 
-            className="flex justify-center gap-6 mb-10 text-sm"
-            style={{ color: '#A8B5A0' }}
+            className="flex justify-center gap-6 mb-10 text-sm text-[#A8B5A0]"
           >
             <span>3 Min</span>
             <span>12 Fragen</span>
@@ -233,19 +223,13 @@ export function AuraColorsQuiz() {
           
           <button
             onClick={() => setStarted(true)}
-            className="px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
-            style={{
-              background: 'linear-gradient(135deg, #D2A95A 0%, #A77D38 100%)',
-              color: '#041726',
-              boxShadow: '0 4px 20px rgba(210, 169, 90, 0.3)'
-            }}
+            className="px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg bg-[linear-gradient(135deg,#D2A95A_0%,#A77D38_100%)] text-[#041726] shadow-[0_4px_20px_rgba(210,169,90,0.3)]"
           >
             Enthülle deine Aura
           </button>
           
           <p 
-            className="text-xs mt-8 opacity-70"
-            style={{ color: '#A8B5A0' }}
+            className="text-xs mt-8 opacity-70 text-[#A8B5A0]"
           >
             {quizMeta.disclaimer}
           </p>
@@ -260,10 +244,7 @@ export function AuraColorsQuiz() {
     
     return (
       <div 
-        className="min-h-[600px] rounded-3xl overflow-hidden"
-        style={{
-          background: 'linear-gradient(165deg, #053B3F 0%, #041726 50%, #031119 100%)'
-        }}
+        className="min-h-[600px] rounded-3xl overflow-hidden bg-[linear-gradient(165deg,#053B3F_0%,#041726_50%,#031119_100%)]"
       >
         {/* Background glow */}
         <div 
@@ -275,26 +256,20 @@ export function AuraColorsQuiz() {
         
         <div className="relative z-10 max-w-lg mx-auto p-4">
           <div 
-            className="rounded-3xl p-8 mb-6 relative overflow-hidden"
-            style={{
-              background: 'linear-gradient(165deg, #0A2540 0%, #132F4C 100%)',
-              border: '1px solid rgba(210, 169, 90, 0.25)',
-              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.4)'
-            }}
+            className="rounded-3xl p-8 mb-6 relative overflow-hidden bg-[linear-gradient(165deg,#0A2540_0%,#132F4C_100%)] border border-[#D2A95A40] shadow-[0_16px_48px_rgba(0,0,0,0.4)]"
           >
             {/* Dynamic glow based on result color */}
             <div 
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: `radial-gradient(ellipse at 50% 0%, ${primary.color}25 0%, transparent 60%)`
-              }}
-            />
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `radial-gradient(ellipse at 50% 0%, ${primary.color}25 0%, transparent 60%)`
+            }}
+          />
             
             <div className="relative z-10">
               {/* Badge */}
               <div 
-                className="text-xs font-semibold tracking-widest uppercase mb-4 text-center"
-                style={{ color: '#D2A95A' }}
+                className="text-xs font-semibold tracking-widest uppercase mb-4 text-center text-[#D2A95A]"
               >
                 Deine Aura
               </div>
@@ -302,10 +277,9 @@ export function AuraColorsQuiz() {
               {/* Aura Visual */}
               <div className="w-32 h-32 mx-auto mb-6 relative">
                 <div 
-                  className="w-full h-full rounded-full opacity-60"
+                  className="w-full h-full rounded-full opacity-60 animate-[pulse_3s_ease-in-out_infinite]"
                   style={{
-                    background: `radial-gradient(circle, ${primary.color} 0%, transparent 70%)`,
-                    animation: 'pulse 3s ease-in-out infinite'
+                    background: `radial-gradient(circle, ${primary.color} 0%, transparent 70%)`
                   }}
                 />
                 <div 
@@ -319,37 +293,32 @@ export function AuraColorsQuiz() {
               
               {/* Title & Archetype */}
               <h1 
-                className="text-3xl font-serif font-semibold text-center mb-2"
-                style={{ color: '#F7F3EA' }}
+                className="text-3xl font-serif font-semibold text-center mb-2 text-[#F7F3EA]"
               >
                 {primary.title}
               </h1>
               <p 
-                className="text-lg font-serif italic text-center mb-6"
-                style={{ color: '#D2A95A' }}
+                className="text-lg font-serif italic text-center mb-6 text-[#D2A95A]"
               >
                 „{primary.archetype}&ldquo;
               </p>
               <p 
-                className="text-center leading-relaxed mb-6 px-4"
-                style={{ color: '#A8B5A0' }}
+                className="text-center leading-relaxed mb-6 px-4 text-[#A8B5A0]"
               >
                 {primary.tagline}
               </p>
               
               {/* Secondary Color & Element */}
               <div 
-                className="flex justify-center gap-6 mb-6 p-4 rounded-xl"
-                style={{ background: 'rgba(0,0,0,0.2)' }}
+                className="flex justify-center gap-6 mb-6 p-4 rounded-xl bg-black/20"
               >
                 <div className="text-center">
                   <div 
-                    className="text-xs uppercase tracking-wider mb-2"
-                    style={{ color: '#A8B5A0' }}
+                    className="text-xs uppercase tracking-wider mb-2 text-[#A8B5A0]"
                   >
                     Zweitfarbe
                   </div>
-                  <div className="flex items-center gap-2" style={{ color: '#F7F3EA' }}>
+                  <div className="flex items-center gap-2 text-[#F7F3EA]">
                     <span 
                       className="w-3 h-3 rounded-full inline-block"
                       style={{ background: secondary.color }}
@@ -359,12 +328,11 @@ export function AuraColorsQuiz() {
                 </div>
                 <div className="text-center">
                   <div 
-                    className="text-xs uppercase tracking-wider mb-2"
-                    style={{ color: '#A8B5A0' }}
+                    className="text-xs uppercase tracking-wider mb-2 text-[#A8B5A0]"
                   >
                     Element
                   </div>
-                  <div className="font-serif" style={{ color: '#F7F3EA' }}>
+                  <div className="font-serif text-[#F7F3EA]">
                     {element.name}
                   </div>
                 </div>
@@ -375,18 +343,15 @@ export function AuraColorsQuiz() {
                 {primary.stats.map((stat, i) => (
                   <div 
                     key={i}
-                    className="rounded-lg p-3 text-center"
-                    style={{ background: 'rgba(0,0,0,0.2)' }}
+                    className="rounded-lg p-3 text-center bg-black/20"
                   >
                     <div 
-                      className="font-serif text-xl mb-1"
-                      style={{ color: '#D2A95A' }}
+                      className="font-serif text-xl mb-1 text-[#D2A95A]"
                     >
                       {stat.value}
                     </div>
                     <div 
-                      className="text-xs uppercase tracking-wider"
-                      style={{ color: '#A8B5A0' }}
+                      className="text-xs uppercase tracking-wider text-[#A8B5A0]"
                     >
                       {stat.label}
                     </div>
@@ -396,18 +361,16 @@ export function AuraColorsQuiz() {
               
               {/* Compatibility */}
               <div 
-                className="p-4 rounded-xl mb-6"
-                style={{ background: 'rgba(108, 161, 146, 0.1)' }}
+                className="p-4 rounded-xl mb-6 bg-[rgba(108,161,146,0.1)]"
               >
                 <h3 
-                  className="text-xs font-semibold uppercase tracking-wider mb-3"
-                  style={{ color: '#6CA192' }}
+                  className="text-xs font-semibold uppercase tracking-wider mb-3 text-[#6CA192]"
                 >
                   Aura-Kompatibilität
                 </h3>
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-sm" style={{ color: '#A8B5A0' }}>Verbündete:</span>
+                    <span className="text-sm text-[#A8B5A0]">Verbündete:</span>
                     <div className="flex gap-2 ml-auto">
                       {primary.allies.map(ally => (
                         <span 
@@ -419,7 +382,7 @@ export function AuraColorsQuiz() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm" style={{ color: '#A8B5A0' }}>Herausforderung:</span>
+                    <span className="text-sm text-[#A8B5A0]">Herausforderung:</span>
                     <div className="flex gap-2 ml-auto">
                       {primary.nemesis.map(nem => (
                         <span 
@@ -435,23 +398,20 @@ export function AuraColorsQuiz() {
               
               {/* Description Toggle */}
               <div 
-                className="rounded-2xl p-4"
-                style={{ background: 'rgba(0,0,0,0.15)' }}
+                className="rounded-2xl p-4 bg-black/15"
               >
                 <button
                   onClick={() => setShowDescription(!showDescription)}
-                  className="w-full flex items-center justify-center gap-2 text-sm py-2"
-                  style={{ color: '#D2A95A' }}
+                  className="w-full flex items-center justify-center gap-2 text-sm py-2 text-[#D2A95A]"
                 >
                   <span>Mehr über deine Aura erfahren</span>
-                  <span className="transition-transform" style={{ transform: showDescription ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  <span className={`transition-transform duration-200 ${showDescription ? 'rotate-180' : 'rotate-0'}`}>
                     ▼
                   </span>
                 </button>
                 {showDescription && (
                   <div 
-                    className="mt-4 text-sm leading-relaxed whitespace-pre-line text-left"
-                    style={{ color: '#A8B5A0' }}
+                    className="mt-4 text-sm leading-relaxed whitespace-pre-line text-left text-[#A8B5A0]"
                   >
                     {primary.description}
                   </div>
@@ -479,16 +439,14 @@ export function AuraColorsQuiz() {
             </AlchemyLinkButton>
             <button
               onClick={resetQuiz}
-              className="py-3 text-sm transition-all"
-              style={{ color: '#6CA192' }}
+              className="py-3 text-sm transition-all text-[#6CA192]"
             >
               Test wiederholen
             </button>
           </div>
           
           <p 
-            className="text-xs text-center mt-6 opacity-70"
-            style={{ color: '#A8B5A0' }}
+            className="text-xs text-center mt-6 opacity-70 text-[#A8B5A0]"
           >
             {quizMeta.disclaimer}
           </p>
@@ -500,47 +458,34 @@ export function AuraColorsQuiz() {
   // Quiz Flow Screen
   return (
     <div 
-      className="min-h-[600px] p-4 rounded-3xl"
-      style={{ background: '#053B3F' }}
+      className="min-h-[600px] p-4 rounded-3xl bg-[#053B3F]"
     >
       {/* Micro-win feedback */}
       {microWin && (
         <div 
-          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 font-serif text-2xl pointer-events-none"
-          style={{
-            color: '#D2A95A',
-            textShadow: '0 0 30px rgba(210, 169, 90, 0.5)',
-            animation: 'fadeInOut 0.8s ease-out forwards'
-          }}
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 font-serif text-2xl pointer-events-none text-[#D2A95A] drop-shadow-[0_0_30px_rgba(210,169,90,0.5)] animate-[fadeInOut_0.8s_ease-out_forwards]"
         >
           {microWin}
         </div>
       )}
       
       <div 
-        className="rounded-3xl p-6 min-h-[calc(100vh-4rem)] flex flex-col"
-        style={{
-          background: 'linear-gradient(180deg, #F7F0E6 0%, #F2E3CF 100%)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-        }}
+        className="rounded-3xl p-6 min-h-[calc(100vh-4rem)] flex flex-col bg-[linear-gradient(180deg,#F7F0E6_0%,#F2E3CF_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
       >
         {/* Progress */}
         <div className="mb-6">
           <div 
-            className="text-xs font-medium uppercase tracking-wider mb-2"
-            style={{ color: '#5A4D3F' }}
+            className="text-xs font-medium uppercase tracking-wider mb-2 text-[#5A4D3F]"
           >
             Frage {currentQuestion + 1} von {questions.length}
           </div>
           <div 
-            className="h-1 rounded-full overflow-hidden"
-            style={{ background: '#E5D9C3' }}
+            className="h-1 rounded-full overflow-hidden bg-[#E5D9C3]"
           >
             <div 
-              className="h-full rounded-full transition-all duration-500"
+              className="h-full rounded-full transition-all duration-500 bg-[linear-gradient(90deg,#053B3F,#6CA192)]"
               style={{ 
-                width: `${progress}%`,
-                background: 'linear-gradient(90deg, #053B3F, #6CA192)'
+                width: `${progress}%`
               }}
             />
           </div>
@@ -550,28 +495,21 @@ export function AuraColorsQuiz() {
         <div className="flex-1 flex flex-col">
           {/* Dimension Label */}
           <div 
-            className="text-xs font-semibold uppercase tracking-widest mb-3"
-            style={{ color: '#6CA192' }}
+            className="text-xs font-semibold uppercase tracking-widest mb-3 text-[#6CA192]"
           >
             {currentDimension?.label}
           </div>
           
           {/* Question Text */}
           <h2 
-            className="text-xl md:text-2xl font-serif font-medium leading-snug mb-4"
-            style={{ color: '#271C16' }}
+            className="text-xl md:text-2xl font-serif font-medium leading-snug mb-4 text-[#271C16]"
           >
             {currentQ.text}
           </h2>
           
           {/* Context */}
           <div 
-            className="text-sm italic p-4 rounded-xl mb-6"
-            style={{
-              color: '#5A4D3F',
-              background: 'rgba(108, 161, 146, 0.08)',
-              borderLeft: '3px solid #6CA192'
-            }}
+            className="text-sm italic p-4 rounded-xl mb-6 text-[#5A4D3F] bg-[rgba(108,161,146,0.08)] border-l-[3px] border-l-[#6CA192]"
           >
             {currentQ.context}
           </div>
@@ -582,20 +520,7 @@ export function AuraColorsQuiz() {
               <button
                 key={option.id}
                 onClick={() => handleAnswer(option)}
-                className="w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 hover:translate-x-1"
-                style={{
-                  background: '#FFFFFF',
-                  borderColor: '#E5D9C3',
-                  color: '#271C16'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#6CA192';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(108, 161, 146, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#E5D9C3';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
+                className="w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 hover:translate-x-1 bg-white border-[#E5D9C3] text-[#271C16] hover:border-[#6CA192] hover:shadow-[0_4px_16px_rgba(108,161,146,0.15)]"
               >
                 <span className="font-medium text-sm leading-relaxed">
                   {option.text}

@@ -33,10 +33,12 @@ export function ZodiacShield({ sign, size = 120, className = "" }: ZodiacShieldP
   const assetId = SIGN_TO_ID[normalizedSign] || 1;
   const isUnlocked = !!SIGN_TO_ID[normalizedSign];
 
+  const wrapperStyle = { width: size, height: size };
+
   return (
     <div 
       className={`relative flex items-center justify-center ${className}`}
-      style={{ width: size, height: size }} // Dynamic size required
+      style={wrapperStyle}
     >
       {/* 
         Container for the shield.
