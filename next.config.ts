@@ -19,9 +19,9 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   // Fix workspace root inference for deterministic builds across environments
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
+  // turbopack: {
+  //   root: path.resolve(__dirname),
+  // },
   // GitHub Pages subpath config (uncomment if needed):
   // basePath: '/QuizzMe',
 };
