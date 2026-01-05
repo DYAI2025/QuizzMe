@@ -1,5 +1,8 @@
 import { MetadataRoute } from "next";
 
+export const dynamic = 'force-static'
+export const revalidate = false
+
 const manifest = (): MetadataRoute.Manifest => ({
   name: "QuizzMe",
   short_name: "QuizzMe",

@@ -340,6 +340,122 @@ function getMoonPhaseLabel(v: number): string {
 }
 
 /**
+ * Calculate energy peaks for the day based on planetary hours and transits
+ */
+export function calculateEnergyPeaks(transits: ReturnType<typeof calculateDailyTransits>) {
+  const peaks: Array<{
+    time: string;
+    type: 'high' | 'medium' | 'low';
+    description: string;
+    planet: string;
+  }> = [];
+
+  // Moon-based energy peaks (every ~2.5 hours the moon aspect changes)
+  const moonSign = transits.currentPlanets.moon?.sign;
+
+  // Morning peak - Sun influence
+  peaks.push({
+    time: '06:00 - 09:00',
+    type: transits.activeTransits.some(t => t.planet === 'jupiter') ? 'high' : 'medium',
+    description: 'Optimale Zeit für Neuanfänge und Planung',
+    planet: 'sun',
+  });
+
+  // Mid-morning - Mercury influence
+  peaks.push({
+    time: '09:00 - 12:00',
+    type: transits.activeTransits.some(t => t.planet === 'mercury' && t.aspect === 'trine') ? 'high' : 'medium',
+    description: 'Beste Zeit für Kommunikation und Lernen',
+    planet: 'mercury',
+  });
+
+  // Afternoon - Mars influence
+  const hasMarsTension = transits.activeTransits.some(t => t.planet === 'mars' && (t.aspect === 'square' || t.aspect === 'opposite'));
+  peaks.push({
+    time: '14:00 - 17:00',
+    type: hasMarsTension ? 'low' : 'high',
+    description: hasMarsTension ? 'Vorsicht bei Konflikten, Energie kanalisieren' : 'Ideale Zeit für aktive Arbeit und Sport',
+    planet: 'mars',
+  });
+
+  // Evening - Venus influence
+  peaks.push({
+    time: '18:00 - 21:00',
+    type: transits.activeTransits.some(t => t.planet === 'venus') ? 'high' : 'medium',
+    description: 'Beste Zeit für Beziehungen und Kreativität',
+    planet: 'venus',
+  });
+
+  // Night - Moon influence
+  const moonPhaseEnergy = transits.moonPhase.value > 0.4 && transits.moonPhase.value < 0.6 ? 'high' : 'medium';
+  peaks.push({
+    time: '21:00 - 00:00',
+    type: moonPhaseEnergy,
+    description: 'Zeit für Reflexion und emotionale Verarbeitung',
+    planet: 'moon',
+  });
+
+  return peaks;
+}
+
+/**
+ * Get overall day quality based on transits
+ */
+export function getDayQuality(transits: ReturnType<typeof calculateDailyTransits>): {
+  score: number; // 0-100
+  label: string;
+  color: string;
+} {
+  let score = 50; // Base score
+
+  for (const transit of transits.activeTransits) {
+    // Positive aspects
+    if (transit.aspect === 'trine') score += 15;
+    if (transit.aspect === 'conjunct' && ['venus', 'jupiter'].includes(transit.planet)) score += 20;
+    if (transit.aspect === 'conjunct' && transit.planet === 'mercury') score += 10;
+
+    // Challenging aspects
+    if (transit.aspect === 'square') score -= 10;
+    if (transit.aspect === 'opposite' && ['mars', 'saturn'].includes(transit.planet)) score -= 15;
+
+    // Jupiter always adds optimism
+    if (transit.planet === 'jupiter') score += 10;
+    // Saturn can be sobering
+    if (transit.planet === 'saturn' && transit.aspect !== 'trine') score -= 5;
+  }
+
+  // Moon phase influence
+  if (transits.moonPhase.label === 'Full Moon') score += 10;
+  if (transits.moonPhase.label === 'New Moon') score += 5;
+
+  // Clamp to 0-100
+  score = Math.max(0, Math.min(100, score));
+
+  // Determine label and color
+  let label: string;
+  let color: string;
+
+  if (score >= 80) {
+    label = 'Exzellent';
+    color = '#22C55E';
+  } else if (score >= 65) {
+    label = 'Gut';
+    color = '#7AA7A1';
+  } else if (score >= 45) {
+    label = 'Ausgeglichen';
+    color = '#C9A46A';
+  } else if (score >= 30) {
+    label = 'Herausfordernd';
+    color = '#F59E0B';
+  } else {
+    label = 'Anspruchsvoll';
+    color = '#EF4444';
+  }
+
+  return { score, label, color };
+}
+
+/**
  * Check if birth time is known (for future asc/moon calculation)
  */
 export function hasBirthTime(input: BirthInput): boolean {

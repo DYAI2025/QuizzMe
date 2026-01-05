@@ -290,7 +290,7 @@ export function LoveLanguagesQuiz() {
                              result.id === 'touch' ? '🤲' : '❤️'}
                         </div>
                         <h1 className="text-3xl font-light text-white mb-2">{result.title}</h1>
-                        <p className="text-sm px-4 py-2 rounded-full inline-block mb-4" style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'white' }}>
+                        <p className="text-sm px-4 py-2 rounded-full inline-block mb-4 bg-white/10 text-white">
                              {result.title}
                         </p>
                         <p className="text-white/70 italic text-sm">
@@ -310,7 +310,7 @@ export function LoveLanguagesQuiz() {
                             {result.stats.map((stat, i) => (
                                 <div key={i} className="flex justify-between items-center">
                                     <span className="text-white/70 text-sm">{stat.label}</span>
-                                    <span className="font-mono text-sm" style={{ color: '#fff' }}>{stat.value}</span>
+                                    <span className="font-mono text-sm text-white">{stat.value}</span>
                                 </div>
                             ))}
                         </div>

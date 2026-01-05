@@ -89,8 +89,9 @@ export async function getCosmicEngine(
             throw new Error("Forcing Mock Engine via COSMIC_FORCE_MOCK env var");
           }
 
-          if ((pythonEngine as { initialize?: () => Promise<void> }).initialize) {
-            await (pythonEngine as { initialize: () => Promise<void> }).initialize();
+          const maybeInit = pythonEngine as unknown as { initialize?: () => Promise<void> };
+          if (maybeInit.initialize) {
+            await maybeInit.initialize();
           }
         } catch (e) {
           console.error("[CosmicEngine] Failed to initialize local python bridge.", e);

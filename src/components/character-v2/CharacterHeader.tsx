@@ -12,6 +12,7 @@ import React from "react";
  * - Unlocks row
  */
 
+import Link from "next/link";
 import { ProfileSnapshot } from "@/lib/lme/types";
 import { ZodiacShield } from "./ZodiacShield";
 import { SIGN_ELEMENT } from "@/lib/astro";
@@ -23,7 +24,7 @@ type CharacterHeaderProps = {
 export function CharacterHeader({ snapshot }: CharacterHeaderProps) {
   const sunSign = snapshot.astro?.western?.sunSign;
   const chineseAnimal = snapshot.astro?.chinese?.animal;
-  const primaryArchetype = snapshot.psyche?.archetypeMix?.[0];
+  // const primaryArchetype = snapshot.psyche?.archetypeMix?.[0]; // Unused
   const completion = snapshot.meta?.completion?.percent ?? 0;
   const unlockCount = snapshot.meta?.completion?.unlockCount ?? 0;
 
@@ -74,13 +75,15 @@ export function CharacterHeader({ snapshot }: CharacterHeaderProps) {
 
             {sunSign && (
               <div className="pt-2">
-                <a
+              <div className="pt-2">
+                <Link
                   href="/verticals/horoscope/daily"
                   className="inline-flex items-center gap-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-full text-sm transition-colors"
                 >
                   <span>🔮</span>
                   <span>Zum Tageshoroskop</span>
-                </a>
+                </Link>
+              </div>
               </div>
             )}
           </div>
@@ -98,7 +101,7 @@ export function CharacterHeader({ snapshot }: CharacterHeaderProps) {
         <div className="bg-slate-800 rounded-full h-3 overflow-hidden mb-4">
           <div
             className="h-full bg-gradient-to-r from-indigo-600 to-purple-600 transition-all duration-500"
-            style={{ width: `${completion}%` }}
+            style={{ width: `${completion}%` }} // Dynamic width is acceptable here as it varies per user
           />
         </div>
 
