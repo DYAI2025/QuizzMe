@@ -42,6 +42,9 @@ export function proxy(request: NextRequest) {
         '/login',
         '/auth',
         '/onboarding',
+        '/agents',
+        '/premium',
+        '/settings',
     ]
 
     // If no locale and path needs locale, redirect
@@ -66,6 +69,9 @@ export function proxy(request: NextRequest) {
         '/login',
         '/auth',
         '/onboarding',
+        '/agents',
+        '/premium',
+        '/settings',
     ]
 
     const shouldRewrite = !excludedPaths.some(p => pathname.startsWith(p)) &&
