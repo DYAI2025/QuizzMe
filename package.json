@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/ensure-middleware-trace.js",
     "build:static": "NEXT_OUTPUT=export next build",
     "export": "NEXT_OUTPUT=export next build",
     "start": "next start",
