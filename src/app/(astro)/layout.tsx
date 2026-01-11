@@ -5,6 +5,8 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { TranslationProvider } from "@/components/i18n/TranslationProvider";
 import { defaultLocale } from "@/i18n/config";
 import Providers from "../providers";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 // Font configurations
 const cormorant = Cormorant_Garamond({
@@ -38,6 +40,12 @@ export default async function AstroLayout({
   children: React.ReactNode;
 }) {
   const { strings, locale } = await getDictionary(defaultLocale);
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    redirect('/login');
+  }
 
   return (
     <div

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Settings,
@@ -228,7 +228,7 @@ const LinkSetting: React.FC<{ setting: SettingItem; onClick: () => void }> = ({
 
 export default function SettingsPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const { profile, loading } = useAstroProfile();
   const [settings, setSettings] = useState<Record<string, boolean | string>>({
     daily_horoscope: true,

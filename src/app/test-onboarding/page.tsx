@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Loader2, ArrowRight, Info, AlertCircle } from 'lucide-react';
 import { MAJOR_CITIES, PlaceOption } from '@/lib/places';
 import { upsertProfile } from '@/lib/astroProfiles';
-import { createClient } from '@/lib/supabase/client';
 import DstFoldModal from '@/components/onboarding/DstFoldModal';
 
 export default function OnboardingPage() {
@@ -16,6 +15,7 @@ export default function OnboardingPage() {
     const [authChecked, setAuthChecked] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [errorCode, setErrorCode] = useState<string | null>(null);
+    const [errorContext, setErrorContext] = useState<'upsert' | 'compute' | null>(null);
 
     // DST Modal State
     const [showDstModal, setShowDstModal] = useState(false);
@@ -38,21 +38,33 @@ export default function OnboardingPage() {
         if (!canSubmit) return;
         setErrorMessage(null);
         setErrorCode(null);
+        setErrorContext(null);
         setLoading(true);
 
         try {
             if (selectedPlace) {
-                await upsertProfile({
-                    username: name,
-                    birth_date: date,
-                    birth_time: time,
-                    birth_place_name: selectedPlace.name,
-                    birth_place_country: selectedPlace.country,
-                    birth_lat: selectedPlace.lat,
-                    birth_lng: selectedPlace.lng,
-                    iana_time_zone: selectedPlace.tz,
-                    fold: foldOverride ?? selectedFold,
-                });
+                try {
+                    await upsertProfile({
+                        username: name,
+                        birth_date: date,
+                        birth_time: time,
+                        birth_place_name: selectedPlace.name,
+                        birth_place_country: selectedPlace.country,
+                        birth_lat: selectedPlace.lat,
+                        birth_lng: selectedPlace.lng,
+                        iana_time_zone: selectedPlace.tz,
+                        fold: foldOverride ?? selectedFold,
+                    });
+                } catch (err: unknown) {
+                    console.error("Profile upsert failed:", err);
+                    setErrorContext('upsert');
+                    const message = err instanceof Error
+                        ? `Profil konnte nicht gespeichert werden: ${err.message}`
+                        : 'Profil konnte nicht gespeichert werden. Bitte versuche es erneut.';
+                    setErrorMessage(message);
+                    setLoading(false);
+                    return;
+                }
             }
 
             // 2. Trigger Compute
@@ -72,6 +84,7 @@ export default function OnboardingPage() {
 
             if (!res.ok) {
                 setErrorCode(data.code || null);
+                setErrorContext('compute');
 
                 if (data.code === 'AMBIGUOUS_LOCAL_TIME') {
                     // Show DST disambiguation modal
@@ -94,6 +107,7 @@ export default function OnboardingPage() {
             console.error("Onboarding failed:", err);
             const msg = err instanceof Error ? err.message : 'Unbekannter Fehler';
             setErrorMessage(msg);
+            setErrorContext('compute');
             setLoading(false);
         }
     };
@@ -238,7 +252,19 @@ export default function OnboardingPage() {
 
                  {errorMessage && (
                     <div className="p-4 border border-red-200 bg-red-50 text-red-800 rounded-xl flex flex-col gap-3">
-                        <p className="mono text-[12px]">{errorMessage}</p>
+                        <p className="mono text-[12px]">
+                            {errorMessage}
+                        </p>
+                        {errorContext === 'upsert' && (
+                            <p className="text-[11px] text-red-600">
+                                Deine Eingaben konnten nicht gespeichert werden. Prüfe deine Verbindung und probiere es erneut.
+                            </p>
+                        )}
+                        {errorContext === 'compute' && (
+                            <p className="text-[11px] text-red-600">
+                                Die Berechnung ist fehlgeschlagen. Du kannst die Berechnung direkt erneut starten.
+                            </p>
+                        )}
                         {errorCode === 'NONEXISTENT_LOCAL_TIME' && (
                             <p className="text-[11px] text-red-600">
                                 Tipp: Während der Zeitumstellung im Frühjahr existieren bestimmte Uhrzeiten nicht.
@@ -256,7 +282,7 @@ export default function OnboardingPage() {
                                 }}
                                 className="px-4 py-3 bg-[#0E1B33] text-white rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:bg-[#1a2c4e] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Erneut versuchen
+                                {errorContext === 'upsert' ? 'Speichern erneut versuchen' : 'Berechnung erneut starten'}
                             </button>
                             <a
                                 href="/login"
