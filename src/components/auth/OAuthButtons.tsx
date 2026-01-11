@@ -34,14 +34,14 @@ export function OAuthButtons() {
 
   return (
     <div className="space-y-2">
-      <p className="mono text-[10px] uppercase tracking-widest text-[#5A6477] font-bold">{t('login.oauth')}</p>
+      <p className="mono text-[10px] uppercase tracking-widest text-[var(--theme-pill-text)] font-bold">{t('login.oauth')}</p>
       <div className="grid grid-cols-2 gap-3">
         {providers.map(({ id, labelKey, Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => handleOAuth(id)}
-            className="flex items-center justify-center gap-2 py-3 bg-white border border-[#E6E0D8] rounded-xl text-[11px] font-semibold hover:border-[#C9A46A] transition-all"
+            className="flex items-center justify-center gap-2 py-3 bg-[var(--theme-elevated-surface)] border border-[var(--theme-elevated-border)] rounded-xl text-[11px] font-semibold text-[var(--app-text)] hover:border-[var(--theme-accent)] transition-all"
           >
             {loadingProvider === id ? <Loader2 className="animate-spin" size={16} /> : <Icon size={16} />}
             <span>{t(labelKey)}</span>

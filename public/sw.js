@@ -1,8 +1,11 @@
-const CACHE_NAME = 'quizzme-static-v1';
+const CACHE_NAME = 'quizzme-static-v2';
 const ASSETS = [
   '/',
   '/manifest.json',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/assets/icons/star.svg',
+  '/assets/icons/moon.svg',
+  '/assets/icons/crystal.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -22,14 +25,36 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  const isSameOrigin = url.origin === self.location.origin;
+  const isStaticAsset = isSameOrigin && (
+    url.pathname.startsWith('/_next/static') ||
+    url.pathname.startsWith('/assets') ||
+    url.pathname === '/manifest.json' ||
+    url.pathname === '/favicon.ico'
+  );
+
+  if (isStaticAsset) {
+    event.respondWith(
+      caches.match(request).then((cached) =>
+        cached || fetch(request).then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return response;
+        })
+      )
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(request).then((cached) =>
-      cached || fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         return response;
       })
-    )
+      .catch(() => caches.match(request))
   );
 });
 

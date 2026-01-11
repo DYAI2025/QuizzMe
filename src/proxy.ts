@@ -83,6 +83,9 @@ export function proxy(request: NextRequest) {
 
         if (localeMatch) {
             const pathWithoutLocale = pathname.replace(`/${localeMatch}`, '')
+            if (excludedPaths.some(p => pathWithoutLocale.startsWith(p))) {
+                return NextResponse.next()
+            }
             // Verticals don't use locale prefix - rewrite directly
             const newUrl = url.clone()
             // Ensure clean path without double slashes
