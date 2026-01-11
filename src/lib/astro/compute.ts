@@ -34,6 +34,25 @@ export type AstroResult = {
     sunSign: ZodiacSign;
     ascendant?: string;
     moonSign?: string;
+    planets?: Array<{
+      name: string;
+      sign: string;
+      degree: number;
+      longitude: number;
+      house?: number;
+    }>;
+    houses?: Array<{
+      number: number;
+      sign: string;
+      degree: number;
+      longitude: number;
+    }>;
+    aspects?: Array<{
+      from: string;
+      to: string;
+      type: string;
+      orb: number;
+    }>;
   };
   chinese: {
     animal: ChineseAnimal;
@@ -179,10 +198,47 @@ export function computeAstro(input: BirthInput): AstroResult {
   const year = input.date.getFullYear();
   const sunSign = getSunSign(input.date);
 
+  const baseDate = new Date(input.date);
+  if (input.time) {
+    baseDate.setHours(input.time.hour, input.time.minute, 0, 0);
+  } else {
+    baseDate.setHours(12, 0, 0, 0);
+  }
+
+  const jd = getJulianDate(baseDate);
+  const planetOrder: Array<{ id: PlanetName; label: string }> = [
+    { id: "sun", label: "Sun" },
+    { id: "moon", label: "Moon" },
+    { id: "mercury", label: "Mercury" },
+    { id: "venus", label: "Venus" },
+    { id: "mars", label: "Mars" },
+    { id: "jupiter", label: "Jupiter" },
+    { id: "saturn", label: "Saturn" },
+    { id: "uranus", label: "Uranus" },
+    { id: "neptune", label: "Neptune" },
+    { id: "pluto", label: "Pluto" },
+  ];
+
+  const planets = planetOrder.map(({ id, label }) => {
+    const longitude = getPlanetPosition(id, jd);
+    const signInfo = getSignFromLongitude(longitude);
+    return {
+      name: label,
+      sign: signInfo.sign,
+      degree: signInfo.degree,
+      longitude,
+    };
+  });
+
+  const aspects = buildNatalAspects(planets);
+
   // Basic result
   const result: AstroResult = {
     western: {
       sunSign,
+      planets,
+      aspects,
+      houses: [],
     },
     chinese: {
       animal: getChineseAnimal(year),
@@ -206,14 +262,14 @@ export function computeAstro(input: BirthInput): AstroResult {
     fullDate.setMinutes(input.time.minute);
 
     // Calculate JD
-    const jd = getJulianDate(fullDate); // Note: this uses UTC methods on the date object
+    const jdForHouses = getJulianDate(fullDate); // Note: this uses UTC methods on the date object
 
-    const gmst = getGMST(jd);
+    const gmst = getGMST(jdForHouses);
     const lst = getLST(gmst, input.place.lng);
     const ascDeg = calculateAscendant(lst, input.place.lat);
     const ascInfo = getSignFromLongitude(ascDeg);
 
-    const moonDeg = getPlanetPosition("moon", jd);
+    const moonDeg = getPlanetPosition("moon", jdForHouses);
     const moonInfo = getSignFromLongitude(moonDeg);
 
     // Add to result (using Type assertion if necessary as types might need update or are optional)
@@ -226,11 +282,73 @@ export function computeAstro(input: BirthInput): AstroResult {
     Object.assign(result.western, {
       ascendant: ascInfo.sign,
       moonSign: moonInfo.sign,
-      // We could store degrees too but Type doesn't have it yet.
     });
+
+    const houses = buildEqualHouses(ascDeg);
+    const planetsWithHouses = planets.map((planet) => ({
+      ...planet,
+      house: getHouseNumber(ascDeg, planet.longitude),
+    }));
+
+    result.western.houses = houses;
+    result.western.planets = planetsWithHouses;
   }
 
   return result;
+}
+
+function buildEqualHouses(ascendantLongitude: number) {
+  return Array.from({ length: 12 }, (_, index) => {
+    const longitude = (ascendantLongitude + index * 30) % 360;
+    const signInfo = getSignFromLongitude(longitude);
+    return {
+      number: index + 1,
+      sign: signInfo.sign,
+      degree: signInfo.degree,
+      longitude,
+    };
+  });
+}
+
+function getHouseNumber(ascendantLongitude: number, planetLongitude: number) {
+  const diff = (planetLongitude - ascendantLongitude + 360) % 360;
+  return Math.floor(diff / 30) + 1;
+}
+
+function buildNatalAspects(planets: Array<{ name: string; longitude: number }>) {
+  const aspects: Array<{ from: string; to: string; type: string; orb: number }> = [];
+  const aspectAngles = [
+    { angle: 0, type: "conjunct" },
+    { angle: 60, type: "sextile" },
+    { angle: 90, type: "square" },
+    { angle: 120, type: "trine" },
+    { angle: 180, type: "opposite" },
+  ];
+  const orbAllowance = 6;
+
+  for (let i = 0; i < planets.length; i += 1) {
+    for (let j = i + 1; j < planets.length; j += 1) {
+      const from = planets[i];
+      const to = planets[j];
+      const diff = Math.abs(from.longitude - to.longitude);
+      const distance = Math.min(diff, 360 - diff);
+
+      for (const aspect of aspectAngles) {
+        const orb = Math.abs(distance - aspect.angle);
+        if (orb <= orbAllowance) {
+          aspects.push({
+            from: from.name,
+            to: to.name,
+            type: aspect.type,
+            orb,
+          });
+          break;
+        }
+      }
+    }
+  }
+
+  return aspects;
 }
 
 /**
@@ -468,4 +586,3 @@ export function hasBirthTime(input: BirthInput): boolean {
 export function hasBirthPlace(input: BirthInput): boolean {
   return input.place !== undefined;
 }
-

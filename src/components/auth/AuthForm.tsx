@@ -38,19 +38,19 @@ export default function AuthForm() {
 
     if (sent) {
         return (
-            <div className="w-full max-w-md p-8 rounded-3xl bg-white/80 backdrop-blur-xl border border-[#E6E0D8] shadow-2xl text-center">
+            <div className="w-full max-w-md p-8 rounded-3xl bg-[var(--theme-card-surface)] backdrop-blur-xl border border-[var(--theme-card-border)] shadow-[var(--theme-card-shadow)] text-center text-[var(--app-text)]">
                 <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 rounded-full bg-[#7AA7A1]/10 flex items-center justify-center">
-                        <CheckCircle className="text-[#7AA7A1]" size={32} />
+                    <div className="w-16 h-16 rounded-full bg-[var(--theme-orb-emerald)] flex items-center justify-center">
+                        <CheckCircle className="text-[var(--theme-accent)]" size={32} />
                     </div>
                 </div>
-                <h1 className="serif text-3xl text-[#0E1B33] mb-4">{t("login.sentTitle")}</h1>
-                <p className="text-sm text-[#5A6477] mb-8 leading-relaxed">
+                <h1 className="serif text-3xl mb-4">{t("login.sentTitle")}</h1>
+                <p className="text-sm text-[var(--theme-pill-text)] mb-8 leading-relaxed">
                     {t("login.sentBody").replace('{email}', email)}
                 </p>
                 <button
                     onClick={() => setSent(false)}
-                    className="text-[10px] uppercase tracking-widest text-[#A1A1AA] hover:text-[#0E1B33] transition-colors"
+                    className="text-[10px] uppercase tracking-widest text-[var(--theme-muted-text)] hover:text-[var(--theme-accent-strong)] transition-colors"
                 >
                     {t("login.useDifferent")}
                 </button>
@@ -59,28 +59,28 @@ export default function AuthForm() {
     }
 
     return (
-        <div className="w-full max-w-md p-8 rounded-3xl bg-white/80 backdrop-blur-xl border border-[#E6E0D8] shadow-2xl">
+        <div className="w-full max-w-md p-8 rounded-3xl bg-[var(--theme-card-surface)] backdrop-blur-xl border border-[var(--theme-card-border)] shadow-[var(--theme-card-shadow)] text-[var(--app-text)]">
             <div className="text-center mb-8">
-                <h1 className="serif text-4xl text-[#0E1B33] mb-2">
+                <h1 className="serif text-4xl mb-2">
                     {t("login.title")}
                 </h1>
-                <p className="mono text-[10px] text-[#5A6477] uppercase tracking-[0.2em]">
+                <p className="mono text-[10px] text-[var(--theme-pill-text)] uppercase tracking-[0.2em]">
                     {t("login.description")}
                 </p>
             </div>
 
             <form onSubmit={handleMagicLink} className="space-y-4">
                 <div className="space-y-2">
-                    <label className="mono text-[10px] uppercase tracking-widest text-[#5A6477] font-bold">{t("login.email")}</label>
+                    <label className="mono text-[10px] uppercase tracking-widest text-[var(--theme-pill-text)] font-bold">{t("login.email")}</label>
                     <div className="relative group">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] group-focus-within:text-[#C9A46A] transition-colors" size={16} />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--theme-muted-text)] group-focus-within:text-[var(--theme-accent)] transition-colors" size={16} />
                         <input
                             type="email"
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-white border border-[#E6E0D8] rounded-xl focus:outline-none focus:border-[#C9A46A] text-[#0E1B33] transition-all"
-                            placeholder="traveler@example.com"
+                            className="w-full pl-12 pr-4 py-3 bg-[var(--theme-input-surface)] border border-[var(--theme-input-border)] rounded-xl focus:outline-none focus:border-[var(--theme-accent)] text-[var(--theme-input-text)] transition-all"
+                            placeholder={t("login.placeholder")}
                         />
                     </div>
                 </div>
@@ -94,7 +94,7 @@ export default function AuthForm() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 mt-4 bg-[#0E1B33] hover:bg-[#1a2c4e] text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                    className="w-full py-4 mt-4 bg-[var(--theme-accent-strong)] hover:opacity-90 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
                 >
                     <span className="relative z-10 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-[0.2em]">
                         {loading ? (
@@ -109,12 +109,12 @@ export default function AuthForm() {
                 </button>
                 
                 <div className="text-center mt-6">
-                    <p className="text-[10px] text-[#A1A1AA]">
-                        Passwordless & Secure.
+                    <p className="text-[10px] text-[var(--theme-muted-text)]">
+                        {t("login.passwordless")}
                     </p>
                 </div>
             </form>
-            <div className="mt-8 pt-6 border-t border-[#E6E0D8]">
+            <div className="mt-8 pt-6 border-t border-[var(--theme-card-border)]">
               <OAuthButtons />
             </div>
         </div>

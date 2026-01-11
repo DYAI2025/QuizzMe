@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { questions, profiles, quizMeta } from './careerdna/data';
 import { contributeClient as contribute } from '@/lib/api';
 import { AlchemyButton, AlchemyLinkButton } from '@/components/ui/AlchemyButton';
+import { trackQuizEvent } from '@/lib/analytics/supabase';
 
 type Scores = Record<string, number>;
 
@@ -59,6 +60,11 @@ export function CareerDNAQuiz() {
 
         // Fire and forget (optimistic UI)
         void contribute(event);
+        void trackQuizEvent({
+            event: "quiz_completed",
+            quizId: quizMeta.id,
+            metadata: { resultId: foundProfile.id, title: foundProfile.title },
+        });
         return foundProfile;
     };
 
@@ -97,6 +103,7 @@ export function CareerDNAQuiz() {
         setShowResult(false);
         setResult(null);
         setStarted(false);
+        void trackQuizEvent({ event: "quiz_restart", quizId: quizMeta.id });
     };
 
     const progress = ((currentQuestion + 1) / questions.length) * 100;
@@ -114,7 +121,10 @@ export function CareerDNAQuiz() {
                         {quizMeta.subtitle}
                     </p>
                     <button
-                        onClick={() => setStarted(true)}
+                        onClick={() => {
+                            setStarted(true);
+                            void trackQuizEvent({ event: "quiz_started", quizId: quizMeta.id });
+                        }}
                         className="w-full py-4 px-8 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg shadow-blue-500/25 border border-blue-400/20"
                     >
                         Analyse starten

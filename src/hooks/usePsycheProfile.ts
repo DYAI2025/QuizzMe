@@ -214,6 +214,29 @@ export function usePsycheProfile(): UsePsycheProfileResult {
         fetchProfile();
     }, [fetchProfile]);
 
+    useEffect(() => {
+        const deviceId = getDeviceId();
+        if (!deviceId) return;
+
+        const channel = supabase
+            .channel(`psyche-profiles-realtime-${deviceId}`)
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'psyche_profiles', filter: `device_id=eq.${deviceId}` },
+                (payload) => {
+                    if (payload.new) {
+                        setProfile(rowToProfile(payload.new as PsycheProfileRow));
+                    }
+                }
+            );
+
+        channel.subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [supabase]);
+
     return { 
         profile, 
         isLoading, 

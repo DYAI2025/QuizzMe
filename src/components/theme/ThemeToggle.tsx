@@ -12,7 +12,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="flex items-center gap-2 px-3 py-2 rounded-full border border-[#E6E0D8] bg-white/60 text-[11px] font-semibold uppercase tracking-[0.2em] hover:shadow-lg transition-all"
+      className="flex items-center gap-2 px-3 py-2 rounded-full border border-[var(--theme-pill-border)] bg-[var(--theme-pill-surface)] text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--theme-pill-text)] hover:shadow-lg transition-all"
       aria-label="Toggle Theme"
     >
       {isLight ? <Sun size={16} /> : <Moon size={16} />}
