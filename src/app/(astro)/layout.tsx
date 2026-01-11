@@ -38,16 +38,17 @@ export default async function AstroLayout({
   children,
 }: {
   children: React.ReactNode;
-}) {
-  const { strings, locale } = await getDictionary(defaultLocale);
-  const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+ }) {
+   const supabase = await createClient();
+   const { data: { session } } = await supabase.auth.getSession();
 
-  if (!session) {
-    redirect('/login');
-  }
+   if (!session) {
+     redirect('/login');
+   }
 
-  return (
+   const { strings, locale } = await getDictionary(defaultLocale);
+
+   return (
     <div
       className={`astro-scope ${cormorant.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
