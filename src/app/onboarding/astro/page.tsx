@@ -260,12 +260,13 @@ export default function OnboardingPage() {
                             >
                                 Erneut versuchen
                             </button>
-                            <a
-                                href="/login"
+                            <button
+                                type="button"
+                                onClick={() => router.push('/login')}
                                 className="px-4 py-3 border border-[#E6E0D8] rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:border-[#0E1B33]"
                             >
                                 Zur Login-Seite
-                            </a>
+                            </button>
                         </div>
                     </div>
                  )}
