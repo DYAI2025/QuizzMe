@@ -255,11 +255,7 @@ export default function OnboardingPage() {
                             <button
                                 type="button"
                                 disabled={!canSubmit || loading}
-                                onClick={() => {
-                                    if (canSubmit && !loading) {
-                                        runFlow();
-                                    }
-                                }}
+                                onClick={() => runFlow()}
                                 className="px-4 py-3 bg-[#0E1B33] text-white rounded-lg text-[12px] font-bold uppercase tracking-[0.2em] hover:bg-[#1a2c4e] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Erneut versuchen
