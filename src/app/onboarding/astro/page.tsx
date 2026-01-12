@@ -10,6 +10,9 @@ import DstFoldModal from '@/components/onboarding/DstFoldModal';
 
 export default function OnboardingPage() {
     const router = useRouter();
+    // Intentionally create the Supabase client only once for this component.
+    // The client manages authentication state internally, so we do not need
+    // to recreate it in response to auth changes.
     const supabase = useMemo(() => createClient(), []);
     const [loading, setLoading] = useState(false);
     const [authChecked, setAuthChecked] = useState(false);
