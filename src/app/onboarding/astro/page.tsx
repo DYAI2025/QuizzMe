@@ -228,7 +228,7 @@ export default function OnboardingPage() {
                         <AlertCircle className="text-[#7AA7A1] mt-0.5 flex-shrink-0" size={16} />
                         <div className="text-[11px] text-[#5A6477] leading-relaxed">
                             <strong>Längengrad-Korrektur aktiv:</strong> Die Berechnung berücksichtigt die
-                            exakte Position von {selectedPlace.name} ({selectedPlace.lat.toFixed(2)}°N, {selectedPlace.lng.toFixed(2)}°E)
+                            exakte Position von {selectedPlace.name} ({Math.abs(selectedPlace.lat).toFixed(2)}°{selectedPlace.lat >= 0 ? 'N' : 'S'}, {Math.abs(selectedPlace.lng).toFixed(2)}°{selectedPlace.lng >= 0 ? 'E' : 'W'})
                             für maximale Präzision bei Aszendent und Häusern.
                         </div>
                     </div>
